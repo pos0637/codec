@@ -115,27 +115,10 @@ namespace encoder_csharp {
         public void Encode(byte[] data1 = null, byte[] data2 = null, byte[] data3 = null) {
             if ((data1 != null) && (data2 != null) && (data3 != null)) {
                 ffmpeg.av_frame_make_writable(frame).ThrowExceptionIfError();
-                /*
+
                 Marshal.Copy(data1, 0, (IntPtr)frame->data[0], data1.Length);
                 Marshal.Copy(data2, 0, (IntPtr)frame->data[1], data2.Length);
-                Marshal.Copy(data3, 0, (IntPtr)frame->data[2], data3.Length);                                
-                */
-
-                /* prepare a dummy image */
-                /* Y */
-                for (int y = 0; y < context->height; y++) {
-                    for (int x = 0; x < context->width; x++) {
-                        frame->data[0][y * frame->linesize[0] + x] = (byte)(x + y + pts * 3);
-                    }
-                }
-
-                /* Cb and Cr */
-                for (int y = 0; y < context->height / 2; y++) {
-                    for (int x = 0; x < context->width / 2; x++) {
-                        frame->data[1][y * frame->linesize[1] + x] = (byte)(128 + y + pts * 2);
-                        frame->data[2][y * frame->linesize[2] + x] = (byte)(64 + x + pts * 5);
-                    }
-                }
+                Marshal.Copy(data3, 0, (IntPtr)frame->data[2], data3.Length);
 
                 frame->pts = pts++;
                 ffmpeg.avcodec_send_frame(context, frame).ThrowExceptionIfError();
