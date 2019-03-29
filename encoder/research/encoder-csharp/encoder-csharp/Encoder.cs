@@ -112,13 +112,14 @@ namespace encoder_csharp {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Encode(byte[] data1 = null, byte[] data2 = null, byte[] data3 = null) {
-            if ((data1 != null) && (data2 != null) && (data3 != null)) {
+        public void Encode(IntPtr data1, IntPtr data2, IntPtr data3) {
+            if ((data1 != IntPtr.Zero) && (data2 != IntPtr.Zero) && (data3 != IntPtr.Zero)) {
                 ffmpeg.av_frame_make_writable(frame).ThrowExceptionIfError();
 
-                Marshal.Copy(data1, 0, (IntPtr)frame->data[0], data1.Length);
-                Marshal.Copy(data2, 0, (IntPtr)frame->data[1], data2.Length);
-                Marshal.Copy(data3, 0, (IntPtr)frame->data[2], data3.Length);
+                int size = frame->width * frame->height;
+                Buffer.MemoryCopy(data1.ToPointer(), frame->data[0], size, size);
+                Buffer.MemoryCopy(data2.ToPointer(), frame->data[1], size / 4, size / 4);
+                Buffer.MemoryCopy(data3.ToPointer(), frame->data[2], size / 4, size / 4);
 
                 frame->pts = pts++;
                 ffmpeg.avcodec_send_frame(context, frame).ThrowExceptionIfError();
