@@ -1,14 +1,16 @@
 ﻿using OpenCvSharp;
 using System;
-using System.Runtime.InteropServices;
 
-namespace encoder_csharp {
-    class Program {
+namespace encoder_csharp
+{
+    class Program
+    {
         private const int width = 320;
         private const int height = 240;
         private static Random random = new Random();
 
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             Encoder encoder = new Encoder();
             encoder.Initialize(width, height, 25);
             encoder.Start("1.h264");
