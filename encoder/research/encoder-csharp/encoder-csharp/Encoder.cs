@@ -1,15 +1,18 @@
 ﻿using FFmpeg.AutoGen;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace encoder_csharp {
+namespace encoder_csharp
+{
     /// <summary>
     /// 编码器
     /// refs: https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/encode_video.c
     /// </summary>
-    public unsafe class Encoder : IDisposable {
+    public unsafe class Encoder : IDisposable
+    {
         private AVCodec* codec;
         private AVCodecContext* context;
         private AVFrame* frame;
@@ -17,12 +20,14 @@ namespace encoder_csharp {
         private FileStream fs;
         private int pts;
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Reset();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Initialize(int width, int height, int frames_per_second) {
+        public void Initialize(int width, int height, int frames_per_second)
+        {
             Reset();
 
             codec = ffmpeg.avcodec_find_encoder(AVCodecID.AV_CODEC_ID_H264);
@@ -50,7 +55,8 @@ namespace encoder_csharp {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Reset() {
+        public void Reset()
+        {
             Stop();
 
             if (context != null) {
@@ -63,7 +69,8 @@ namespace encoder_csharp {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Start(string filename) {
+        public void Start(string filename)
+        {
             frame = ffmpeg.av_frame_alloc();
             if (frame == null) {
                 throw new Exception("alloc frame fail");
@@ -87,7 +94,8 @@ namespace encoder_csharp {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Stop() {
+        public void Stop()
+        {
             if (fs != null) {
                 fs.Write(new byte[] { 0x0, 0x0, 0x1, 0xb7 }, 0, 4);
                 fs.Flush();
@@ -112,7 +120,8 @@ namespace encoder_csharp {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Encode(IntPtr data1, IntPtr data2, IntPtr data3) {
+        public void Encode(IntPtr data1, IntPtr data2, IntPtr data3)
+        {
             if ((data1 != IntPtr.Zero) && (data2 != IntPtr.Zero) && (data3 != IntPtr.Zero)) {
                 ffmpeg.av_frame_make_writable(frame).ThrowExceptionIfError();
 
@@ -139,10 +148,31 @@ namespace encoder_csharp {
 
                 byte[] data = new byte[packet->size];
                 Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
+                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
                 fs.Write(data, 0, packet->size);
 
                 ffmpeg.av_packet_unref(packet);
             } while (true);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void EncodeSEI(byte[] content)
+        {
+            int length = 16 + content.Length;
+            int seiPayloadSizeLength = (length / 0xFF) + (((length % 0xFF) == 0) ? 0 : 1);
+            // NAL header + SEI payload type + SEI payload size + SEI payload uuid + SEI payload content + rbsp trailing bits
+            byte[] data = new byte[4 + 1 + 1 + seiPayloadSizeLength + 16 + length + 1];
+            byte[] NALHeader = new byte[] { 0x00, 0x00, 0x00, 0x01, 0x06 };
+            NALHeader.CopyTo(data, 0);
+            data[5] = 0x05; // user_data_unregistered
+            for (int i = 1; i < seiPayloadSizeLength; ++i) {
+                data[5 + i] = 0xFF;
+            }
+            data[5 + seiPayloadSizeLength] = (byte)(length % 0xFF);
+            content.CopyTo(data, 5 + seiPayloadSizeLength + 16);
+            data[5 + seiPayloadSizeLength + 16 + length] = 0x80;
+
+            fs.Write(data, 0, data.Length);
         }
     }
 }
