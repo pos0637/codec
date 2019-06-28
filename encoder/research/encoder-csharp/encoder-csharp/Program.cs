@@ -21,6 +21,7 @@ namespace encoder_csharp
                 Cv2.PutText(mat, DateTime.Now.ToString("hh:mm:ss:fff"), new Point(random.Next(0, 220), random.Next(20, 220)), HersheyFonts.HersheySimplex, 0.5, new Scalar(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
                 mat = mat.CvtColor(ColorConversionCodes.BGR2YUV_I420);
                 encoder.Encode(mat.Data, mat.Data + size, mat.Data + size + size / 4);
+                encoder.EncodeSEI(System.Text.Encoding.UTF8.GetBytes("Hello, world!"));
 
                 /*
                 Cv2.ImShow("mat", mat);

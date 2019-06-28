@@ -169,8 +169,8 @@ namespace encoder_csharp
                 data[5 + i] = 0xFF;
             }
             data[5 + seiPayloadSizeLength] = (byte)(length % 0xFF);
-            content.CopyTo(data, 5 + seiPayloadSizeLength + 16);
-            data[5 + seiPayloadSizeLength + 16 + length] = 0x80;
+            content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
+            data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
             fs.Write(data, 0, data.Length);
         }
