@@ -11,9 +11,9 @@ namespace encoder_csharp
 
         static void Main(string[] args)
         {
-            Encoder encoder = new Encoder();
+            EncoderRTMP encoder = new EncoderRTMP();
             encoder.Initialize(width, height, 25);
-            encoder.Start("1.h264");
+            encoder.Start("rtmp://localhost:1935/live/test");
 
             int size = width * height;
             for (int i = 0; i < 25; ++i) {
