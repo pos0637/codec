@@ -13,12 +13,15 @@ namespace encoder_csharp
     /// </summary>
     public unsafe class Encoder : IDisposable
     {
+        private AVFormatContext* formatContext;
         private AVCodec* codec;
         private AVCodecContext* context;
         private AVFrame* frame;
         private AVPacket* packet;
-        private FileStream fs;
+        private AVStream* stream;
         private int pts;
+        private int frames_per_second;
+        private bool ioOpened;
 
         public void Dispose()
         {
@@ -30,6 +33,12 @@ namespace encoder_csharp
         {
             Reset();
 
+            fixed (AVFormatContext** c = &formatContext) {
+                if (ffmpeg.avformat_alloc_output_context2(c, null, "mp4", null) < 0) {
+                    throw new Exception("Could not allocate output format context!");
+                }
+            }
+
             codec = ffmpeg.avcodec_find_encoder(AVCodecID.AV_CODEC_ID_H264);
             if (codec == null) {
                 throw new Exception("codec not found!");
@@ -40,17 +49,28 @@ namespace encoder_csharp
                 throw new Exception("alloc context fail");
             }
 
+            context->codec_id = codec->id;
+            context->codec_type = AVMediaType.AVMEDIA_TYPE_VIDEO;
+            context->pix_fmt = AVPixelFormat.AV_PIX_FMT_YUV420P;
             context->bit_rate = 400000;
             context->width = width;
             context->height = height;
             context->time_base = new AVRational { num = 1, den = frames_per_second };
             context->framerate = new AVRational { num = frames_per_second, den = 1 };
-            context->gop_size = 10;
+            context->gop_size = 50;
             context->max_b_frames = 1;
-            context->pix_fmt = AVPixelFormat.AV_PIX_FMT_YUV420P;
+            context->qmin = 10;
+            context->qmax = 50;
+            context->level = 41;
+            context->refs = 1;
+            this.frames_per_second = frames_per_second;
 
             if (codec->id == AVCodecID.AV_CODEC_ID_H264) {
                 ffmpeg.av_opt_set(context->priv_data, "preset", "slow", 0);
+            }
+
+            if ((formatContext->oformat->flags & ffmpeg.AVFMT_GLOBALHEADER) != 0) {
+                context->flags |= ffmpeg.AV_CODEC_FLAG_GLOBAL_HEADER;
             }
         }
 
@@ -65,6 +85,11 @@ namespace encoder_csharp
                     ffmpeg.avcodec_free_context(c);
                 }
                 context = null;
+            }
+
+            if (formatContext != null) {
+                ffmpeg.avformat_free_context(formatContext);
+                formatContext = null;
             }
         }
 
@@ -89,19 +114,28 @@ namespace encoder_csharp
                 throw new Exception("alloc packet fail");
             }
 
-            fs = new FileStream(filename, FileMode.Create, FileAccess.Write);
+            stream = ffmpeg.avformat_new_stream(formatContext, codec);
+            stream->time_base = new AVRational { num = 1, den = frames_per_second };
+            stream->codecpar->codec_tag = 0;
+
+            ffmpeg.avcodec_parameters_from_context(stream->codecpar, context);
+            if ((formatContext->oformat->flags & ffmpeg.AVFMT_GLOBALHEADER) != 0) {
+                stream->codec->flags |= ffmpeg.AV_CODEC_FLAG_GLOBAL_HEADER;
+            }
+
+            ffmpeg.avio_open2(&formatContext->pb, filename, ffmpeg.AVIO_FLAG_READ_WRITE, null, null).ThrowExceptionIfError();
+            ffmpeg.avformat_write_header(formatContext, null).ThrowExceptionIfError();
+            ioOpened = true;
             pts = 0;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Stop()
         {
-            if (fs != null) {
-                fs.Write(new byte[] { 0x0, 0x0, 0x1, 0xb7 }, 0, 4);
-                fs.Flush();
-                fs.Close();
-                fs.Dispose();
-                fs = null;
+            if (ioOpened) {
+                ffmpeg.av_write_trailer(formatContext);
+                ffmpeg.avio_close(formatContext->pb);
+                ioOpened = false;
             }
 
             if (packet != null) {
@@ -146,11 +180,12 @@ namespace encoder_csharp
                     throw new Exception("error during encoding");
                 }
 
-                byte[] data = new byte[packet->size];
-                Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
-                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
-                fs.Write(data, 0, packet->size);
+                packet->duration = stream->time_base.den / stream->time_base.num * frames_per_second;
 
+                // byte[] data = new byte[packet->size];
+                // Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
+                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
+                ffmpeg.av_interleaved_write_frame(formatContext, packet);
                 ffmpeg.av_packet_unref(packet);
             } while (true);
         }
@@ -172,7 +207,8 @@ namespace encoder_csharp
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
-            fs.Write(data, 0, data.Length);
+            // ffmpeg.av_interleaved_write_frame(formatContext, packet);
+            // ffmpeg.av_packet_unref(packet);
         }
     }
 }
