@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Threading;
 
 namespace encoder_csharp
 {
@@ -12,19 +13,19 @@ namespace encoder_csharp
 
         static void Main(string[] args)
         {
-            Encoder encoder = new Encoder();
+            EncoderRTMP encoder = new EncoderRTMP();
             encoder.Initialize(width, height, frames_per_second);
-            // encoder.Start("rtmp://localhost:1935/live/test");
-            encoder.Start("1.h264");
+            encoder.Start("rtmp://localhost:1935/live/test");
+            // encoder.Start("1.h264");
 
             int size = width * height;
-            for (int i = 0; i < 10 * frames_per_second; ++i) {
+            for (int i = 0; i < 300 * frames_per_second; ++i) {
                 Mat mat = new Mat(height, width, MatType.CV_8UC3, new Scalar(0, 0, 0));
                 Cv2.PutText(mat, i + ": " + DateTime.Now.ToString("hh:mm:ss:fff"), new Point(random.Next(0, 220), random.Next(20, 220)), HersheyFonts.HersheySimplex, 0.5, new Scalar(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
                 mat = mat.CvtColor(ColorConversionCodes.BGR2YUV_I420);
                 encoder.Encode(mat.Data, mat.Data + size, mat.Data + size + size / 4);
                 encoder.EncodeSEI(System.Text.Encoding.UTF8.GetBytes($"{i / frames_per_second} Hello, world!"));
-
+                Thread.Sleep(1000 / frames_per_second);
                 /*
                 Cv2.ImShow("mat", mat);
                 if (Cv2.WaitKey(0) == 27) {

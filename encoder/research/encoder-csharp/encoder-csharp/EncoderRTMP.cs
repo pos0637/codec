@@ -1,6 +1,8 @@
 ﻿using FFmpeg.AutoGen;
 using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace encoder_csharp
 {
@@ -16,10 +18,10 @@ namespace encoder_csharp
         private AVFrame* frame;
         private AVPacket* packet;
         private AVStream* stream;
-        private AVBitStreamFilter* bsfFilter;
-        private AVBSFContext* bsfContext;
         private int pts;
         private int frames_per_second;
+        private bool ioOpened;
+        private Hashtable userData = Hashtable.Synchronized(new Hashtable());
 
         public void Dispose()
         {
@@ -59,12 +61,10 @@ namespace encoder_csharp
             context->framerate = new AVRational { num = frames_per_second, den = 1 };
             context->gop_size = 50;
             context->max_b_frames = 1;
-            /*
             context->qmin = 10;
             context->qmax = 50;
             context->level = 41;
             context->refs = 1;
-            */
             this.frames_per_second = frames_per_second;
 
             if (codec->id == AVCodecID.AV_CODEC_ID_H264) {
@@ -119,8 +119,7 @@ namespace encoder_csharp
             }
 
             stream = ffmpeg.avformat_new_stream(formatContext, codec);
-            stream->time_base.num = 1;
-            stream->time_base.den = frames_per_second;
+            stream->time_base = new AVRational { num = 1, den = frames_per_second };
             stream->codecpar->codec_tag = 0;
 
             ffmpeg.avcodec_parameters_from_context(stream->codecpar, context);
@@ -128,35 +127,19 @@ namespace encoder_csharp
                 stream->codec->flags |= ffmpeg.AV_CODEC_FLAG_GLOBAL_HEADER;
             }
 
-            bsfFilter = ffmpeg.av_bsf_get_by_name("h264_metadata");
-            if (bsfFilter == null) {
-                throw new Exception("av_bsf_get_by_name fail");
-            }
-
-            fixed (AVBSFContext** c = &bsfContext) {
-                ffmpeg.av_bsf_alloc(bsfFilter, c).ThrowExceptionIfError();
-                ffmpeg.avcodec_parameters_copy(bsfContext->par_in, stream->codecpar).ThrowExceptionIfError();
-                ffmpeg.av_bsf_init(bsfContext).ThrowExceptionIfError();
-            }
-
             ffmpeg.avio_open2(&formatContext->pb, server, ffmpeg.AVIO_FLAG_READ_WRITE, null, null).ThrowExceptionIfError();
             ffmpeg.avformat_write_header(formatContext, null).ThrowExceptionIfError();
-
+            ioOpened = true;
             pts = 0;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Stop()
         {
-            if (bsfContext != null) {
-                fixed (AVBSFContext** c = &bsfContext) {
-                    ffmpeg.av_bsf_free(c);
-                    bsfContext = null;
-                }
-            }
-
-            if (formatContext != null) {
+            if (ioOpened) {
+                ffmpeg.av_write_trailer(formatContext);
                 ffmpeg.avio_close(formatContext->pb);
+                ioOpened = false;
             }
 
             if (packet != null) {
@@ -201,18 +184,42 @@ namespace encoder_csharp
                     throw new Exception("error during encoding");
                 }
 
-                /*
-                packet->stream_index = stream->id;
-                packet->pts = frame->pts * (stream->time_base.den) / ((stream->time_base.num) * frames_per_second);
-                packet->dts = packet->pts;
-                packet->duration = (stream->time_base.den) / ((stream->time_base.num) * frames_per_second);
-                packet->pos = -1;
-                */
+                byte* oldData = null;
+                int oldSize = 0;
+                IntPtr newData = IntPtr.Zero;
+                if (userData.ContainsKey(packet->pts)) {
+                    byte[] content = userData[packet->pts] as byte[];
+                    userData.Remove(packet->pts);
+
+                    oldData = packet->data;
+                    oldSize = packet->size;
+                    newData = Marshal.AllocHGlobal(packet->size + content.Length);
+                    Buffer.MemoryCopy(packet->data, (void*)newData, packet->size + content.Length, packet->size);
+                    Marshal.Copy(content, 0, IntPtr.Add(newData, packet->size), content.Length);
+
+                    packet->data = (byte*)newData.ToPointer();
+                    packet->size = packet->size + content.Length;
+                }
+
+                if (packet->pts != ffmpeg.AV_NOPTS_VALUE)
+                    packet->pts = ffmpeg.av_rescale_q(packet->pts, context->time_base, stream->time_base);
+                if (packet->dts != ffmpeg.AV_NOPTS_VALUE)
+                    packet->dts = ffmpeg.av_rescale_q(packet->dts, context->time_base, stream->time_base);
+                double sec = packet->pts * ffmpeg.av_q2d(stream->time_base);
+                Console.WriteLine($"frame: {frame->pts}, pts: {packet->pts}, dts: {packet->dts}, time: {sec}, length: {packet->size}");
 
                 // byte[] data = new byte[packet->size];
                 // Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
-                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
+                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));               
+
                 ffmpeg.av_interleaved_write_frame(formatContext, packet);
+
+                if (newData != IntPtr.Zero) {
+                    packet->data = oldData;
+                    packet->size = oldSize;
+                    Marshal.FreeHGlobal(newData);
+                }
+
                 ffmpeg.av_packet_unref(packet);
             } while (true);
         }
@@ -240,12 +247,7 @@ namespace encoder_csharp
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
-            ffmpeg.av_opt_set(bsfContext->priv_data, "sei_user_data", "086f3693-b7b3-4f2c-9653-21492feee5b8+LiuQiHelloWorld", ffmpeg.AV_OPT_SEARCH_CHILDREN);
-            ffmpeg.av_bsf_send_packet(bsfContext, packet);
-            while (ffmpeg.av_bsf_receive_packet(bsfContext, packet) == 0) {
-                ffmpeg.av_interleaved_write_frame(formatContext, packet);
-                ffmpeg.av_packet_unref(packet);
-            }
+            userData.Add(pts, data);
         }
     }
 }

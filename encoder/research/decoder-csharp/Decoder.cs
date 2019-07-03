@@ -15,7 +15,6 @@ namespace decoder_csharp
         private AVCodecContext* context;
         private AVFrame* frame;
         private AVPacket* packet;
-        private byte[] buffer;
 
         public void Dispose()
         {
@@ -74,8 +73,6 @@ namespace decoder_csharp
             if (packet == null) {
                 throw new Exception("alloc packet fail");
             }
-
-            buffer = new byte[INBUF_SIZE + ffmpeg.AV_INPUT_BUFFER_PADDING_SIZE];
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
