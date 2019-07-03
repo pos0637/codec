@@ -1,5 +1,7 @@
 ﻿using FFmpeg.AutoGen;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -17,9 +19,10 @@ namespace encoder_csharp
         private AVFrame* frame;
         private AVPacket* packet;
         private AVStream* stream;
-        private int pts;
+        private long pts;
         private int frames_per_second;
         private bool ioOpened;
+        private Hashtable userData = Hashtable.Synchronized(new Hashtable());
 
         public void Dispose()
         {
@@ -178,6 +181,23 @@ namespace encoder_csharp
                     throw new Exception("error during encoding");
                 }
 
+                byte* oldData = null;
+                int oldSize = 0;
+                IntPtr newData = IntPtr.Zero;
+                if (userData.ContainsKey(packet->pts)) {
+                    byte[] content = userData[packet->pts] as byte[];
+                    userData.Remove(packet->pts);
+
+                    oldData = packet->data;
+                    oldSize = packet->size;
+                    newData = Marshal.AllocHGlobal(packet->size + content.Length);
+                    Buffer.MemoryCopy(packet->data, (void*)newData, packet->size + content.Length, packet->size);
+                    Marshal.Copy(content, 0, IntPtr.Add(newData, packet->size), content.Length);
+
+                    packet->data = (byte*)newData.ToPointer();
+                    packet->size = packet->size + content.Length;
+                }
+
                 if (packet->pts != ffmpeg.AV_NOPTS_VALUE)
                     packet->pts = ffmpeg.av_rescale_q(packet->pts, context->time_base, stream->time_base);
                 if (packet->dts != ffmpeg.AV_NOPTS_VALUE)
@@ -187,8 +207,16 @@ namespace encoder_csharp
 
                 // byte[] data = new byte[packet->size];
                 // Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
-                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
+                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));               
+
                 ffmpeg.av_interleaved_write_frame(formatContext, packet);
+
+                if (newData != IntPtr.Zero) {
+                    packet->data = oldData;
+                    packet->size = oldSize;
+                    Marshal.FreeHGlobal(newData);
+                }
+
                 ffmpeg.av_packet_unref(packet);
             } while (true);
         }
@@ -210,24 +238,7 @@ namespace encoder_csharp
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
-            AVPacket* packet = ffmpeg.av_packet_alloc();
-            if (packet == null) {
-                throw new Exception("alloc packet fail");
-            }
-
-            ffmpeg.av_init_packet(packet);
-            packet->data = (byte*)Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, (IntPtr)packet->data, data.Length);
-            packet->size = data.Length;
-            packet->stream_index = 0;
-            // packet->flags |= 0x2000;
-
-            pts++;
-            packet->pts = ffmpeg.av_rescale_q(pts, context->time_base, stream->time_base);
-            packet->dts = ffmpeg.av_rescale_q(pts, context->time_base, stream->time_base);
-
-            ffmpeg.av_interleaved_write_frame(formatContext, packet).ThrowExceptionIfError();
-            ffmpeg.av_packet_free(&packet);
+            userData.Add(pts, data);
         }
     }
 }
