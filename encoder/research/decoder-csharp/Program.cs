@@ -1,6 +1,5 @@
 ﻿using OpenCvSharp;
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using static decoder_csharp.Decoder;
 
@@ -69,7 +68,7 @@ namespace decoder_csharp
                 }
 
                 mat = mat.CvtColor(ColorConversionCodes.YUV2BGR_I420);
-                Cv2.ImShow("mat", mat);
+                Cv2.ImShow($"mat", mat);
                 Cv2.WaitKey(0);
             };
 

@@ -1,8 +1,6 @@
 ﻿using FFmpeg.AutoGen;
 using System;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace decoder_csharp
 {
@@ -12,12 +10,11 @@ namespace decoder_csharp
         public delegate void OnFrame(AVFrame* frame);
 
         private const int INBUF_SIZE = 4096;
+        private AVFormatContext* formatContext;
         private AVCodec* codec;
-        private AVCodecParserContext* parser;
         private AVCodecContext* context;
         private AVFrame* frame;
         private AVPacket* packet;
-        private FileStream fs;
         private byte[] buffer;
 
         public void Dispose()
@@ -32,11 +29,6 @@ namespace decoder_csharp
 
             codec = ffmpeg.avcodec_find_decoder(AVCodecID.AV_CODEC_ID_H264);
             if (codec == null) {
-                throw new Exception("codec not found!");
-            }
-
-            parser = ffmpeg.av_parser_init((int)codec->id);
-            if (parser == null) {
                 throw new Exception("codec not found!");
             }
 
@@ -63,6 +55,14 @@ namespace decoder_csharp
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Start(string filename)
         {
+            fixed (AVFormatContext** c = &formatContext) {
+                if (ffmpeg.avformat_open_input(c, filename, null, null) < 0) {
+                    throw new Exception("Could not allocate input format context!");
+                }
+
+                ffmpeg.avformat_find_stream_info(formatContext, null).ThrowExceptionIfError();
+            }
+
             frame = ffmpeg.av_frame_alloc();
             if (frame == null) {
                 throw new Exception("alloc frame fail");
@@ -75,22 +75,15 @@ namespace decoder_csharp
                 throw new Exception("alloc packet fail");
             }
 
-            fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
             buffer = new byte[INBUF_SIZE + ffmpeg.AV_INPUT_BUFFER_PADDING_SIZE];
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Stop()
         {
-            if (fs != null) {
-                fs.Close();
-                fs.Dispose();
-                fs = null;
-            }
-
-            if (parser != null) {
-                ffmpeg.av_parser_close(parser);
-                parser = null;
+            if (formatContext != null) {
+                ffmpeg.avformat_free_context(formatContext);
+                formatContext = null;
             }
 
             if (packet != null) {
@@ -111,56 +104,32 @@ namespace decoder_csharp
         [MethodImpl(MethodImplOptions.Synchronized)]
         public bool Decode(OnPacket onPacket, OnFrame onFrame)
         {
-            int read = fs.Read(buffer, 0, INBUF_SIZE);
-            if (read <= 0) {
+            int ret = ffmpeg.av_read_frame(formatContext, packet);
+            if (ret < 0) {
                 return false;
             }
 
-            IntPtr ptr = Marshal.AllocHGlobal(read);
-            IntPtr data = ptr;
-            Marshal.Copy(buffer, 0, ptr, read);
-
-            while (read > 0) {
-                int ret = ffmpeg.av_parser_parse2(parser, context, &packet->data, &packet->size, (byte*)data, read, ffmpeg.AV_NOPTS_VALUE, ffmpeg.AV_NOPTS_VALUE, 0);
-                if (ret < 0) {
-                    Marshal.FreeHGlobal(data);
-                    throw new Exception("Error while parsing");
-                }
-
-                data += ret;
-                read -= ret;
-
-                if (packet->size > 0) {
-                    DecodePacket(onPacket, onFrame);
-                }
-            }
-
-            Marshal.FreeHGlobal(ptr);
-
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void DecodePacket(OnPacket onPacket, OnFrame onFrame)
-        {
-            onPacket?.Invoke(packet);
-
-            int ret = ffmpeg.avcodec_send_packet(context, packet);
+            ret = ffmpeg.avcodec_send_packet(context, packet);
             if (ret < 0) {
-                return;
+                return false;
             }
+
+            onPacket?.Invoke(packet);
 
             while (ret >= 0) {
                 ret = ffmpeg.avcodec_receive_frame(context, frame);
-                if (ret == ffmpeg.AVERROR(ffmpeg.EAGAIN) || ret == ffmpeg.AVERROR_EOF) {
-                    return;
+                if ((ret == ffmpeg.AVERROR(ffmpeg.EAGAIN)) || (ret == ffmpeg.AVERROR_EOF)) {
+                    return true;
                 }
                 else if (ret < 0) {
-                    throw new Exception("Error during decoding");
+                    throw new Exception("error during encoding");
                 }
 
+                Console.WriteLine($"id: {context->frame_number}");
                 onFrame?.Invoke(frame);
             }
+
+            return true;
         }
     }
 }

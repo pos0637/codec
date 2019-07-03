@@ -1,7 +1,5 @@
 ﻿using FFmpeg.AutoGen;
 using System;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -34,7 +32,7 @@ namespace encoder_csharp
             Reset();
 
             fixed (AVFormatContext** c = &formatContext) {
-                if (ffmpeg.avformat_alloc_output_context2(c, null, "mp4", null) < 0) {
+                if (ffmpeg.avformat_alloc_output_context2(c, null, "h264", null) < 0) {
                     throw new Exception("Could not allocate output format context!");
                 }
             }
@@ -180,7 +178,12 @@ namespace encoder_csharp
                     throw new Exception("error during encoding");
                 }
 
-                packet->duration = stream->time_base.den / stream->time_base.num * frames_per_second;
+                if (packet->pts != ffmpeg.AV_NOPTS_VALUE)
+                    packet->pts = ffmpeg.av_rescale_q(packet->pts, context->time_base, stream->time_base);
+                if (packet->dts != ffmpeg.AV_NOPTS_VALUE)
+                    packet->dts = ffmpeg.av_rescale_q(packet->dts, context->time_base, stream->time_base);
+                double sec = packet->pts * ffmpeg.av_q2d(stream->time_base);
+                Console.WriteLine($"frame: {frame->pts}, pts: {packet->pts}, dts: {packet->dts}, time: {sec}, length: {packet->size}");
 
                 // byte[] data = new byte[packet->size];
                 // Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
@@ -207,8 +210,24 @@ namespace encoder_csharp
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
-            // ffmpeg.av_interleaved_write_frame(formatContext, packet);
-            // ffmpeg.av_packet_unref(packet);
+            AVPacket* packet = ffmpeg.av_packet_alloc();
+            if (packet == null) {
+                throw new Exception("alloc packet fail");
+            }
+
+            ffmpeg.av_init_packet(packet);
+            packet->data = (byte*)Marshal.AllocHGlobal(data.Length);
+            Marshal.Copy(data, 0, (IntPtr)packet->data, data.Length);
+            packet->size = data.Length;
+            packet->stream_index = 0;
+            // packet->flags |= 0x2000;
+
+            pts++;
+            packet->pts = ffmpeg.av_rescale_q(pts, context->time_base, stream->time_base);
+            packet->dts = ffmpeg.av_rescale_q(pts, context->time_base, stream->time_base);
+
+            ffmpeg.av_interleaved_write_frame(formatContext, packet).ThrowExceptionIfError();
+            ffmpeg.av_packet_free(&packet);
         }
     }
 }

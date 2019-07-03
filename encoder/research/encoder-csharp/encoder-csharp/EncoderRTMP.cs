@@ -1,7 +1,6 @@
 ﻿using FFmpeg.AutoGen;
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace encoder_csharp
 {
