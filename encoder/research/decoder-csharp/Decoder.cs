@@ -60,6 +60,7 @@ namespace decoder_csharp
                 }
 
                 ffmpeg.avformat_find_stream_info(formatContext, null).ThrowExceptionIfError();
+                ffmpeg.avcodec_parameters_to_context(context, formatContext->streams[0]->codecpar);
             }
 
             frame = ffmpeg.av_frame_alloc();
@@ -108,7 +109,7 @@ namespace decoder_csharp
 
             ret = ffmpeg.avcodec_send_packet(context, packet);
             if (ret < 0) {
-                return false;
+                return true;
             }
 
             onPacket?.Invoke(packet);

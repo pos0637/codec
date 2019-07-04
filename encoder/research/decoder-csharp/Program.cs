@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using static decoder_csharp.Decoder;
 
@@ -11,15 +12,17 @@ namespace decoder_csharp
         {
             Decoder decoder = new Decoder();
             decoder.Initialize();
-            decoder.Start("1.h264");
+            // decoder.Start("1.h264");
+            decoder.Start("rtmp://localhost:1935/live/test");
 
             OnPacket onPacket = (packet) => {
                 Console.WriteLine($"length: {packet->size}");
                 byte[] data = new byte[packet->size];
                 Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
-                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
+                Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
 
                 byte[] NALHeader = new byte[] { 0x00, 0x00, 0x00, 0x01, 0x06 };
+                // byte[] NALHeader = new byte[] { 0x48, 0x65, 0x6c, 0x6c, 0x6f };
                 int startIndex = 0;
                 int pos;
                 while ((pos = data.IndexOf(NALHeader, startIndex)) >= 0) {

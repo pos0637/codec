@@ -18,7 +18,7 @@ namespace encoder_csharp
         private AVFrame* frame;
         private AVPacket* packet;
         private AVStream* stream;
-        private int pts;
+        private long pts;
         private int frames_per_second;
         private bool ioOpened;
         private Hashtable userData = Hashtable.Synchronized(new Hashtable());
@@ -244,6 +244,9 @@ namespace encoder_csharp
                 data[5 + i] = 0xFF;
             }
             data[5 + seiPayloadSizeLength] = (byte)(length % 0xFF);
+            for (int i = 0; i < 16; ++i) {
+                data[6 + seiPayloadSizeLength + i] = 0xAB;
+            }
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
