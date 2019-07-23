@@ -9,7 +9,7 @@ namespace decoder_csharp
         public delegate void OnPacket(AVPacket* packet);
         public delegate void OnFrame(AVFrame* frame);
 
-        private const int INBUF_SIZE = 4096;
+        private const int INBUF_SIZE = 4096; 
         private AVFormatContext* formatContext;
         private AVCodec* codec;
         private AVCodecContext* context;
@@ -107,12 +107,12 @@ namespace decoder_csharp
                 return false;
             }
 
+            onPacket?.Invoke(packet);
+
             ret = ffmpeg.avcodec_send_packet(context, packet);
             if (ret < 0) {
                 return true;
             }
-
-            onPacket?.Invoke(packet);
 
             while (ret >= 0) {
                 ret = ffmpeg.avcodec_receive_frame(context, frame);

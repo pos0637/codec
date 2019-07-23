@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace encoder_csharp
@@ -24,7 +25,15 @@ namespace encoder_csharp
                 Cv2.PutText(mat, i + ": " + DateTime.Now.ToString("hh:mm:ss:fff"), new Point(random.Next(0, 220), random.Next(20, 220)), HersheyFonts.HersheySimplex, 0.5, new Scalar(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
                 mat = mat.CvtColor(ColorConversionCodes.BGR2YUV_I420);
                 encoder.Encode(mat.Data, mat.Data + size, mat.Data + size + size / 4);
-                encoder.EncodeSEI(System.Text.Encoding.UTF8.GetBytes($"{i / frames_per_second} Hello, world!"));
+
+                List<byte> data = new List<byte>();
+                byte[] header = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
+                byte[] content = System.Text.Encoding.UTF8.GetBytes($"{i / frames_per_second} Hello, world!");
+                byte[] length = BitConverter.GetBytes(content.Length);
+                data.AddRange(header);
+                data.AddRange(length);
+                data.AddRange(content);
+                encoder.EncodeSEI(data.ToArray());
                 Thread.Sleep(1000 / frames_per_second);
                 /*
                 Cv2.ImShow("mat", mat);

@@ -19,28 +19,20 @@ namespace decoder_csharp
                 Console.WriteLine($"length: {packet->size}");
                 byte[] data = new byte[packet->size];
                 Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
-                Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
+                // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));
 
-                byte[] NALHeader = new byte[] { 0x00, 0x00, 0x00, 0x01, 0x06 };
-                // byte[] NALHeader = new byte[] { 0x48, 0x65, 0x6c, 0x6c, 0x6f };
+                byte[] NALHeader = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
                 int startIndex = 0;
                 int pos;
                 while ((pos = data.IndexOf(NALHeader, startIndex)) >= 0) {
-                    int length = 0;
-                    for (int i = 6; ; ++i) {
-                        length += data[i];
-                        if (data[i] != 0xFF) {
-                            break;
-                        }
-                    }
+                    byte[] content = new byte[4];
+                    Array.Copy(data, pos + 4, content, 0, 4);
 
-                    int seiPayloadSizeLength = (length / 0xFF) + (((length % 0xFF) == 0) ? 0 : 1);
-                    byte[] content = new byte[length];
-                    Array.Copy(data, 4 + 1 + 1 + seiPayloadSizeLength + 16, content, 0, length);
-                    string userData = System.Text.Encoding.UTF8.GetString(content);
+                    int length = BitConverter.ToInt32(content, 0);
+                    string userData = System.Text.Encoding.UTF8.GetString(data, pos + 4 + 4, length);
                     Console.WriteLine($"SEI length: {length}, {userData}");
 
-                    startIndex = pos + length;
+                    startIndex = pos + 4 + 4 + length;
                 }
             };
 
@@ -75,7 +67,7 @@ namespace decoder_csharp
                 Cv2.WaitKey(0);
             };
 
-            while (decoder.Decode(onPacket, onFrame)) {
+            while (decoder.Decode(onPacket, null)) {
             }
 
             decoder.Stop();
