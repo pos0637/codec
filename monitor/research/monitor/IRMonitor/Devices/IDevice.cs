@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace Devices
 {
     /// <summary>
-    /// 定义设备抽象类
+    /// 设备抽象类
     /// </summary>
     public abstract class IDevice : IDisposable
     {
