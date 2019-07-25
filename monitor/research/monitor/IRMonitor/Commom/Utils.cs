@@ -379,7 +379,7 @@ namespace Common
         public static Byte[] CutImageBytes(Byte[] bytes)
         {
             try {
-                Int32 sos = 0, eoi= 0;
+                Int32 sos = 0, eoi = 0;
 
                 // 找到jpeg图片sos段的结尾
                 for (Int32 i = 2; i < bytes.Length; i++) {
@@ -396,7 +396,7 @@ namespace Common
                     if ((bytes[i] == 0xFF) && (bytes[i + 1] != 0xFF)) {
                         // 获取段数据长度
                         Int32 count = 0;
-                        count += bytes[i + 2]; 
+                        count += bytes[i + 2];
                         count = count * 16 * 16 + bytes[i + 3];
 
                         // 偏移
@@ -408,7 +408,7 @@ namespace Common
                 // 在sos段后遍历搜索EOI结束段
                 for (Int32 i = sos; i < bytes.Length; i++) {
                     // 结束符
-                    if ((bytes[i] == 0xFF) && (bytes[i+1] == 0xD9)) {
+                    if ((bytes[i] == 0xFF) && (bytes[i + 1] == 0xD9)) {
                         eoi = i + 2;
                         break;
                     }
@@ -425,6 +425,20 @@ namespace Common
                 Tracker.LogE(ex);
                 return null;
             }
+        }
+
+        public static T[] SubArray<T>(this T[] data, int index)
+        {
+            T[] result = new T[data.Length - index];
+            Array.Copy(data, index, result, 0, data.Length - index);
+            return result;
+        }
+
+        public static T[] SubArray<T>(this T[] data, int index, int length)
+        {
+            T[] result = new T[length];
+            Array.Copy(data, index, result, 0, length);
+            return result;
         }
     }
 }
