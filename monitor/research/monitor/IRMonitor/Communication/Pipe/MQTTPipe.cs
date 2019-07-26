@@ -28,6 +28,11 @@ namespace Communication
         private const int RETRY_DURATION = 3000;
 
         /// <summary>
+        /// 超时时间
+        /// </summary>
+        private const int TIMEOUT = 3000;
+
+        /// <summary>
         /// 客户端
         /// </summary>
         private IMqttClient mqttClient;
@@ -105,6 +110,7 @@ namespace Communication
                 .WithTcpServer(arguments["Server"] as string, arguments["Port"] as int?)
                 .WithTls()
                 .WithCleanSession()
+                .WithCommunicationTimeout(TimeSpan.FromMilliseconds(TIMEOUT))
                 .Build();
 
             await ConnectAsync();

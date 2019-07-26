@@ -28,8 +28,18 @@ namespace Communication
         /// </summary>
         private MQTTPipe pipe;
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override void Dispose()
+        {
+            pipe?.Dispose();
+            base.Dispose();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Initialize(Dictionary<string, object> arguments)
         {
+            base.Initialize(arguments);
+
             pipe = new MQTTPipe();
             pipe.Connect(arguments);
             pipe.OnConnectedCallback = OnConnected;

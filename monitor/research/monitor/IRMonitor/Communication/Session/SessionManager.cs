@@ -9,7 +9,7 @@ namespace Communication
     /// <summary>
     /// 会话管理器
     /// </summary>
-    public abstract class SessionManager
+    public abstract class SessionManager : IDisposable
     {
         /// <summary>
         /// 定义创建新会话事件函数代理
@@ -52,10 +52,18 @@ namespace Communication
         protected List<SessionPipe> sessionList = new List<SessionPipe>();
 
         /// <summary>
+        /// 释放资源
+        /// </summary>
+        public virtual void Dispose() { }
+
+        /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="arguments">参数列表</param>
-        public abstract void Initialize(Dictionary<string, object> arguments);
+        public virtual void Initialize(Dictionary<string, object> arguments)
+        {
+            KeepAlive();
+        }
 
         /// <summary>
         /// 添加会话

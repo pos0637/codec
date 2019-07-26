@@ -42,6 +42,10 @@ namespace Common
             mCompare = compare;
         }
 
+        public PriorityQueue()
+        {
+        }
+
         /// <summary>
         /// 添加消息
         /// </summary>
