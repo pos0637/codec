@@ -62,10 +62,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Commom\Common.csproj">
-      <Project>{d8738b46-5320-436e-b629-49c5a6d400d9}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DBHelper\DBHelper.csproj">
       <Project>{05df77de-1c61-40c8-93a2-772510c0f603}</Project>
       <Name>DBHelper</Name>

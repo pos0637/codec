@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Communication.Base;
+using Communication.Transport;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
-using static Common.Utils;
 
-namespace Communication
+namespace Communication.Session
 {
     /// <summary>
     /// MQTT会话管理器
@@ -16,7 +16,7 @@ namespace Communication
         /// </summary>
         private class MQTTSessionPipe : SessionPipe
         {
-            public MQTTSessionPipe(Pipe pipe, string sessionId) : base(pipe, sessionId) { }
+            public MQTTSessionPipe(Pipe pipe, string targetClientId, string sessionId) : base(pipe, targetClientId, sessionId) { }
 
             public override void Connect(Dictionary<string, object> arguments) { }
 
@@ -50,6 +50,18 @@ namespace Communication
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
+        protected override SessionPipe OnNewSession(string targetClientId, string sessionId)
+        {
+            return new TransportPipe(new MQTTSessionPipe(this.pipe, targetClientId, sessionId));
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        protected override void OnReceive(string clientId, byte[] buffer, int length)
+        {
+            base.OnReceive(clientId, buffer, length);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnConnected()
         {
             sessionList.ForEach(pipe => pipe.OnConnectedCallback?.Invoke());
@@ -65,28 +77,6 @@ namespace Communication
         private void OnSendCompleted(object state)
         {
             sessionList.ForEach(pipe => pipe.OnSendCompletedCallback?.Invoke(state));
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnReceive(byte[] buffer, int length)
-        {
-            int headerLength = SessionPipe.SESSION_ID_LENGTH + SessionPipe.SESSION_ID_LENGTH;
-            if (length < headerLength) {
-                return;
-            }
-
-            // 判断会话索引是否存在
-            var sessionId = Encoding.UTF8.GetString(buffer.SubArray(0, SessionPipe.SESSION_ID_LENGTH));
-            var pipe = GetSession(sessionId);
-            if (pipe != null) {
-                // 调用对应会话
-                pipe.Receive(buffer, length);
-            }
-            else {
-                // 添加会话
-                var clientId = Encoding.UTF8.GetString(buffer.SubArray(SessionPipe.SESSION_ID_LENGTH, SessionPipe.SESSION_ID_LENGTH));
-                AddSession(clientId, new MQTTSessionPipe(pipe, clientId));
-            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

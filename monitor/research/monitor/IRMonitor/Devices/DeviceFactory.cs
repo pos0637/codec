@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace Devices
 {
@@ -15,7 +14,7 @@ namespace Devices
         /// <summary>
         /// 动态链接库路径
         /// </summary>
-        private readonly String mDevicePath = Application.StartupPath;
+        private readonly String mDevicePath = Directory.GetCurrentDirectory();
 
         /// <summary>
         /// 设备类型哈希表

@@ -1,4 +1,6 @@
 ﻿using log4net;
+using log4net.Config;
+using log4net.Repository;
 using System;
 using System.IO;
 
@@ -12,13 +14,14 @@ namespace Common
         static Tracker()
         {
             // 打开日志配置文件
-            String path = AppDomain.CurrentDomain.BaseDirectory + @"\log4net.config";
-            log4net.Config.XmlConfigurator.Configure(new FileInfo(path));
-            sLog = LogManager.GetLogger("runtime");
-            sLogDA = LogManager.GetLogger("database");
-            sLogEX = LogManager.GetLogger("exception");
-            sLogNW = LogManager.GetLogger("network");
-            sLogBU = LogManager.GetLogger("business");
+            string path = AppDomain.CurrentDomain.BaseDirectory + @"\log4net.config";
+            ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");
+            XmlConfigurator.Configure(repository, new FileInfo(path));
+            sLog = LogManager.GetLogger(repository.Name, "runtime");
+            sLogDA = LogManager.GetLogger(repository.Name, "database");
+            sLogEX = LogManager.GetLogger(repository.Name, "exception");
+            sLogNW = LogManager.GetLogger(repository.Name, "network");
+            sLogBU = LogManager.GetLogger(repository.Name, "business");
         }
 
         private static ILog sLog;

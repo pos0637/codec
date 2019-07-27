@@ -5,12 +5,14 @@ using MQTTnet.Client.Options;
 using MQTTnet.Server;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Communication
+namespace Communication.Base
 {
     /// <summary>
     /// MQTT通讯管道
@@ -86,15 +88,21 @@ namespace Communication
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Send(byte[] buffer, int offset, int length, object state)
+        public override void Send(string targetClientId, byte[] buffer, int offset, int length, object state)
         {
-            SendAsync(buffer, offset, length, state).Wait();
+            SendAsync(targetClientId, buffer, offset, length, state);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Receive(byte[] buffer, int length)
+        public override void Receive(string clientId, byte[] buffer, int length)
         {
-            OnReceiveCallback?.Invoke(buffer, length);
+            int headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH;
+            if (length < headerLength) {
+                return;
+            }
+
+            byte[] data = buffer.SubArray(headerLength, length - headerLength);
+            OnReceiveCallback?.Invoke(Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH), data, length);
         }
 
         /// <summary>
@@ -102,16 +110,31 @@ namespace Communication
         /// </summary>
         /// <param name="arguments">参数列表</param>
         /// <returns>任务</returns>
-        private async Task ConnectAsync(Dictionary<string, object> arguments)
+        private async void ConnectAsync(Dictionary<string, object> arguments)
         {
+            ClientId = arguments["ClientId"] as string;
+            Debug.Assert(ClientId.Length == CLIENT_ID_LENGTH);
             topic = arguments["Topic"] as string;
+
             options = new MqttClientOptionsBuilder()
-                .WithClientId(arguments["ClientId"] as string)
+                .WithClientId(ClientId)
                 .WithTcpServer(arguments["Server"] as string, arguments["Port"] as int?)
-                .WithTls()
                 .WithCleanSession()
                 .WithCommunicationTimeout(TimeSpan.FromMilliseconds(TIMEOUT))
                 .Build();
+
+            // 订阅主题
+            mqttClient.UseConnectedHandler(async e => {
+                Tracker.LogNW(TAG, "connected");
+                await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic(topic).Build());
+                Tracker.LogNW(TAG, "subscribed");
+            });
+
+            // 接收数据
+            mqttClient.UseApplicationMessageReceivedHandler(e => {
+                Tracker.LogNW(TAG, $"received[{e.ApplicationMessage.Topic}]: {string.Concat(e.ApplicationMessage.Payload?.Select(b => b.ToString("X2")).ToArray())}");
+                Receive(null, e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length);
+            });
 
             await ConnectAsync();
         }
@@ -125,20 +148,6 @@ namespace Communication
                 try {
                     // 连接
                     await mqttClient.ConnectAsync(options, cancellationToken.Token);
-
-                    // 订阅主题
-                    mqttClient.UseConnectedHandler(async e => {
-                        Tracker.LogNW(TAG, "connected");
-                        await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic(topic).Build());
-                        Tracker.LogNW(TAG, "subscribed");
-                    });
-
-                    // 接收数据
-                    mqttClient.UseApplicationMessageReceivedHandler(e => {
-                        Tracker.LogNW(TAG, $"received[{e.ApplicationMessage.Topic}]: {string.Concat(e.ApplicationMessage.Payload?.Select(b => b.ToString("X2")).ToArray())}");
-                        Receive(e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length);
-                    });
-
                     OnConnectedCallback?.Invoke();
 
                     return;
@@ -154,18 +163,24 @@ namespace Communication
         /// <summary>
         /// 异步发送数据
         /// </summary>
+        /// <param name="targetClientId">目标客户索引</param>
         /// <param name="buffer">数据</param>
         /// <param name="offset">偏移</param>
         /// <param name="length">长度</param>
         /// <param name="state">状态</param>
         /// <returns>任务</returns>
-        private async Task SendAsync(byte[] buffer, int offset, int length, object state)
+        private async void SendAsync(string targetClientId, byte[] buffer, int offset, int length, object state)
         {
+            int newLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH + length;
+            byte[] data = new byte[newLength];
+            Array.Copy(Encoding.UTF8.GetBytes(ClientId), 0, data, 0, CLIENT_ID_LENGTH);
+            Array.Copy(Encoding.UTF8.GetBytes(targetClientId), 0, data, CLIENT_ID_LENGTH, CLIENT_ID_LENGTH);
+            Array.Copy(buffer, offset, data, CLIENT_ID_LENGTH + CLIENT_ID_LENGTH, length);
+
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
-                .WithPayload(buffer.Skip(5).Take(length))
+                .WithPayload(data)
                 .WithExactlyOnceQoS()
-                .WithRetainFlag()
                 .Build();
 
             await mqttClient.PublishAsync(message);

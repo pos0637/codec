@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Communication
+namespace Communication.Base
 {
     /// <summary>
     /// 通讯管道
     /// </summary>
     public abstract class Pipe : IDisposable
     {
+        /// <summary>
+        /// 用户索引长度
+        /// </summary>
+        public const int CLIENT_ID_LENGTH = 4;
+
         /// <summary>
         /// 定义完成回调函数代理
         /// </summary>
@@ -23,9 +28,10 @@ namespace Communication
         /// <summary>
         /// 定义接收回调函数代理
         /// </summary>
+        /// <param name="clientId">客户索引</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        public delegate void DgOnReceiveCallback(byte[] buffer, int length);
+        public delegate void DgOnReceiveCallback(string clientId, byte[] buffer, int length);
 
         /// <summary>
         /// 定义异常回调函数代理
@@ -59,6 +65,11 @@ namespace Communication
         public DgOnExceptionCallback OnExceptionCallback { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
 
         /// <summary>
+        /// 用户索引
+        /// </summary>
+        public string ClientId { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
+
+        /// <summary>
         /// 释放资源
         /// </summary>
         public virtual void Dispose()
@@ -80,17 +91,19 @@ namespace Communication
         /// <summary>
         /// 发送数据
         /// </summary>
+        /// <param name="targetClientId">目标客户索引</param>
         /// <param name="buffer">数据</param>
         /// <param name="offset">偏移</param>
         /// <param name="length">长度</param>
         /// <param name="state">状态</param>
-        public abstract void Send(byte[] buffer, int offset, int length, object state);
+        public abstract void Send(string targetClientId, byte[] buffer, int offset, int length, object state);
 
         /// <summary>
         /// 接收数据
         /// </summary>
+        /// <param name="clientId">客户索引</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        public abstract void Receive(byte[] buffer, int length);
+        public abstract void Receive(string clientId, byte[] buffer, int length);
     }
 }

@@ -5,15 +5,13 @@ namespace Common
     /// <summary>
     /// 单例模式
     /// </summary>
-    public class Singleton<T> where T: class
+    public class Singleton<T> where T : class
     {
         private static T sInstance;
-        private static readonly Object sLock = new Object();
+        private static readonly object sLock = new object();
 
-        public static T Instance 
-        {
-            get
-            {
+        public static T Instance {
+            get {
                 if (sInstance == null) {
                     lock (sLock) {
                         if (sInstance == null)

@@ -187,11 +187,6 @@
     <ClCompile Include="src\Gvsp.cpp" />
     <ClCompile Include="src\UdpSocket.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Devices\Devices.csproj">
-      <Project>{65a4d717-d4fd-402d-87dc-cc0f684ee59b}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

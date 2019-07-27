@@ -1,7 +1,6 @@
 ﻿using Common;
-using Drivers.Device;
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace Devices
 {
