@@ -23,15 +23,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HIKVision", "HIKVision", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Magnity", "Magnity", "{6C24AADE-AD78-4334-B0B3-035121B3A4E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{4C7B3796-398E-4B9F-99BE-523515D8BB21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{4C7B3796-398E-4B9F-99BE-523515D8BB21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{75EE0D0B-087F-420C-82DC-89E9C749C5BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resources", "Resources\Resources.csproj", "{75EE0D0B-087F-420C-82DC-89E9C749C5BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{DB789A7F-0696-4C85-BF7A-9EC0A247FD63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{DB789A7F-0696-4C85-BF7A-9EC0A247FD63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devices", "Devices\Devices.csproj", "{FC62DFAB-C628-45A6-8600-4FD0A8F87D4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Devices", "Devices\Devices.csproj", "{FC62DFAB-C628-45A6-8600-4FD0A8F87D4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication", "Communication\Communication.csproj", "{8A27D1D3-E33C-4247-864F-43F29968A0F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communication", "Communication\Communication.csproj", "{8A27D1D3-E33C-4247-864F-43F29968A0F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBHelper", "DBHelper\DBHelper.csproj", "{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,6 +129,30 @@ Global
 		{8A27D1D3-E33C-4247-864F-43F29968A0F1}.Release|x64.Build.0 = Release|Any CPU
 		{8A27D1D3-E33C-4247-864F-43F29968A0F1}.Release|x86.ActiveCfg = Release|Any CPU
 		{8A27D1D3-E33C-4247-864F-43F29968A0F1}.Release|x86.Build.0 = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|x64.Build.0 = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Debug|x86.Build.0 = Debug|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|x64.ActiveCfg = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|x64.Build.0 = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|x86.ActiveCfg = Release|Any CPU
+		{5086AEAA-E16D-492D-9D4C-1CC70B80AC6D}.Release|x86.Build.0 = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|x64.Build.0 = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|x64.Build.0 = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{43CFB7BA-50AB-4D5A-B385-B8DAF427C4B1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

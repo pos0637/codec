@@ -1,6 +1,6 @@
-﻿using System;
+﻿using DBHelper.ADO;
+using System;
 using System.Data;
-using DBHelper.ADO;
 
 namespace DBHelper
 {
@@ -12,10 +12,8 @@ namespace DBHelper
         {
         }
 
-        public static DbFactory Instance
-        {
-            get
-            {
+        public static DbFactory Instance {
+            get {
                 return _Instance;
             }
         }

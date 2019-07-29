@@ -1,6 +1,5 @@
-﻿using System;
+﻿using DBHelper;
 using System.Data.SqlClient;
-using DBHelper;
 
 namespace Repository.Pool
 {
@@ -12,15 +11,12 @@ namespace Repository.Pool
         public DBConnectionPool() { }
 
         private string mConnectionString;
- 
-        public string ConnectionString
-        {
-            get
-            {
+
+        public string ConnectionString {
+            get {
                 return mConnectionString;
             }
-            set
-            {
+            set {
                 mConnectionString = value;
             }
         }

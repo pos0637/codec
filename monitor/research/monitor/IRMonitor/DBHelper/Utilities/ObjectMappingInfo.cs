@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Web;
 
 namespace Fg.DBHelper.Utilities
 {
@@ -14,6 +14,7 @@ namespace Fg.DBHelper.Utilities
         private const String mObjectMapCacheKey = "ObjectMap_";
         private const String mDefaultPrimaryKey = "ItemID";
 
+        private static Hashtable hashtable = Hashtable.Synchronized(new Hashtable());
         private String _CacheByProperty;
         private Int32 _CacheTimeOutMultiplier;
         private Dictionary<String, String> _ColumnNames = new Dictionary<String, String>();
@@ -22,22 +23,17 @@ namespace Fg.DBHelper.Utilities
         private Dictionary<String, PropertyInfo> _Properties = new Dictionary<String, PropertyInfo>();
         private String _TableName;
 
-        public String CacheByProperty
-        {
-            get
-            {
+        public String CacheByProperty {
+            get {
                 return this._CacheByProperty;
             }
-            set
-            {
+            set {
                 this._CacheByProperty = value;
             }
         }
 
-        public String CacheKey
-        {
-            get
-            {
+        public String CacheKey {
+            get {
                 String _CacheKey = "ObjectCache_" + TableName + "_";
                 if (!String.IsNullOrEmpty(CacheByProperty)) {
                     _CacheKey = _CacheKey + CacheByProperty + "_";
@@ -46,66 +42,50 @@ namespace Fg.DBHelper.Utilities
             }
         }
 
-        public Int32 CacheTimeOutMultiplier
-        {
-            get
-            {
+        public Int32 CacheTimeOutMultiplier {
+            get {
                 return this._CacheTimeOutMultiplier;
             }
-            set
-            {
+            set {
                 this._CacheTimeOutMultiplier = value;
             }
         }
 
-        public Dictionary<String, String> ColumnNames
-        {
-            get
-            {
+        public Dictionary<String, String> ColumnNames {
+            get {
                 return this._ColumnNames;
             }
         }
 
-        public String ObjectType
-        {
-            get
-            {
+        public String ObjectType {
+            get {
                 return this._ObjectType;
             }
-            set
-            {
+            set {
                 this._ObjectType = value;
             }
         }
 
-        public String PrimaryKey
-        {
-            get
-            {
+        public String PrimaryKey {
+            get {
                 return this._PrimaryKey;
             }
-            set
-            {
+            set {
                 this._PrimaryKey = value;
             }
         }
 
-        public Dictionary<String, PropertyInfo> Properties
-        {
-            get
-            {
+        public Dictionary<String, PropertyInfo> Properties {
+            get {
                 return this._Properties;
             }
         }
 
-        public String TableName
-        {
-            get
-            {
+        public String TableName {
+            get {
                 return this._TableName;
             }
-            set
-            {
+            set {
                 this._TableName = value;
             }
         }
@@ -119,7 +99,7 @@ namespace Fg.DBHelper.Utilities
         {
             String cacheKey = mObjectMapCacheKey + objType.FullName;
             try {
-                ObjectMappingInfo objMap = (ObjectMappingInfo)HttpRuntime.Cache[cacheKey];
+                ObjectMappingInfo objMap = hashtable[cacheKey] as ObjectMappingInfo;
                 if (objMap == null) {
                     objMap = new ObjectMappingInfo();
                     objMap.ObjectType = objType.FullName;
@@ -135,7 +115,8 @@ namespace Fg.DBHelper.Utilities
                             objProperty.Name.ToUpperInvariant(),
                             GetColumnName(objProperty));
                     }
-                    HttpRuntime.Cache[cacheKey] = objMap;
+
+                    hashtable.Add(cacheKey, objMap);
                 }
                 return objMap;
             }

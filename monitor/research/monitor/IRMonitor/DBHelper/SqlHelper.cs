@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Fg.DBHelper.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using Fg.DBHelper.Utilities;
 
 namespace DBHelper
 {
@@ -20,16 +19,14 @@ namespace DBHelper
         /// <summary>
         /// 获取Sql字符串
         /// </summary>
-        public String SqlString
-        {
+        public String SqlString {
             get { return mSqlExpression.mSqlString; }
         }
 
         /// <summary>
         /// 获取当前语句中的参数数组
         /// </summary>
-        public IDataParameter[] Parameters
-        {
+        public IDataParameter[] Parameters {
             get { return mSqlExpression.mParameters.ToArray(); }
         }
 
@@ -243,7 +240,7 @@ namespace DBHelper
                 mSqlExpression.mSqlString, CommandType.Text, mSqlExpression.mParameters.ToArray());
 
             if (resultTable.Rows.Count > 0)
-                return resultTable.AsEnumerable().FirstOrDefault();
+                return resultTable.Rows[0];
 
             return null;
         }

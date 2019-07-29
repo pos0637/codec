@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Data;
-using System.Data.OleDb;
 using System.Data.SQLite;
 using System.Text.RegularExpressions;
 
@@ -38,8 +37,7 @@ namespace DBHelper.ADO
 
         #region "IDbCommandHelp成员"
 
-        public String SqlPlaceHolder
-        {
+        public String SqlPlaceHolder {
             get { return "@"; }
         }
 
@@ -121,13 +119,11 @@ namespace DBHelper.ADO
         #endregion
 
         #region "IDbHelp成员"
-        public Boolean ConnectionIsOpen
-        {
+        public Boolean ConnectionIsOpen {
             get { return mConnectionIsOpen; }
         }
 
-        public TransactionType TransactionState
-        {
+        public TransactionType TransactionState {
             get { return mTransactionState; }
         }
 
@@ -462,9 +458,6 @@ namespace DBHelper.ADO
 
             if (parameter.Direction != ParameterDirection.Input)
                 parameter.DbType = GetSqlDbType(param.DbType);
-
-            if (param is OleDbParameter)
-                parameter.Size = (param as OleDbParameter).Size;
 
             return parameter;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Fg.DBHelper.Utilities
 {
@@ -9,85 +8,65 @@ namespace Fg.DBHelper.Utilities
     {
         #region "公有属性:定义各种类型的Null值"
 
-        public static Boolean NullBoolean
-        {
-            get
-            {
+        public static Boolean NullBoolean {
+            get {
                 return false;
             }
         }
 
-        public static Byte NullByte
-        {
-            get
-            {
+        public static Byte NullByte {
+            get {
                 return 0xff;
             }
         }
 
-        public static DateTime NullDate
-        {
-            get
-            {
+        public static DateTime NullDate {
+            get {
                 return DateTime.MinValue;
             }
         }
 
-        public static Decimal NullDecimal
-        {
-            get
-            {
+        public static Decimal NullDecimal {
+            get {
                 return -79228162514264337593543950335M;
             }
         }
 
-        public static Double NullDouble
-        {
-            get
-            {
+        public static Double NullDouble {
+            get {
                 return Double.MinValue;
             }
         }
 
-        public static Guid NullGuid
-        {
-            get
-            {
+        public static Guid NullGuid {
+            get {
                 return Guid.Empty;
             }
         }
 
-        public static Int32 NullInteger
-        {
-            get
-            {
+        public static Int32 NullInteger {
+            get {
                 return -1;
             }
         }
 
-        public static Int16 NullShort
-        {
-            get
-            {
+        public static Int16 NullShort {
+            get {
                 return -1;
             }
         }
 
-        public static Single NullSingle
-        {
-            get
-            {
+        public static Single NullSingle {
+            get {
                 return Single.MinValue;
             }
         }
 
-        public static String NullString
-        {
+        public static String NullString {
             get { return String.Empty; }
         }
 
-        public static Char NullChar
-        {
+        public static Char NullChar {
             get { return Char.MinValue; }
         }
 
@@ -117,7 +96,7 @@ namespace Fg.DBHelper.Utilities
                     return objField.Equals(NullDecimal);
                 }
                 if (objField is DateTime) {
-                    return Conversions.ToDate(objField).Date.Equals(NullDate.Date);
+                    return ((DateTime)objField).Equals(NullDate.Date);
                 }
                 if (objField is String) {
                     return objField.Equals(NullString);
