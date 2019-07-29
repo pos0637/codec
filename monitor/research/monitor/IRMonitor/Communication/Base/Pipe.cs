@@ -12,6 +12,22 @@ namespace Communication.Base
     public abstract class Pipe : IDisposable
     {
         /// <summary>
+        /// 响应信息
+        /// </summary>
+        public class Response
+        {
+            /// <summary>
+            /// 用户索引
+            /// </summary>
+            public string clientId;
+
+            /// <summary>
+            /// 会话索引
+            /// </summary>
+            public string sessionId;
+        }
+
+        /// <summary>
         /// 用户索引长度
         /// </summary>
         public const int CLIENT_ID_LENGTH = 4;
@@ -30,10 +46,10 @@ namespace Communication.Base
         /// <summary>
         /// 定义接收回调函数代理
         /// </summary>
-        /// <param name="clientId">客户索引</param>
+        /// <param name="response">响应信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        public delegate void DgOnReceiveCallback(string clientId, byte[] buffer, int length);
+        public delegate void DgOnReceiveCallback(Response response, byte[] buffer, int length);
 
         /// <summary>
         /// 定义异常回调函数代理
@@ -72,6 +88,11 @@ namespace Communication.Base
         public string ClientId { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
 
         /// <summary>
+        /// 重试次数
+        /// </summary>
+        public int retry = 3;
+
+        /// <summary>
         /// 释放资源
         /// </summary>
         public virtual void Dispose()
@@ -107,17 +128,46 @@ namespace Communication.Base
             Array.Copy(Encoding.UTF8.GetBytes(targetClientId), 0, data, CLIENT_ID_LENGTH, CLIENT_ID_LENGTH);
             Array.Copy(buffer, offset, data, CLIENT_ID_LENGTH + CLIENT_ID_LENGTH, length);
 
-            SendData(data, state);
+            for (var i = 0; i < retry; ++i) {
+                try {
+                    SendData(data, state);
+                    return;
+                }
+                catch {
+                }
+            }
         }
 
         /// <summary>
-        /// 接收数据
+        /// 注入接收数据
         /// </summary>
-        /// <param name="clientId">客户索引</param>
+        /// <param name="response">响应信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public virtual void Receive(string clientId, byte[] buffer, int length)
+        public virtual void InjectReceiveData(Response response, byte[] buffer, int length)
+        {
+            HandleReceiveData(response, buffer, length);
+        }
+
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="buffer">数据</param>
+        /// <param name="state">状态</param>        
+        protected virtual void SendData(byte[] buffer, object state)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 处理接收数据
+        /// </summary>
+        /// <param name="response">响应信息</param>
+        /// <param name="buffer">接收缓冲区</param>
+        /// <param name="length">接收字节数</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        protected virtual void HandleReceiveData(Response response, byte[] buffer, int length)
         {
             int headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH;
             if (length < headerLength) {
@@ -130,14 +180,7 @@ namespace Communication.Base
             }
 
             var data = buffer.SubArray(headerLength, length - headerLength);
-            OnReceiveCallback?.Invoke(Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH), data, length);
+            OnReceiveCallback?.Invoke(new Response() { clientId = Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH) }, data, length - headerLength);
         }
-
-        /// <summary>
-        /// 发送数据
-        /// </summary>
-        /// <param name="buffer">数据</param>
-        /// <param name="state">状态</param>
-        protected virtual void SendData(byte[] buffer, object state) { }
     }
 }

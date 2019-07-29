@@ -87,19 +87,7 @@ namespace Communication.Session
             Array.Copy(Encoding.UTF8.GetBytes(SessionId), 0, data, 0, SESSION_ID_LENGTH);
             Array.Copy(buffer, offset, data, SESSION_ID_LENGTH, length);
 
-            pipe.Send(TargetClientId, data, 0, newLength, state);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Receive(string clientId, byte[] buffer, int length)
-        {
-            if (length < SESSION_ID_LENGTH) {
-                return;
-            }
-
-            var data = buffer.SubArray(SESSION_ID_LENGTH, length - SESSION_ID_LENGTH);
-            lastActiveTime = DateTime.Now;
-            OnReceiveCallback?.Invoke(clientId, data, data.Length);
+            pipe.Send(TargetClientId, buffer, 0, buffer.Length, state);
         }
 
         /// <summary>
@@ -122,6 +110,19 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
+        protected override void HandleReceiveData(Response response, byte[] buffer, int length)
+        {
+            if (length < SESSION_ID_LENGTH) {
+                return;
+            }
+
+            response.sessionId = Encoding.UTF8.GetString(buffer, 0, SESSION_ID_LENGTH);
+            var data = buffer.SubArray(SESSION_ID_LENGTH, length - SESSION_ID_LENGTH);
+            lastActiveTime = DateTime.Now;
+            OnReceiveCallback?.Invoke(response, data, data.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnConnected()
         {
             OnConnectedCallback?.Invoke();
@@ -140,9 +141,9 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnReceive(string clientId, byte[] buffer, int length)
+        private void OnReceive(Response response, byte[] buffer, int length)
         {
-            Receive(clientId, buffer, length);
+            HandleReceiveData(response, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

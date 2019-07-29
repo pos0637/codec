@@ -56,9 +56,9 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected override void OnReceive(string clientId, byte[] buffer, int length)
+        protected override void OnReceive(Base.Pipe.Response response, byte[] buffer, int length)
         {
-            base.OnReceive(clientId, buffer, length);
+            base.OnReceive(response, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

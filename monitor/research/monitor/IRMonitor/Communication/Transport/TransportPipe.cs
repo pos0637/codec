@@ -3,6 +3,7 @@ using Communication.Session;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 
 namespace Communication.Transport
@@ -31,7 +32,6 @@ namespace Communication.Transport
             public int offset;
             public int length;
             public int priority;
-            public bool ack;
             public object state;
         }
 
@@ -94,9 +94,9 @@ namespace Communication.Transport
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Receive(string clientId, byte[] buffer, int length)
+        public override void InjectReceiveData(Response response, byte[] buffer, int length)
         {
-            // TODO: 处理Frame
+            pipe.InjectReceiveData(response, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -122,9 +122,8 @@ namespace Communication.Transport
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Send(byte[] buffer, int offset, int length, int priority, object state)
         {
-            if ((buffer == null) || (buffer.Length < length)) {
+            if ((buffer == null) || (buffer.Length < length))
                 throw new ArgumentException();
-            }
 
             queue.Enqueue(new PrioritizedData() {
                 buffer = buffer,
@@ -133,6 +132,13 @@ namespace Communication.Transport
                 priority = priority,
                 state = state
             });
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        protected override void HandleReceiveData(Response response, byte[] buffer, int length)
+        {
+            string data = Encoding.UTF8.GetString(buffer);
+            Console.WriteLine(data);
         }
 
         /// <summary>
@@ -171,9 +177,9 @@ namespace Communication.Transport
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnReceive(string clientId, byte[] buffer, int length)
+        private void OnReceive(Response response, byte[] buffer, int length)
         {
-            Receive(clientId, buffer, length);
+            HandleReceiveData(response, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

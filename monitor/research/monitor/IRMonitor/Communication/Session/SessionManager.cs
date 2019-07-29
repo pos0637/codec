@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -25,7 +26,7 @@ namespace Communication.Session
         /// <summary>
         /// 保活间隔
         /// </summary>
-        private const int KEEP_ALIVE_DURATION = 15 * 1000;
+        private const int KEEP_ALIVE_DURATION = 30 * 1000;
 
         /// <summary>
         /// 保活时间
@@ -115,27 +116,28 @@ namespace Communication.Session
         /// <summary>
         /// 接收数据
         /// </summary>
-        /// <param name="clientId">客户索引</param>
+        /// <param name="response">响应信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected virtual void OnReceive(string clientId, byte[] buffer, int length)
+        protected virtual void OnReceive(Base.Pipe.Response response, byte[] buffer, int length)
         {
-            if (length < SessionPipe.SESSION_ID_LENGTH) {
+            const int headerLength = SessionPipe.SESSION_ID_LENGTH;
+            if (length < headerLength) {
                 return;
             }
 
             // 判断会话索引是否存在
-            var sessionId = Encoding.UTF8.GetString(buffer, 0, SessionPipe.SESSION_ID_LENGTH);
+            var sessionId = Encoding.UTF8.GetString(buffer.SubArray(0, SessionPipe.SESSION_ID_LENGTH));
             var pipe = GetSession(sessionId);
             if (pipe != null) {
                 // 调用对应会话
-                pipe.Receive(clientId, buffer, length);
+                pipe.InjectReceiveData(response, buffer, length);
             }
             else {
                 // 添加会话
                 sessionId = GenerateSessionId();
-                AddSession(sessionId, OnNewSession(clientId, sessionId));
+                AddSession(sessionId, OnNewSession(response.clientId, sessionId));
             }
         }
 
@@ -162,26 +164,21 @@ namespace Communication.Session
         {
             ThreadPool.QueueUserWorkItem(state => {
                 while (runningFlag) {
-                    var now = DateTime.Now;
-                    var _sessions = Hashtable.Synchronized(new Hashtable());
-                    var _sessionList = new List<SessionPipe>();
-
+                    DateTime now = DateTime.Now;
                     lock (this) {
                         var enumerator = sessions.GetEnumerator();
                         while (enumerator.MoveNext()) {
                             var pipe = enumerator.Value as SessionPipe;
-                            if ((now - pipe.GetLastActiveTime()).TotalMilliseconds <= MAX_KEEP_ALIVE_DURATION) {
-                                _sessions.Add(enumerator.Key, pipe);
-                                _sessionList.Add(pipe);
-                                pipe.KeepAlive();
+                            if ((now - pipe.GetLastActiveTime()).Milliseconds > MAX_KEEP_ALIVE_DURATION) {
+                                pipe.Dispose();
+                                sessions.Remove(enumerator.Key);
+                                sessionList.Remove(pipe);
+                                OnSessionClosedCallback?.Invoke(pipe);
                             }
                             else {
-                                pipe.Dispose();
+                                pipe.KeepAlive();
                             }
                         }
-
-                        this.sessions = _sessions;
-                        this.sessionList = _sessionList;
                     }
 
                     Thread.Sleep(KEEP_ALIVE_DURATION);

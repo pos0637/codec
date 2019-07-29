@@ -94,8 +94,15 @@ namespace Communication.Base
                 .WithExactlyOnceQoS()
                 .Build();
 
-            await mqttClient.PublishAsync(message);
-            OnSendCompletedCallback?.Invoke(state);
+            try {
+                await mqttClient.PublishAsync(message);
+                OnSendCompletedCallback?.Invoke(state);
+            }
+            catch (Exception e) {
+                Tracker.LogE(TAG, e);
+                OnExceptionCallback?.Invoke(e);
+                throw new Exception("send fail");
+            }
         }
 
         /// <summary>
@@ -126,7 +133,7 @@ namespace Communication.Base
             // 接收数据
             mqttClient.UseApplicationMessageReceivedHandler(e => {
                 Tracker.LogNW(TAG, $"received[{e.ApplicationMessage.Topic}]: {string.Concat(e.ApplicationMessage.Payload?.Select(b => b.ToString("X2")).ToArray())}");
-                Receive(null, e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length);
+                HandleReceiveData(null, e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length);
             });
 
             await ConnectAsync();
