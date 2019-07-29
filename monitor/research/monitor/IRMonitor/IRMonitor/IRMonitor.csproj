@@ -7,11 +7,15 @@
 
   <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" Version="4.1.0.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Communication\Communication.csproj" />
+    <ProjectReference Include="..\Devices\Devices.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\Repository\Repository.csproj" />
     <ProjectReference Include="..\Resources\Resources.csproj" />
   </ItemGroup>
 
