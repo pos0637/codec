@@ -105,6 +105,12 @@ namespace Communication.Transport
             pipe.KeepAlive();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override DateTime GetLastActiveTime()
+        {
+            return pipe.GetLastActiveTime();
+        }
+
         /// <summary>
         /// 发送数据
         /// </summary>
@@ -116,8 +122,9 @@ namespace Communication.Transport
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Send(byte[] buffer, int offset, int length, int priority, object state)
         {
-            if ((buffer == null) || (buffer.Length < length))
+            if ((buffer == null) || (buffer.Length < length)) {
                 throw new ArgumentException();
+            }
 
             queue.Enqueue(new PrioritizedData() {
                 buffer = buffer,

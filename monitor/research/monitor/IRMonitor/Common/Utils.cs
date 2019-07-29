@@ -18,7 +18,7 @@ namespace Common
         /// <param name="worker">工作线程</param>
         /// <param name="timeout">超时时间</param>
         /// <returns>用户是否中断等待</returns>
-        public static Boolean WaitForTimeout(BaseWorker worker, Int64 timeout)
+        public static bool WaitForTimeout(BaseWorker worker, long timeout)
         {
             DateTime startTime = DateTime.Now;
 
@@ -28,7 +28,7 @@ namespace Common
 
                 Thread.Sleep(10);
 
-                if ((DateTime.Now - startTime).Milliseconds >= timeout)
+                if ((DateTime.Now - startTime).TotalMilliseconds >= timeout)
                     break;
             }
 
@@ -74,8 +74,9 @@ namespace Common
             MemoryStream ms = null;
 
             try {
-                ms = new MemoryStream(bytes);
-                ms.Position = 0;
+                ms = new MemoryStream(bytes) {
+                    Position = 0
+                };
 
                 BinaryFormatter bf = new BinaryFormatter();
                 object obj = bf.Deserialize(ms);
@@ -126,6 +127,7 @@ namespace Common
             }
             return buffer;
         }
+
         /// <summary>
         /// 获取图片二进制流
         /// </summary>
@@ -208,6 +210,13 @@ namespace Common
             }
         }
 
+        /// <summary>
+        /// 获取子数组
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="data">原数组</param>
+        /// <param name="index">子数组开始索引</param>
+        /// <returns>子数组</returns>
         public static T[] SubArray<T>(this T[] data, int index)
         {
             T[] result = new T[data.Length - index];
@@ -215,6 +224,14 @@ namespace Common
             return result;
         }
 
+        /// <summary>
+        /// 获取子数组
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="data">原数组</param>
+        /// <param name="index">子数组开始索引</param>
+        /// <param name="length">子数组长度</param>
+        /// <returns>子数组</returns>
         public static T[] SubArray<T>(this T[] data, int index, int length)
         {
             T[] result = new T[length];

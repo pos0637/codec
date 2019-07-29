@@ -1,10 +1,10 @@
-﻿using Communication.Base;
+﻿using Common;
+using Communication.Base;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using static Common.Utils;
 
 namespace Communication.Session
 {
@@ -29,14 +29,14 @@ namespace Communication.Session
         public string SessionId { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
 
         /// <summary>
-        /// 最后激活时间
-        /// </summary>
-        public DateTime LastActiveTime { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
-
-        /// <summary>
         /// 通讯管道
         /// </summary>
         private Pipe pipe;
+
+        /// <summary>
+        /// 最后激活时间
+        /// </summary>
+        private DateTime lastActiveTime;
 
         protected SessionPipe() { }
 
@@ -53,6 +53,7 @@ namespace Communication.Session
             Debug.Assert(TargetClientId.Length == CLIENT_ID_LENGTH);
             SessionId = sessionId;
             Debug.Assert(SessionId.Length == SESSION_ID_LENGTH);
+            lastActiveTime = DateTime.Now;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -75,31 +76,30 @@ namespace Communication.Session
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Send(string targetClientId, byte[] buffer, int offset, int length, object state)
         {
-            pipe.Send(targetClientId, buffer, offset, length, state);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Receive(string clientId, byte[] buffer, int length)
-        {
-            int headerLength = SESSION_ID_LENGTH;
-            if (length < headerLength) {
-                return;
-            }
-
-            byte[] data = buffer.SubArray(headerLength, length - headerLength);
-            LastActiveTime = DateTime.Now;
-            OnReceiveCallback?.Invoke(clientId, data, data.Length);
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual void Send(byte[] buffer, int offset, int length, object state)
         {
-            int newLength = SESSION_ID_LENGTH + length;
-            byte[] data = new byte[newLength];
+            var newLength = SESSION_ID_LENGTH + length;
+            var data = new byte[newLength];
             Array.Copy(Encoding.UTF8.GetBytes(SessionId), 0, data, 0, SESSION_ID_LENGTH);
             Array.Copy(buffer, offset, data, SESSION_ID_LENGTH, length);
 
-            Send(TargetClientId, data, 0, newLength, state);
+            pipe.Send(TargetClientId, data, 0, newLength, state);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override void Receive(string clientId, byte[] buffer, int length)
+        {
+            if (length < SESSION_ID_LENGTH) {
+                return;
+            }
+
+            var data = buffer.SubArray(SESSION_ID_LENGTH, length - SESSION_ID_LENGTH);
+            lastActiveTime = DateTime.Now;
+            OnReceiveCallback?.Invoke(clientId, data, data.Length);
         }
 
         /// <summary>
@@ -109,6 +109,16 @@ namespace Communication.Session
         public virtual void KeepAlive()
         {
             pipe.Send(TargetClientId, Encoding.UTF8.GetBytes(SessionId), 0, SESSION_ID_LENGTH, null);
+        }
+
+        /// <summary>
+        /// 获取最后激活时间
+        /// </summary>
+        /// <returns>最后激活时间</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public virtual DateTime GetLastActiveTime()
+        {
+            return lastActiveTime;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

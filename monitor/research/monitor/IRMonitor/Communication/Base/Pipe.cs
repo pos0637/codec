@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Communication.Base
 {
@@ -96,7 +98,17 @@ namespace Communication.Base
         /// <param name="offset">偏移</param>
         /// <param name="length">长度</param>
         /// <param name="state">状态</param>
-        public abstract void Send(string targetClientId, byte[] buffer, int offset, int length, object state);
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public virtual void Send(string targetClientId, byte[] buffer, int offset, int length, object state)
+        {
+            var newLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH + length;
+            var data = new byte[newLength];
+            Array.Copy(Encoding.UTF8.GetBytes(ClientId), 0, data, 0, CLIENT_ID_LENGTH);
+            Array.Copy(Encoding.UTF8.GetBytes(targetClientId), 0, data, CLIENT_ID_LENGTH, CLIENT_ID_LENGTH);
+            Array.Copy(buffer, offset, data, CLIENT_ID_LENGTH + CLIENT_ID_LENGTH, length);
+
+            SendData(data, state);
+        }
 
         /// <summary>
         /// 接收数据
@@ -104,6 +116,28 @@ namespace Communication.Base
         /// <param name="clientId">客户索引</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        public abstract void Receive(string clientId, byte[] buffer, int length);
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public virtual void Receive(string clientId, byte[] buffer, int length)
+        {
+            int headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH;
+            if (length < headerLength) {
+                return;
+            }
+
+            var targetClientId = Encoding.UTF8.GetString(buffer, CLIENT_ID_LENGTH, CLIENT_ID_LENGTH);
+            if (targetClientId != ClientId) {
+                return;
+            }
+
+            var data = buffer.SubArray(headerLength, length - headerLength);
+            OnReceiveCallback?.Invoke(Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH), data, length);
+        }
+
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="buffer">数据</param>
+        /// <param name="state">状态</param>
+        protected virtual void SendData(byte[] buffer, object state) { }
     }
 }

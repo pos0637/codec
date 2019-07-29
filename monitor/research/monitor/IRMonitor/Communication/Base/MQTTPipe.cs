@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,22 +86,16 @@ namespace Communication.Base
             mqttClient.DisconnectAsync();
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Send(string targetClientId, byte[] buffer, int offset, int length, object state)
+        protected override async void SendData(byte[] buffer, object state)
         {
-            SendAsync(targetClientId, buffer, offset, length, state);
-        }
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(buffer)
+                .WithExactlyOnceQoS()
+                .Build();
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Receive(string clientId, byte[] buffer, int length)
-        {
-            int headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH;
-            if (length < headerLength) {
-                return;
-            }
-
-            byte[] data = buffer.SubArray(headerLength, length - headerLength);
-            OnReceiveCallback?.Invoke(Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH), data, length);
+            await mqttClient.PublishAsync(message);
+            OnSendCompletedCallback?.Invoke(state);
         }
 
         /// <summary>
@@ -158,33 +151,6 @@ namespace Communication.Base
                     await Task.Delay(TimeSpan.FromMilliseconds(RETRY_DURATION));
                 }
             }
-        }
-
-        /// <summary>
-        /// 异步发送数据
-        /// </summary>
-        /// <param name="targetClientId">目标客户索引</param>
-        /// <param name="buffer">数据</param>
-        /// <param name="offset">偏移</param>
-        /// <param name="length">长度</param>
-        /// <param name="state">状态</param>
-        /// <returns>任务</returns>
-        private async void SendAsync(string targetClientId, byte[] buffer, int offset, int length, object state)
-        {
-            int newLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH + length;
-            byte[] data = new byte[newLength];
-            Array.Copy(Encoding.UTF8.GetBytes(ClientId), 0, data, 0, CLIENT_ID_LENGTH);
-            Array.Copy(Encoding.UTF8.GetBytes(targetClientId), 0, data, CLIENT_ID_LENGTH, CLIENT_ID_LENGTH);
-            Array.Copy(buffer, offset, data, CLIENT_ID_LENGTH + CLIENT_ID_LENGTH, length);
-
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(data)
-                .WithExactlyOnceQoS()
-                .Build();
-
-            await mqttClient.PublishAsync(message);
-            OnSendCompletedCallback?.Invoke(state);
         }
     }
 }

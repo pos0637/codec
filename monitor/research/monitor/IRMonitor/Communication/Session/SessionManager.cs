@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using static Common.Utils;
 
 namespace Communication.Session
 {
@@ -26,7 +25,7 @@ namespace Communication.Session
         /// <summary>
         /// 保活间隔
         /// </summary>
-        private const int KEEP_ALIVE_DURATION = 30 * 1000;
+        private const int KEEP_ALIVE_DURATION = 15 * 1000;
 
         /// <summary>
         /// 保活时间
@@ -122,13 +121,12 @@ namespace Communication.Session
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual void OnReceive(string clientId, byte[] buffer, int length)
         {
-            const int headerLength = SessionPipe.SESSION_ID_LENGTH;
-            if (length < headerLength) {
+            if (length < SessionPipe.SESSION_ID_LENGTH) {
                 return;
             }
 
             // 判断会话索引是否存在
-            var sessionId = Encoding.UTF8.GetString(buffer.SubArray(0, SessionPipe.SESSION_ID_LENGTH));
+            var sessionId = Encoding.UTF8.GetString(buffer, 0, SessionPipe.SESSION_ID_LENGTH);
             var pipe = GetSession(sessionId);
             if (pipe != null) {
                 // 调用对应会话
@@ -164,21 +162,26 @@ namespace Communication.Session
         {
             ThreadPool.QueueUserWorkItem(state => {
                 while (runningFlag) {
-                    DateTime now = DateTime.Now;
+                    var now = DateTime.Now;
+                    var _sessions = Hashtable.Synchronized(new Hashtable());
+                    var _sessionList = new List<SessionPipe>();
+
                     lock (this) {
                         var enumerator = sessions.GetEnumerator();
                         while (enumerator.MoveNext()) {
                             var pipe = enumerator.Value as SessionPipe;
-                            if ((now - pipe.LastActiveTime).Milliseconds > MAX_KEEP_ALIVE_DURATION) {
-                                pipe.Dispose();
-                                sessions.Remove(enumerator.Key);
-                                sessionList.Remove(pipe);
-                                OnSessionClosedCallback?.Invoke(pipe);
-                            }
-                            else {
+                            if ((now - pipe.GetLastActiveTime()).TotalMilliseconds <= MAX_KEEP_ALIVE_DURATION) {
+                                _sessions.Add(enumerator.Key, pipe);
+                                _sessionList.Add(pipe);
                                 pipe.KeepAlive();
                             }
+                            else {
+                                pipe.Dispose();
+                            }
                         }
+
+                        this.sessions = _sessions;
+                        this.sessionList = _sessionList;
                     }
 
                     Thread.Sleep(KEEP_ALIVE_DURATION);
