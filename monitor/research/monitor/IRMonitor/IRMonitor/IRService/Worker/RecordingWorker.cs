@@ -31,13 +31,12 @@ namespace IRMonitor.Worker
     /// </summary>
     public class RecordingWorker : BaseWorker
     {
-        public event DelegateStorage.DgOnAddRecordInfo OnAddRecord; // 添加录像文件记录
+        public event Delegates.DgOnAddRecordInfo OnAddRecord; // 添加录像文件记录
 
         private FixedLenQueue<Byte[]> mVideoQueue = new FixedLenQueue<Byte[]>(1); // 图像队列
         private Thread mVideoThread; // 图像录制线程
         private Int32 mUserCount; // 计数
         private Int32 mSpace = 2 * 1024 * 1024; // 单文件空间
-        private AVCEncoder mEnCoder; // 编码器
         private Int32 mWidth; // 宽度
         private Int32 mHeight; // 高度
         private Int32 mFrameNum; // 帧数
@@ -76,9 +75,6 @@ namespace IRMonitor.Worker
 
             if (mEncodeBufAddr != IntPtr.Zero)
                 mEncodeBufHandle.Free();
-
-            if (mEnCoder != null)
-                mEnCoder.Dispose();
         }
 
         /// <summary>
@@ -107,7 +103,6 @@ namespace IRMonitor.Worker
             mEncodeBuf = new Byte[(Int32)(len * 1.5)];
             mEncodeBufHandle = GCHandle.Alloc(mEncodeBuf, GCHandleType.Pinned);
             mEncodeBufAddr = mEncodeBufHandle.AddrOfPinnedObject();
-            mEnCoder = new AVCEncoder();
             mSelectionList = selectionList;
             return ARESULT.S_OK;
         }
@@ -159,8 +154,6 @@ namespace IRMonitor.Worker
         protected override void Run()
         {
             try {
-                mEnCoder.Init(mWidth, mHeight, mImageFrameRate);
-
                 while (!IsTerminated()) {
                     DateTime time = DateTime.Now;
                     String floderPath = String.Format("{0}/{1}-{2}-{3}", mRecordFolder, time.Year.ToString(),
@@ -206,7 +199,7 @@ namespace IRMonitor.Worker
                     Byte[] buf = mVideoQueue.Dequeue();
                     if (buf == null)
                         break;
-
+                    /*
                     using (Image img = ImageGenerater.CreateBitmap(buf, mWidth, mHeight)) {
                         Image img2 = img.GetThumbnailImage(mThumbnailWidth, mThumbnailHeight, null, IntPtr.Zero);
                         Byte[] bytes = Utils.GetBytesByImage(img2);
@@ -215,6 +208,7 @@ namespace IRMonitor.Worker
                         mInfoBw.Write(bytes.Length);
                         mInfoBw.Write(bytes);
                     }
+                    */
 
                     // 只存带后缀的文件名
                     mFrameInfo.mVideoFileName = Path.GetFileName(videoFileName);
@@ -232,8 +226,6 @@ namespace IRMonitor.Worker
                     mInfoBw.Close();
                     ifs.Close();
                 }
-
-                mEnCoder.Free();
             }
             catch (Exception ex) {
                 Tracker.LogE(ex);
@@ -318,7 +310,7 @@ namespace IRMonitor.Worker
                     break;
 
                 buf.CopyTo(mImageBuf, 0);
-                Int32 encoderLen = mEnCoder.Encode(mEncodeBufAddr, mEncodeBuf.Length, mImageBufAddr);
+                Int32 encoderLen = 0;
                 if (encoderLen <= 0)
                     continue;
 

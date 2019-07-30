@@ -33,9 +33,9 @@ namespace IRMonitor.Worker
 
         #region 委托
 
-        public event DelegateStorage.DgOnAutoReplyShortMessage gOnReceiveShortMessage;
+        public event Delegates.DgOnAutoReplyShortMessage gOnReceiveShortMessage;
 
-        public event DelegateStorage.DgOnSendShortMessage gOnSendShortMessage;
+        public event Delegates.DgOnSendShortMessage gOnSendShortMessage;
 
         #endregion
 

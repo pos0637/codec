@@ -277,6 +277,7 @@ namespace IRMonitor
 
                 // 生成告警图片
                 Byte[] data = mRealtimeImage;
+                /*
                 Boolean ret = ImageGenerater.DrawSecondAnalysisImage(
                     data,
                     selections,
@@ -289,7 +290,7 @@ namespace IRMonitor
                     IRPalette.PaletteType.Red);
                 if (ret == false)
                     return ARESULT.E_FAIL;
-
+                */
                 // 未开启告警录像，录像起始Id为 -1
                 Int64 recordId = -1;
                 info.mIsRecord = false;

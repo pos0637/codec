@@ -1,10 +1,9 @@
-﻿using Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Linq;
+using Common;
 
-namespace IRTerminal.Worker
+namespace IRMonitor.Worker
 {
     /// <summary>
     /// 通知设置
@@ -14,12 +13,12 @@ namespace IRTerminal.Worker
         /// <summary>
         /// 整点回调
         /// </summary>
-        public event DelegateStorage.DgOnHourSend OnHourSend;
+        public event Delegates.DgOnHourSend OnHourSend;
 
         /// <summary>
         /// 定时回调
         /// </summary>
-        public event DelegateStorage.DgOnRegularSend OnRegularSend;
+        public event Delegates.DgOnRegularSend OnRegularSend;
 
         /// <summary>
         /// 定时时间集
