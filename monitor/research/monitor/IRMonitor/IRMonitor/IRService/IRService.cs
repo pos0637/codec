@@ -2316,6 +2316,5 @@ namespace IRMonitor
             reportData.mDeviceInfo = mDeviceInfo;
             OnReportDataCallback?.Invoke(reportData);
         }
-
     }
 }

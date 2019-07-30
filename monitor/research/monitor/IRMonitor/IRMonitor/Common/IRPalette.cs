@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace IRMonitor.Common
+﻿namespace IRMonitor.Common
 {
     /// <summary>
     /// 红外调色板
@@ -16,32 +14,37 @@ namespace IRMonitor.Common
             /// 红色
             /// </summary>
             Red,
+
             /// <summary>
             /// 蓝色
             /// </summary>
             Blue,
+
             /// <summary>
             /// 灰度
             /// </summary>
             Gray,
+
             /// <summary>
             /// 彩虹色
             /// </summary>
             Rainbow,
+
             /// <summary>
             /// 北极蓝
             /// </summary>
             Arctic,
+
             /// <summary>
             /// 火山红
             /// </summary>
-            Lava,
+            Lava
         }
 
         /// <summary>
         /// 灰度
         /// </summary>
-        public static Int32[] sGrayPalette = {
+        public static int[] sGrayPalette = {
             0x00000000, 0x00010101, 0x00020202, 0x00030303, 0x00040404, 0x00050505, 0x00060606, 0x00070707,
             0x00080808, 0x00090909, 0x000A0A0A, 0x000B0B0B, 0x000C0C0C, 0x000D0D0D, 0x000E0E0E, 0x000F0F0F,
             0x00101010, 0x00111111, 0x00121212, 0x00131313, 0x00141414, 0x00151515, 0x00161616, 0x00171717,
@@ -79,7 +82,7 @@ namespace IRMonitor.Common
         /// <summary>
         /// 红色
         /// </summary>
-        public static Int32[] sRedPalette = {
+        public static int[] sRedPalette = {
             0x00002000, 0x00022002, 0x00042004, 0x00062006, 0x00082008, 0x000a200a, 0x000c200c, 0x000e200e,
             0x00102010, 0x00122012, 0x00142014, 0x00162016, 0x00182018, 0x001a201a, 0x001c201c, 0x001e201e,
             0x00202020, 0x00222022, 0x00242024, 0x00262026, 0x00282028, 0x002a202a, 0x002c202c, 0x002e202e,
@@ -117,7 +120,7 @@ namespace IRMonitor.Common
         /// <summary>
         /// 蓝色
         /// </summary>
-        public static Int32[] sBluePalette = {
+        public static int[] sBluePalette = {
             0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000020, 0x00000020, 0x00000020, 0x00000020,
             0x00000040, 0x00000040, 0x00000040, 0x00000040, 0x00000060, 0x00000060, 0x00000060, 0x00000060,
             0x00000080, 0x00000080, 0x00000080, 0x00000080, 0x000000A0, 0x000000A0, 0x000000A0, 0x000000A0,
@@ -155,7 +158,7 @@ namespace IRMonitor.Common
         /// <summary>
         /// 彩虹色
         /// </summary>
-        public static Int32[] sRainbowPalette = {
+        public static int[] sRainbowPalette = {
             0x4D865, 0x4D865, 0x4D865, 0x1D865, 0x3D865, 0x2D865,
             0x2D865, 0x4D865, 0x4D865, 0x3D865, 0x2D865, 0x2D865,
             0x2D865, 0x1D865, 0x2D865, 0x2D865, 0x1D897, 0x2D897,
@@ -204,7 +207,7 @@ namespace IRMonitor.Common
         /// <summary>
         /// 北极蓝
         /// </summary>
-        public static Int32[] sArcticPalette = {
+        public static int[] sArcticPalette = {
             0x92, 0x96, 0x99, 0x9D, 0xA0, 0xA4,
             0xA7, 0xAB, 0xAE, 0xB2, 0xB5, 0xB9,
             0xBC, 0xC0, 0xC3, 0xC7, 0xCA, 0xCE,
@@ -253,7 +256,7 @@ namespace IRMonitor.Common
         /// <summary>
         /// 红山红
         /// </summary>
-        public static Int32[] sLavaPalette = {
+        public static int[] sLavaPalette = {
             0x200, 0x30400, 0x40600, 0x60800, 0x70A00, 0x90C00,
             0xA0E00, 0xC1000, 0xD1200, 0xF1400, 0x101600, 0x121800,
             0x131A00, 0x151C00, 0x161E00, 0x182000, 0x1D2273, 0x1C2476,
