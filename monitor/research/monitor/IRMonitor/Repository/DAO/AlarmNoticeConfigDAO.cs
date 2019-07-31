@@ -19,10 +19,8 @@ namespace Repository.DAO
                 return null;
 
             try {
-                String sql = "SELECT * FROM AlarmNoticeConfig";
-                DataTable dt = DbFactory.Instance.CreateSqlHelper(connection, sql)
-                    .ToDataTable();
-
+                string sql = "SELECT * FROM AlarmNoticeConfig";
+                DataTable dt = DbFactory.Instance.CreateSqlHelper(connection, sql).ToDataTable();
                 if ((dt == null) || (dt.Rows.Count <= 0))
                     return null;
 
@@ -31,38 +29,37 @@ namespace Repository.DAO
                     AlarmNoticeConfig alarmConfig = new AlarmNoticeConfig();
 
                     if (dr["senduser"] != DBNull.Value) {
-                        String temp = dr["senduser"].ToString();
-                        String[] var = temp.Split(new char[] { ',' },
+                        string temp = dr["senduser"].ToString();
+                        string[] var = temp.Split(new char[] { ',' },
                             StringSplitOptions.RemoveEmptyEntries);
-                        alarmConfig.mSendUser = new List<String>(var);
+                        alarmConfig.mSendUser = new List<string>(var);
                     }
 
-                    alarmConfig.mIsAlarmSend = (Boolean)dr["isalarmsend"];
-                    alarmConfig.mIsHourSend = (Boolean)dr["ishoursend"];
-                    alarmConfig.mIsRegularTimeSend = (Boolean)dr["isregulartimesend"];
+                    alarmConfig.mIsAlarmSend = (bool)dr["isalarmsend"];
+                    alarmConfig.mIsHourSend = (bool)dr["ishoursend"];
+                    alarmConfig.mIsRegularTimeSend = (bool)dr["isregulartimesend"];
 
                     if (dr["regulartime"] != DBNull.Value) {
-                        String temp = dr["regulartime"].ToString();
-                        String[] var = temp.Split(new char[] { ',' },
-                            StringSplitOptions.RemoveEmptyEntries);
+                        string temp = dr["regulartime"].ToString();
+                        string[] variables = temp.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        foreach (String item in var) {
+                        foreach (string item in variables) {
                             TimeSpan span;
                             if (TimeSpan.TryParse(item, out span))
                                 alarmConfig.mRegularTime.Add(span);
                         }
                     }
 
-                    alarmConfig.mIsAutoReply = (Boolean)dr["isautoreply"];
-                    alarmConfig.mIsSelectionRecord = (Boolean)dr["IsSelectionRecord"];
-                    alarmConfig.mIsGroupSelectionRecord = (Boolean)dr["IsGroupSelectionRecord"];
+                    alarmConfig.mIsAutoReply = (bool)dr["isautoreply"];
+                    alarmConfig.mIsSelectionRecord = (bool)dr["IsSelectionRecord"];
+                    alarmConfig.mIsGroupSelectionRecord = (bool)dr["IsGroupSelectionRecord"];
                     alarmNoticeConfigList.Add(alarmConfig);
                 }
 
                 return alarmNoticeConfigList[0];
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -83,14 +80,14 @@ namespace Repository.DAO
         /// <param name="isGroupSelectionRecord">组选区录像</param>
         /// <returns></returns>
         public static ARESULT UpdateAlarmNoticeConfigInfo(
-            List<String> sendUser,
-            Boolean isAlarmSend,
-            Boolean isHourSend,
-            Boolean isRegularTimeSend,
+            List<string> sendUser,
+            bool isAlarmSend,
+            bool isHourSend,
+            bool isRegularTimeSend,
             List<TimeSpan> regularTime,
-            Boolean isAutoReply,
-            Boolean isSelectionRecord,
-            Boolean isGroupSelectionRecord)
+            bool isAutoReply,
+            bool isSelectionRecord,
+            bool isGroupSelectionRecord)
         {
             IDbHelper connection = DBConnection.Instance.GetConnection();
             if (connection == null)
@@ -99,13 +96,13 @@ namespace Repository.DAO
             try {
                 connection.BeginTransaction();
 
-                String sendUserStr = "";
+                string sendUserStr = "";
                 sendUser.ForEach(i => sendUserStr = sendUserStr + i + ",");
 
-                String regularTimeStr = "";
+                string regularTimeStr = "";
                 regularTime.ForEach(i => regularTimeStr = regularTimeStr + i.ToString() + ",");
 
-                String sqlStr = @"UPDATE AlarmNoticeConfig SET senduser=@senduser,
+                string sqlStr = @"UPDATE AlarmNoticeConfig SET senduser=@senduser,
                                   isalarmsend=@isalarmsend, ishoursend=@ishoursend, isregulartimesend=@isregulartimesend,
                                   regulartime=@regulartime, isautoreply=@isautoreply, IsSelectionRecord=@IsSelectionRecord,
                                   IsGroupSelectionRecord=@IsGroupSelectionRecord";
@@ -125,9 +122,9 @@ namespace Repository.DAO
 
                 return (ret >= 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {

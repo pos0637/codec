@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace IRMonitor.Worker
+namespace IRMonitor.CellService.Worker
 {
     /// <summary>
     /// 短信服务线程
@@ -17,14 +17,14 @@ namespace IRMonitor.Worker
             /// <summary>
             /// 手机号码
             /// </summary>
-            public List<String> mPhoneNumList;
+            public List<string> mPhoneNumList;
 
             /// <summary>
             /// 短信内容
             /// </summary>
-            public String mContent;
+            public string mContent;
 
-            public Message(List<String> phoneList, String content)
+            public Message(List<string> phoneList, string content)
             {
                 mPhoneNumList = phoneList;
                 mContent = content;
@@ -49,7 +49,7 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 失败次数
         /// </summary>
-        private const Int32 mMaxErrorTime = 10;
+        private const int mMaxErrorTime = 10;
 
         /// <summary>
         /// 等待发送的短信

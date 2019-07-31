@@ -150,7 +150,7 @@ namespace Communication.Session
         {
             while (true) {
                 sessionCounter = (++sessionCounter) % 9999;
-                string sessionId = $"{sessionCounter:D4}";
+                var sessionId = $"{sessionCounter:D4}";
                 if (GetSession(sessionId) == null) {
                     return sessionId;
                 }

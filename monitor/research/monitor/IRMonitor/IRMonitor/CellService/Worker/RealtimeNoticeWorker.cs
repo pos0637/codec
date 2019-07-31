@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using Common;
 
-namespace IRMonitor.Worker
+namespace IRMonitor.CellService.Worker
 {
     /// <summary>
     /// 通知设置
@@ -23,27 +23,27 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 定时时间集
         /// </summary>
-        private List<Int32> mRegularTimeList = new List<Int32>();
+        private List<int> mRegularTimeList = new List<int>();
 
         /// <summary>
         /// 发送定时时间
         /// </summary>
-        private Int32 mRegularTimeSend = 0;
+        private int mRegularTimeSend = 0;
 
         /// <summary>
         /// 当前小时数
         /// </summary>
-        private Int32 mCurrentHour = -1;
+        private int mCurrentHour = -1;
 
         /// <summary>
         /// 是否允许整点通知
         /// </summary>
-        private Boolean mIsHourSend = false;
+        private bool mIsHourSend = false;
 
         /// <summary>
         /// 是否允许定时通知
         /// </summary>
-        private Boolean mIsRegularTimeSend = false;
+        private bool mIsRegularTimeSend = false;
 
         /// <summary>
         /// 修改配置
@@ -51,7 +51,7 @@ namespace IRMonitor.Worker
         /// <param name="isHourSend">是否允许整点通知</param>
         /// <param name="isRegularTime">是否允许定时通知</param>
         /// <param name="regularTime">定时时间集</param>
-        public void SetConfig(Boolean isHourSend, Boolean isRegularTime, List<TimeSpan> regularTime)
+        public void SetConfig(bool isHourSend, bool isRegularTime, List<TimeSpan> regularTime)
         {
             lock (mRegularTimeList) {
                 mRegularTimeList.Clear();
@@ -60,14 +60,14 @@ namespace IRMonitor.Worker
                 mIsRegularTimeSend = isRegularTime;
 
                 foreach (TimeSpan time in regularTime) {
-                    Int32 seconds = (Int32)time.TotalSeconds;
+                    int seconds = (int)time.TotalSeconds;
                     mRegularTimeList.Add(seconds);
                 }
 
                 // 降序排序
                 mRegularTimeList.Sort();
                 mRegularTimeList.Reverse();
-                mRegularTimeSend = (Int32)DateTime.Now.TimeOfDay.TotalSeconds;
+                mRegularTimeSend = (int)DateTime.Now.TimeOfDay.TotalSeconds;
             }
         }
 
@@ -76,10 +76,10 @@ namespace IRMonitor.Worker
         /// </summary>
         /// <param name="time">当前时间</param>
         /// <returns></returns>
-        private Boolean MatchOnTime(TimeSpan time)
+        private bool MatchOnTime(TimeSpan time)
         {
-            Int32 hour = time.Hours;
-            Int32 minute = time.Minutes;
+            int hour = time.Hours;
+            int minute = time.Minutes;
 
             if ((hour != mCurrentHour) && (minute >= 59)) {
                 mCurrentHour = hour;
@@ -94,12 +94,12 @@ namespace IRMonitor.Worker
         /// </summary>
         /// <param name="time">当前时间</param>
         /// <returns></returns>
-        private Boolean MatchRegularTime(TimeSpan time)
+        private bool MatchRegularTime(TimeSpan time)
         {
-            Int32 seconds = (Int32)time.TotalSeconds;
+            int seconds = (int)time.TotalSeconds;
 
             lock (mRegularTimeList) {
-                Int32 regularTime = mRegularTimeList.Find((item) => item <= seconds);
+                int regularTime = mRegularTimeList.Find((item) => item <= seconds);
                 if ((regularTime != 0) && (regularTime > mRegularTimeSend)) {
                     mRegularTimeSend = regularTime;
                     return true;

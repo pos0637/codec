@@ -14,12 +14,12 @@ namespace Devices
         /// <summary>
         /// 动态链接库路径
         /// </summary>
-        private readonly String mDevicePath = Directory.GetCurrentDirectory();
+        private readonly string mDevicePath = Directory.GetCurrentDirectory();
 
         /// <summary>
         /// 设备类型哈希表
         /// </summary>
-        private Hashtable mDeviceTypeList = new Hashtable();
+        private Hashtable mDeviceTypeList = Hashtable.Synchronized(new Hashtable());
 
         /// <summary>
         /// 构造函数 
@@ -36,7 +36,7 @@ namespace Devices
         /// <param name="typeName">设备类名称</param>
         /// <param name="name">设备名称</param>
         /// <returns>设备对象</returns>
-        public IDevice GetDevice(Int64 id, String typeName, String name)
+        public IDevice GetDevice(long id, string typeName, string name)
         {
             Type deviceType;
             lock (mDeviceTypeList) {
@@ -58,8 +58,8 @@ namespace Devices
 
                 return device;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
         }
@@ -73,7 +73,7 @@ namespace Devices
                 if (mDeviceTypeList.Count > 0)
                     return;
 
-                Tracker.LogI(String.Format("Get All DeviceType From Path:({0})", mDevicePath));
+                Tracker.LogI(string.Format("Get All DeviceType From Path:({0})", mDevicePath));
 
                 DirectoryInfo folder = new DirectoryInfo(mDevicePath);
                 if (!folder.Exists)
@@ -89,8 +89,8 @@ namespace Devices
                             }
                         }
                     }
-                    catch (Exception ex) {
-                        Tracker.LogE(ex);
+                    catch (Exception e) {
+                        Tracker.LogE(e);
                         continue;
                     }
                 }

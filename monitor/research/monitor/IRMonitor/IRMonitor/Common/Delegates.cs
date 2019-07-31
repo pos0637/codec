@@ -14,18 +14,18 @@ namespace IRMonitor
         ///  添加告警
         /// </summary>
         public delegate ARESULT DgOnAddAlarmInfo(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int32 alarmReason,
-            Int32 alarmLevel,
-            String alarmCondition,
-            Single alarmTemperature,
-            Int64 selectionId,
-            String selectionName,
-            String selectionData,
-            String temperatureInfo,
-            Single maxTemperature,
-            Single minTemperature,
+            int alarmMode,
+            int alarmType,
+            int alarmReason,
+            int alarmLevel,
+            string alarmCondition,
+            float alarmTemperature,
+            long selectionId,
+            string selectionName,
+            string selectionData,
+            string temperatureInfo,
+            float maxTemperature,
+            float minTemperature,
             List<Selection> selections,
             AlarmInfo alarmInfo);
 
@@ -33,31 +33,31 @@ namespace IRMonitor
         /// 更新告警
         /// </summary>
         public delegate ARESULT DgOnUpdateAlarmInfo(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int64 selectionId,
-            String selectionData,
+            int alarmMode,
+            int alarmType,
+            long selectionId,
+            string selectionData,
             AlarmInfo alarmInfo);
 
         /// <summary>
         /// 告警超时
         /// </summary>
         public delegate ARESULT DgOnAlarmTimeout(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int64 selectionId,
-            String selectionData,
+            int alarmMode,
+            int alarmType,
+            long selectionId,
+            string selectionData,
             AlarmInfo alarmInfo);
 
         /// <summary>
         ///  图像数据回调
         /// </summary>
-        public delegate void DgOnImageCallback(Byte[] buffer);
+        public delegate void DgOnImageCallback(byte[] data);
 
         /// <summary>
         ///  温度数据回调
         /// </summary>
-        public delegate void DgOnTemperatureCallback(Single[] buffer);
+        public delegate void DgOnTemperatureCallback(float[] data);
 
         /// <summary>
         /// 设备连接失败回调
@@ -68,13 +68,13 @@ namespace IRMonitor
         /// 添加录像信息
         /// </summary>
         public delegate ARESULT DgOnAddRecordInfo(
-            String videoFileName,
-            String selectionFileName);
+            string videoFileName,
+            string selectionFileName);
 
         /// <summary>
         /// 接收到短信
         /// </summary>
-        public delegate void DgOnAutoReplyShortMessage(String phone);
+        public delegate void DgOnAutoReplyShortMessage(string phone);
 
         /// <summary>
         /// 平台短信
@@ -85,28 +85,28 @@ namespace IRMonitor
         /// 添加普通选区温度信息
         /// </summary>
         public delegate ARESULT DgOnAddSelectionTemperature(
-            Int64 selectionId,
+            long selectionId,
             DateTime time,
-            Single maxTemperature,
-            Single minTemperature,
-            Single avgTemperature);
+            float maxTemperature,
+            float minTemperature,
+            float avgTemperature);
 
         /// <summary>
         /// 添加选区组温度信息
         /// </summary>
         public delegate ARESULT DgOnAddGroupSelectionTemperature(
-            Int64 groupSelectionId,
+            long groupSelectionId,
             DateTime time,
-            Single maxTemperature,
-            Single temperaturedifference,
-            Single temperaturerise);
+            float maxTemperature,
+            float temperaturedifference,
+            float temperaturerise);
 
         /// <summary>
         /// 选区温度数据回调
         /// </summary>
         public delegate void DgOnRealtimeSelectionTemperature(
-            String allSelectionData,
-            String allGroupData);
+            string allSelectionData,
+            string allGroupData);
 
         /// <summary>
         /// 整点发送
@@ -128,30 +128,38 @@ namespace IRMonitor
         /// </summary>
         /// <param name="seconds">时间戳</param>
         /// <param name="IsRender">是否渲染</param>
-        /// <param name="buf">数据</param>
-        public delegate void DgOnReplayImageCallback(Double seconds, Boolean IsRender, Byte[] buf);
+        /// <param name="data">数据</param>
+        public delegate void DgOnReplayImageCallback(double seconds, bool IsRender, byte[] data);
 
         /// <summary>
         /// 回放选区数据回调
         /// </summary>
-        public delegate void DgOnReplaySelectionCallback(String selection);
+        public delegate void DgOnReplaySelectionCallback(string selection);
 
+        /// <summary>
+        /// 报表数据回调
+        /// </summary>
+        /// <param name="reportData">报表数据</param>
         public delegate void DgOnReportDataCallback(ReportData reportData);
 
+        /// <summary>
+        /// 温度曲线回调
+        /// </summary>
+        /// <param name="curve">温度曲线</param>
         public delegate void DgOnGetTempCurve(TempCurve curve);
 
         /// <summary>
         /// 定时发送
         /// </summary>
-        public delegate void DgOnSendReportData(Int64 selectionId);
+        public delegate void DgOnSendReportData(long selectionId);
 
         /// <summary>
         /// 实时温度信息
         /// </summary>
         public delegate void DgOnSendRealTemperature(
             DateTime time,
-            Single maxTemperature,
-            Single minTemperature,
-            Single avgTemperature);
+            float maxTemperature,
+            float minTemperature,
+            float avgTemperature);
     }
 }

@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace Models
 {
+    /// <summary>
+    /// 设备单元信息
+    /// </summary>
     [DataContract]
     public class Cell
     {
@@ -12,7 +15,6 @@ namespace Models
         [DataMember(Name = "CellName")]
         public String mCellName;
 
-        // 红外摄像头配置信息
         [DataMember(Name = "IRCameraIP")]
         public String mIRCameraIp;
 

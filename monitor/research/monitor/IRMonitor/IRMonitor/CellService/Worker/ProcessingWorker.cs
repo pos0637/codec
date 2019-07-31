@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace IRMonitor.Worker
+namespace IRMonitor.CellService.Worker
 {
     /// <summary>
     /// 温度处理线程
@@ -25,36 +25,36 @@ namespace IRMonitor.Worker
 
         #region 参数
 
-        private Int32 mMaxReadyAlarmNum = 3; // 预告警次数
-        private FixedLenQueue<Single[]> mTempertureQueue = new FixedLenQueue<Single[]>(1); // 缓存队列
-        private Double mSelctionSampleRate; // 选区采样频率, 单位(min)
-        private Boolean mNeedSampleSelction; // 是否需要添加选区历史数据
+        private int mMaxReadyAlarmNum = 3; // 预告警次数
+        private FixedLenQueue<float[]> mTempertureQueue = new FixedLenQueue<float[]>(1); // 缓存队列
+        private double mSelctionSampleRate; // 选区采样频率, 单位(min)
+        private bool mNeedSampleSelction; // 是否需要添加选区历史数据
         private DateTime mNextSelectionSample; // 下一次添加选区数据的时间
-        private Double mGroupSampleRate; // 选区组采样频率, 单位(min)
-        private Boolean mNeedSampleGroup; // 是否需要添加选区组历史数据
+        private double mGroupSampleRate; // 选区组采样频率, 单位(min)
+        private bool mNeedSampleGroup; // 是否需要添加选区组历史数据
         private DateTime mNextGroupSample; // 下一次添加选区组数据的时间
         private List<Selection> mSelectionList; // 选区链表
         private List<GroupSelection> mSelectionGroupList; // 选区组链表
-        private Int32 mWidth; // 宽度
-        private Int32 mHeight; // 高度
-        private Single mMaxTemperature; // 全局最高温
-        private Single mMinTemperature; // 全局最低温
-        private Boolean mSyncState = false; // 同步状态
-        private Object mSyncEvent = new Object(); // 同步Event
-        private Int32 mTimeout = 5; // 5分钟超时
+        private int mWidth; // 宽度
+        private int mHeight; // 高度
+        private float mMaxTemperature; // 全局最高温
+        private float mMinTemperature; // 全局最低温
+        private bool mSyncState = false; // 同步状态
+        private object mSyncEvent = new object(); // 同步Event
+        private int mTimeout = 5; // 5分钟超时
 
-        private Double mReportSendRate = 1; // 定时报表频率, 单位(h)
-        private Boolean mNeedReportSend; // 是否需要发送报表
+        private double mReportSendRate = 1; // 定时报表频率, 单位(h)
+        private bool mNeedReportSend; // 是否需要发送报表
         private DateTime mNextReportSend; // 下一次发送报表的时间
 
-        private Double mRealTemperatureSendRate = 1; // 定时实时温度频率, 单位(min)
-        private Boolean mNeedRealTemperatureSend; // 是否需要发送实时温度
+        private double mRealTemperatureSendRate = 1; // 定时实时温度频率, 单位(min)
+        private bool mNeedRealTemperatureSend; // 是否需要发送实时温度
         private DateTime mNextRealTemperatureSend; // 下一次发送实时温度的时间
 
         /// <summary>
         /// 结束告警误差范围
         /// </summary>
-        private const Single HIGH_ALARM_ERROR_RANGE = 5f;
+        private const float HIGH_ALARM_ERROR_RANGE = 5f;
 
         #endregion
 
@@ -62,8 +62,8 @@ namespace IRMonitor.Worker
         /// 初始化
         /// </summary>
         public ARESULT Init(
-            Int32 width,
-            Int32 height,
+            int width,
+            int height,
             List<Selection> selectionList,
             List<GroupSelection> groupList)
         {
@@ -81,7 +81,7 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 接收温度数据
         /// </summary>
-        public void ReceiveTempertureData(Single[] buf)
+        public void ReceiveTempertureData(float[] buf)
         {
             mTempertureQueue.Enqueue(buf);
         }
@@ -91,7 +91,7 @@ namespace IRMonitor.Worker
         /// </summary>
         public void WaitFor()
         {
-            Boolean ret = false;
+            bool ret = false;
             lock (mSyncEvent) {
                 mSyncState = true;
                 mTempertureQueue.Notify();
@@ -156,7 +156,7 @@ namespace IRMonitor.Worker
                     mNextRealTemperatureSend = time.AddMinutes(mRealTemperatureSendRate);
                 }
 
-                Single[] buf = mTempertureQueue.Dequeue();
+                float[] buf = mTempertureQueue.Dequeue();
                 if (buf == null)
                     continue;
 
@@ -165,12 +165,12 @@ namespace IRMonitor.Worker
 
                 ProcessTemperature(buf);
 
-                Int32 count;
+                int count;
                 lock (mSelectionList) {
                     count = mSelectionList.Count;
                 }
 
-                for (Int32 i = 0; i < count; i++) {
+                for (int i = 0; i < count; i++) {
                     try {
                         Selection selection;
                         lock (mSelectionList) {
@@ -191,7 +191,7 @@ namespace IRMonitor.Worker
                     count = mSelectionGroupList.Count;
                 }
 
-                for (Int32 i = 0; i < count; i++) {
+                for (int i = 0; i < count; i++) {
                     try {
                         GroupSelection group;
                         lock (mSelectionGroupList) {
@@ -225,17 +225,17 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 温度处理
         /// </summary>
-        private void ProcessTemperature(Single[] buf)
+        private void ProcessTemperature(float[] buf)
         {
             DateTime time = DateTime.Now;
-            String seleionData = "", groupData = "";
+            string selectionData = "", groupData = "";
 
-            Int32 count = 0;
+            int count = 0;
             lock (mSelectionList) {
                 count = mSelectionList.Count;
             }
 
-            for (Int32 i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 try {
                     Selection selection;
                     lock (mSelectionList) {
@@ -271,10 +271,10 @@ namespace IRMonitor.Worker
                         OnSendReportData?.Invoke(selection.mSelectionId);
                     }
 
-                    seleionData += JsonUtils.ObjectToJson(selection.mTemperatureData) + ",";
+                    selectionData += JsonUtils.ObjectToJson(selection.mTemperatureData) + ",";
                 }
-                catch (Exception ex) {
-                    Tracker.LogE(ex);
+                catch (Exception e) {
+                    Tracker.LogE(e);
                     continue;
                 }
             }
@@ -284,7 +284,7 @@ namespace IRMonitor.Worker
                 count = mSelectionGroupList.Count;
             }
 
-            for (Int32 i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 try {
                     GroupSelection group;
                     lock (mSelectionGroupList) {
@@ -306,20 +306,20 @@ namespace IRMonitor.Worker
                     }
                     groupData += JsonUtils.ObjectToJson(group.mTemperatureData) + ",";
                 }
-                catch (Exception ex) {
-                    Tracker.LogE(ex);
+                catch (Exception e) {
+                    Tracker.LogE(e);
                     continue;
                 }
             }
 
             // 选区温度信息实时回调
-            if (!String.IsNullOrEmpty(seleionData))
-                seleionData = String.Format("[{0}]", seleionData.Remove(seleionData.Length - 1, 1));
+            if (!string.IsNullOrEmpty(selectionData))
+                selectionData = string.Format("[{0}]", selectionData.Remove(selectionData.Length - 1, 1));
 
-            if (!String.IsNullOrEmpty(groupData))
-                groupData = String.Format("[{0}]", groupData.Remove(groupData.Length - 1, 1));
+            if (!string.IsNullOrEmpty(groupData))
+                groupData = string.Format("[{0}]", groupData.Remove(groupData.Length - 1, 1));
 
-            OnRealtimeSelectionTemperature?.Invoke(seleionData, groupData);
+            OnRealtimeSelectionTemperature?.Invoke(selectionData, groupData);
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace IRMonitor.Worker
         {
             AlarmConfigData alarmSet;
             AlarmInfo info;
-            Single temperature = 0.0f;
+            float temperature;
 
             switch (alarmType) {
                 case GroupAlarmType.MaxTemperature:
@@ -388,12 +388,11 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Alarming;
 
                 // 添加告警
-                String groupData = group.Serialize();
-                String temperatureInfo = JsonUtils.ObjectToJson(group.mTemperatureData);
+                string groupData = group.Serialize();
+                string temperatureInfo = JsonUtils.ObjectToJson(group.mTemperatureData);
 
                 // 阈值设置序列化
-                String condition = String.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
-                        alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
+                string condition = string.Format("{0},{1},{2}", alarmSet.mGeneralThreshold, alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
 
                 // 记录告警开始时间
                 info.mBeginTime = DateTime.Now;
@@ -401,10 +400,10 @@ namespace IRMonitor.Worker
 
                 // 告警入库
                 OnAddAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)alarmType,
-                    (Int32)alarmSet.mAlarmReason,
-                    (Int32)info.mCurrentAlarmLevel,
+                    (int)AlarmMode.GroupSelection,
+                    (int)alarmType,
+                    (int)alarmSet.mAlarmReason,
+                    (int)info.mCurrentAlarmLevel,
                     condition,
                     temperature,
                     group.mId,
@@ -420,10 +419,10 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Unknown;
 
                 // 结束告警
-                String selectionData = group.Serialize();
+                string selectionData = group.Serialize();
                 OnUpdateAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)alarmType,
+                    (int)AlarmMode.GroupSelection,
+                    (int)alarmType,
                     group.mId,
                     selectionData,
                     info);
@@ -434,19 +433,18 @@ namespace IRMonitor.Worker
             else if (info.mAlarmStatus == AlarmStatus.AlarmingChanged) {
 
                 // 结束上一次告警
-                String selectionData = group.Serialize();
+                string selectionData = group.Serialize();
                 OnUpdateAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)alarmType,
+                    (int)AlarmMode.GroupSelection,
+                    (int)alarmType,
                     group.mId,
                     selectionData,
                     info);
 
-                String temperatureInfo = JsonUtils.ObjectToJson(group.mTemperatureData);
+                string temperatureInfo = JsonUtils.ObjectToJson(group.mTemperatureData);
 
                 // 阈值设置序列化
-                String condition = String.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
-                        alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
+                string condition = string.Format("{0},{1},{2}", alarmSet.mGeneralThreshold, alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
 
                 // 记录告警开始时间
                 info.mBeginTime = DateTime.Now;
@@ -454,10 +452,10 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Alarming;
 
                 OnAddAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)alarmType,
-                    (Int32)alarmSet.mAlarmReason,
-                    (Int32)info.mCurrentAlarmLevel,
+                    (int)AlarmMode.GroupSelection,
+                    (int)alarmType,
+                    (int)alarmSet.mAlarmReason,
+                    (int)info.mCurrentAlarmLevel,
                     condition,
                     temperature,
                     group.mId,
@@ -474,10 +472,10 @@ namespace IRMonitor.Worker
                  && (info.mIsTimeout == false)) {
                 DateTime time = DateTime.Now;
                 if ((time - info.mBeginTime).TotalMinutes >= mTimeout) {
-                    String selectionData = group.Serialize();
+                    string selectionData = group.Serialize();
                     OnAlarmTimeout?.Invoke(
-                        (Int32)AlarmMode.GroupSelection,
-                        (Int32)alarmType,
+                        (int)AlarmMode.GroupSelection,
+                        (int)alarmType,
                         group.mId,
                         selectionData,
                         info);
@@ -503,7 +501,7 @@ namespace IRMonitor.Worker
         private void SubProcessSeletionAlarm(SelectionAlarmType alarmType, Selection select)
         {
             AlarmConfigData alarmSet;
-            Single temperature = 0.0f;
+            float temperature = 0.0f;
             AlarmInfo info;
 
             switch (alarmType) {
@@ -539,11 +537,11 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Alarming;
 
                 // 添加告警
-                String selectionData = select.Serialize();
-                String temperatureInfo = JsonUtils.ObjectToJson(select.mTemperatureData);
+                string selectionData = select.Serialize();
+                string temperatureInfo = JsonUtils.ObjectToJson(select.mTemperatureData);
 
                 // 阈值设置序列化
-                String condition = String.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
+                string condition = string.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
                         alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
 
                 List<Selection> list = new List<Selection>() { select };
@@ -554,10 +552,10 @@ namespace IRMonitor.Worker
 
                 // 告警入库
                 OnAddAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)alarmType,
-                    (Int32)alarmSet.mAlarmReason,
-                    (Int32)info.mCurrentAlarmLevel,
+                    (int)AlarmMode.Selection,
+                    (int)alarmType,
+                    (int)alarmSet.mAlarmReason,
+                    (int)info.mCurrentAlarmLevel,
                     condition,
                     temperature,
                     select.mSelectionId,
@@ -574,10 +572,10 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Unknown;
 
                 // 结束告警
-                String selectionData = select.Serialize();
+                string selectionData = select.Serialize();
                 OnUpdateAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)alarmType,
+                    (int)AlarmMode.Selection,
+                    (int)alarmType,
                     select.mSelectionId,
                     selectionData,
                     info);
@@ -588,19 +586,19 @@ namespace IRMonitor.Worker
             else if (info.mAlarmStatus == AlarmStatus.AlarmingChanged) {
 
                 // 结束上一次告警
-                String selectionData = select.Serialize();
+                string selectionData = select.Serialize();
                 OnUpdateAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)alarmType,
+                    (int)AlarmMode.Selection,
+                    (int)alarmType,
                     select.mSelectionId,
                     selectionData,
                     info);
 
-                String temperatureInfo = JsonUtils.ObjectToJson(select.mTemperatureData);
+                string temperatureInfo = JsonUtils.ObjectToJson(select.mTemperatureData);
                 List<Selection> list = new List<Selection>() { select };
 
                 // 阈值设置序列化
-                String condition = String.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
+                string condition = string.Format("{0},{1},{2}", alarmSet.mGeneralThreshold,
                     alarmSet.mSeriousThreshold, alarmSet.mCriticalThreshold);
 
                 // 记录告警开始时间
@@ -609,10 +607,10 @@ namespace IRMonitor.Worker
                 info.mAlarmStatus = AlarmStatus.Alarming;
 
                 OnAddAlarmInfo?.Invoke(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)alarmType,
-                    (Int32)alarmSet.mAlarmReason,
-                    (Int32)info.mCurrentAlarmLevel,
+                    (int)AlarmMode.Selection,
+                    (int)alarmType,
+                    (int)alarmSet.mAlarmReason,
+                    (int)info.mCurrentAlarmLevel,
                     condition,
                     temperature,
                     select.mSelectionId,
@@ -629,10 +627,10 @@ namespace IRMonitor.Worker
                 && (info.mIsTimeout == false)) {
                 DateTime time = DateTime.Now;
                 if ((time - info.mBeginTime).TotalMinutes >= mTimeout) {
-                    String selectionData = select.Serialize();
+                    string selectionData = select.Serialize();
                     OnAlarmTimeout?.Invoke(
-                        (Int32)AlarmMode.Selection,
-                        (Int32)alarmType,
+                        (int)AlarmMode.Selection,
+                        (int)alarmType,
                         select.mSelectionId,
                         selectionData,
                         info);
@@ -647,7 +645,7 @@ namespace IRMonitor.Worker
         /// </summary>
         private void CalcAlarmInfo(
             AlarmConfigData set,
-            Single temperture,
+            float temperture,
             AlarmInfo info)
         {
             AlarmLevel level = AlarmLevel.Unknown;
@@ -741,7 +739,7 @@ namespace IRMonitor.Worker
         /// </summary>
         private void SpecialCalAlarmInfo(
             AlarmConfigData set,
-            Single temperture,
+            float temperture,
             AlarmInfo info)
         {
             AlarmLevel level = AlarmLevel.Unknown;
@@ -840,13 +838,12 @@ namespace IRMonitor.Worker
         /// </summary>
         private void ProcessAlarmReadyEnd(
             AlarmConfigData set,
-            Single temperture,
+            float temperture,
             AlarmInfo info)
         {
             if (info.mAlarmStatus == AlarmStatus.AlarmReadyEnd) {
-                AlarmLevel level = AlarmLevel.Unknown;
-
                 if (set.mAlarmReason == AlarmReason.High) {
+                    AlarmLevel level;
                     if (temperture >= (set.mCriticalThreshold - HIGH_ALARM_ERROR_RANGE))
                         level = AlarmLevel.Critical;
                     else if (temperture >= (set.mSeriousThreshold - HIGH_ALARM_ERROR_RANGE))
@@ -867,7 +864,7 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 设置选区采样频率
         /// </summary>
-        public void SetSelctionSampleRate(Int32 rate)
+        public void SetSelctionSampleRate(int rate)
         {
             mSelctionSampleRate = rate;
         }
@@ -875,10 +872,9 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 设置选区组采样频率
         /// </summary>
-        public void SetGroupSelctionSampleRate(Int32 rate)
+        public void SetGroupSelctionSampleRate(int rate)
         {
             mGroupSampleRate = rate;
         }
     }
 }
-

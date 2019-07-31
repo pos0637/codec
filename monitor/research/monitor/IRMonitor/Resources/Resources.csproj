@@ -5,6 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="ir.s3db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

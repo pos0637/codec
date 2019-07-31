@@ -1,7 +1,8 @@
-﻿using Communication.Session;
+﻿using Common;
+using IRMonitor.ServiceManager;
+using IRMonitor.Services.LiveStreaming;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace IRMonitor
 {
@@ -9,27 +10,28 @@ namespace IRMonitor
     {
         static void Main(string[] args)
         {
-            MQTTSessionManager sessionManager = new MQTTSessionManager();
-            sessionManager.OnNewSessionCallback = (pipe) => {
-                Console.WriteLine($"OnNewSession: {pipe.SessionId}");
-            };
-
-            sessionManager.OnSessionClosedCallback = (pipe) => {
-                Console.WriteLine($"OnSessionClosed: {pipe.SessionId}");
-            };
-
-            sessionManager.Initialize(new Dictionary<string, object>() {
-                { "Server", "112.51.3.158" },
-                { "Port", 1883 },
-                { "Topic", "Topic1" },
-                { "ClientId", "1234" }
-            });
-
-            while (true) {
-                Thread.Sleep(1000);
+            if (ARESULT.AFAILED(CellServiceManager.Instance.LoadConfig())) {
+                Console.WriteLine("IRServiceManager初始化失败");
+                Console.ReadLine();
+                return;
             }
 
-            Console.WriteLine("Hello World!");
+            string serviceId = LiveStreamingServiceManager.Instance.AddService(new Dictionary<string, object>() {
+                { "Cell", CellServiceManager.gIRServiceList[0] }
+            });
+            LiveStreamingServiceManager.Instance.GetService(serviceId).Start();
+
+            /*
+            ServiceInstanceManager manager = new ServiceInstanceManager();
+            if (ARESULT.AFAILED(manager.Start())) {
+                Console.WriteLine("ServiceInstanceManager初始化失败");
+                Console.ReadLine();
+                return;
+            }
+
+            SmsServiceWorker.Instance.Start();
+            SmsServiceWorker.Instance.Join();
+            */
         }
     }
 }

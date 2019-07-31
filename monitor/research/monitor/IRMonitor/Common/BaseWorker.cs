@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 
 namespace Common
 {
@@ -11,7 +10,7 @@ namespace Common
         /// <summary>
         /// 执行函数接口
         /// </summary>
-        public interface ExecutorInterface
+        public interface IExecutor
         {
             /// <summary>
             /// 执行
@@ -38,10 +37,10 @@ namespace Common
         public delegate void DgOnTerminated(ARESULT userData);
 
         // 等待线程数量
-        private Int32 mWaitCount = 0;
+        private int mWaitCount = 0;
 
         // 线程运行标志
-        private Boolean mRunFlag = false;
+        private bool mRunFlag = false;
 
         // 线程状态
         private WorkerStatus mStatus = WorkerStatus.Idle;
@@ -50,26 +49,24 @@ namespace Common
         private ARESULT mUserData = ARESULT.S_OK;
 
         // 执行函数接口
-        private ExecutorInterface mExecutor;
+        private IExecutor mExecutor;
 
         // 工作线程锁
-        public Object mLock = new Object();
+        public object mLock = new object();
 
         // 工作线程事件
-        public Object mEvent = new Object();
+        public object mEvent = new object();
 
         // 终止事件函数委托
         private DgOnTerminated mDgOnTerminated;
-        public DgOnTerminated OnTerminated
-        {
+        public DgOnTerminated OnTerminated {
             private get { return mDgOnTerminated; }
             set { lock (mLock) { mDgOnTerminated = value; } }
         }
 
         // 线程名称
-        private String mName = "unnamed";
-        public String Name
-        {
+        private string mName = "unnamed";
+        public string Name {
             get { return mName; }
             protected set { mName = value; }
         }
@@ -85,7 +82,7 @@ namespace Common
         /// 构造函数
         /// </summary>
         /// <param name="executor">执行函数接口</param>
-        public BaseWorker(ExecutorInterface executor)
+        public BaseWorker(IExecutor executor)
         {
             mExecutor = executor;
         }
@@ -134,7 +131,7 @@ namespace Common
         /// 等待
         /// </summary>
         /// <param name="timeout">超时时间</param>
-        public virtual void Wait(Int32 timeout)
+        public virtual void Wait(int timeout)
         {
             lock (mEvent) {
                 Monitor.Wait(mEvent, timeout);
@@ -197,9 +194,9 @@ namespace Common
         /// 是否终止运行
         /// </summary>
         /// <returns>终止运行标志</returns>
-        public Boolean IsTerminated()
+        public bool IsTerminated()
         {
-            Boolean ret;
+            bool ret;
 
             lock (mLock) {
                 ret = (mRunFlag == false);
@@ -212,9 +209,9 @@ namespace Common
         /// 线程是否处于无动作状态
         /// </summary>
         /// <returns>无动作状态标志</returns>
-        public Boolean IsIdle()
+        public bool IsIdle()
         {
-            Boolean ret;
+            bool ret;
 
             lock (mLock) {
                 ret = (mStatus == WorkerStatus.Idle);
@@ -261,7 +258,7 @@ namespace Common
         /// 执行函数
         /// </summary>
         /// <param name="state">线程参数</param>
-        private void Execute(Object state)
+        private void Execute(object state)
         {
             Run();
 
@@ -274,7 +271,7 @@ namespace Common
 
             // 唤醒等待事件
             lock (mEvent) {
-                Monitor.PulseAll(mEvent); 
+                Monitor.PulseAll(mEvent);
             }
         }
     }

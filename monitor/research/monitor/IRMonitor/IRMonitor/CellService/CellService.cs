@@ -1,28 +1,33 @@
 ﻿using Common;
 using Devices;
+using IRMonitor.CellService.Worker;
 using IRMonitor.Common;
-using IRMonitor.Worker;
 using Models;
+using Newtonsoft.Json;
 using Repository.DAO;
+using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
 
-namespace IRMonitor
+namespace IRMonitor.CellService
 {
-    public class IRService
+    /// <summary>
+    /// 设备单元服务
+    /// </summary>
+    public class CellService
     {
         #region 参数
 
         private List<Selection> mSelectionList = new List<Selection>(); // 选区列表
         private List<GroupSelection> mSelectionGroupList = new List<GroupSelection>(); // 组选区列表
         private List<IDevice> mDeviceList = new List<IDevice>(); // 设备列表
-        private Byte[] mRealtimeImage; // 实时图像缓存
+        private byte[] mRealtimeImage; // 实时图像缓存
 
         public Cell mCell; // Cell配置
-        public Int32 mSyncAlarmId = 0; // 同步告警索引
-        public Int32 mSyncSelectionId = 1; // 同步选区信息索引
-        public Int32 mSyncSelectionGroupId = 0; // 同步组选区信息索引
-        private Int64 mCurrentRecordId = -1; // 告警录像索引
+        public int mSyncAlarmId = 0; // 同步告警索引
+        public int mSyncSelectionId = 1; // 同步选区信息索引
+        public int mSyncSelectionGroupId = 0; // 同步组选区信息索引
+        private long mCurrentRecordId = -1; // 告警录像索引
         private AlarmNoticeConfig mAlarmNoticeConfig; // 告警通知
         private TempCurveSample mTempCurveSample; // 采样频率
         private UserRoutineConfig mUserRoutineConfig; // 用户常规设置
@@ -120,7 +125,7 @@ namespace IRMonitor
             #region 事件与槽连接
 
             // 保存一份实时的图像数据，用于生产告警图像
-            OnImageCallback += delegate (Byte[] buf) { mRealtimeImage = buf; };
+            OnImageCallback += delegate (byte[] buf) { mRealtimeImage = buf; };
 
             // 录像
             mRecordingWorker.OnAddRecord += new Delegates.DgOnAddRecordInfo(AddRecord);
@@ -134,14 +139,12 @@ namespace IRMonitor
             mProcessingWorker.OnUpdateAlarmInfo += new Delegates.DgOnUpdateAlarmInfo(UpdateAlarmInfo);
             mProcessingWorker.OnAlarmTimeout += new Delegates.DgOnAlarmTimeout(AlarmTimeout);
             mProcessingWorker.OnAddSelectionTemperature += new Delegates.DgOnAddSelectionTemperature(AddSelectionTemperature);
-            mProcessingWorker.OnAddGroupSelectionTemperature +=
-                new Delegates.DgOnAddGroupSelectionTemperature(AddGroupSelectionTemperature);
+            mProcessingWorker.OnAddGroupSelectionTemperature += new Delegates.DgOnAddGroupSelectionTemperature(AddGroupSelectionTemperature);
             mProcessingWorker.OnSendReportData += new Delegates.DgOnSendReportData(SendReportData);
             mProcessingWorker.OnSendRealTemperature += new Delegates.DgOnSendRealTemperature(SendRealTemperatureInfo);
 
             // 定时和整点
-            mRealtimeNoticeWorker.SetConfig(mAlarmNoticeConfig.mIsHourSend, mAlarmNoticeConfig.mIsRegularTimeSend
-                , mAlarmNoticeConfig.mRegularTime);
+            mRealtimeNoticeWorker.SetConfig(mAlarmNoticeConfig.mIsHourSend, mAlarmNoticeConfig.mIsRegularTimeSend, mAlarmNoticeConfig.mRegularTime);
             mRealtimeNoticeWorker.OnHourSend += new Delegates.DgOnHourSend(SendShortMessageCallback);
             mRealtimeNoticeWorker.OnRegularSend += new Delegates.DgOnRegularSend(SendShortMessageCallback);
 
@@ -160,16 +163,16 @@ namespace IRMonitor
         public ARESULT Start()
         {
             // 加载设备
-            IDevice dev = DeviceFactory.Instance.GetDevice(0, mCell.mIRCameraType, "红外设备");
-            if (dev == null) {
-                Tracker.LogI(String.Format("Load ({0}) Device FAILED", mCell.mIRCameraType));
+            IDevice device = DeviceFactory.Instance.GetDevice(0, mCell.mIRCameraType, "红外设备");
+            if (device == null) {
+                Tracker.LogI(string.Format("Load ({0}) Device FAILED", mCell.mIRCameraType));
                 return ARESULT.E_FAIL;
             }
 
-            Tracker.LogI(String.Format("Load ({0}) Device SUCCEED", mCell.mIRCameraType));
+            Tracker.LogI(string.Format("Load ({0}) Device SUCCEED", mCell.mIRCameraType));
 
             lock (mDeviceList) {
-                mDeviceList.Add(dev);
+                mDeviceList.Add(device);
             }
 
             // 设置红外参数
@@ -181,12 +184,10 @@ namespace IRMonitor
             SetDistance(mIRParam.mDistance);
 
             // 数据获取线程初始化
-            mGetIrDataWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraIp,
-                mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, dev);
+            mGetIrDataWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraIp, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, device);
 
             // 录像线程初始化
-            mRecordingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraVideoFrameRate,
-                mCell.mIRCameraTemperatureFrameRate, mCell.mIRCameraVideoFolder, mCell.mIRCameraVideoDuration, mSelectionList);
+            mRecordingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, mCell.mIRCameraVideoFolder, mCell.mIRCameraVideoDuration, mSelectionList);
 
             // 温度处理线程初始化
             mProcessingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelectionList, mSelectionGroupList);
@@ -216,8 +217,7 @@ namespace IRMonitor
         /// <returns>是否成功</returns>
         public ARESULT Finalize()
         {
-            SmsServiceWorker.Instance.gOnReceiveShortMessage -=
-                new Delegates.DgOnAutoReplyShortMessage(OnAutoReplyShortMessageCallback);
+            SmsServiceWorker.Instance.gOnReceiveShortMessage -= new Delegates.DgOnAutoReplyShortMessage(OnAutoReplyShortMessageCallback);
 
             if (mGetIrDataWorker != null) {
                 mGetIrDataWorker.Discard();
@@ -252,33 +252,32 @@ namespace IRMonitor
         /// 添加告警记录
         /// </summary>
         public ARESULT AddAlarmInfo(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int32 alarmReason,
-            Int32 alarmLevel,
-            String alarmCondition,
-            Single alarmTemperature,
-            Int64 selectionId,
-            String selectionName,
-            String selectionData,
-            String temperatureInfo,
-            Single maxTemperature,
-            Single minTemperature,
+            int alarmMode,
+            int alarmType,
+            int alarmReason,
+            int alarmLevel,
+            string alarmCondition,
+            float alarmTemperature,
+            long selectionId,
+            string selectionName,
+            string selectionData,
+            string temperatureInfo,
+            float maxTemperature,
+            float minTemperature,
             List<Selection> selections,
             AlarmInfo info)
         {
             try {
-                String imagePath = String.Format("{0}/{1}.JPG",
-                    mCell.mIRCameraImageFolder, DateTime.Now.ToString("yyyyMMddHHmmss"));
-
-                String jstr = JsonUtils.ObjectToJson<UserRoutineConfig>(mUserRoutineConfig);
-                if (jstr == null)
+                string imagePath = string.Format("{0}/{1}.JPG", mCell.mIRCameraImageFolder, DateTime.Now.ToString("yyyyMMddHHmmss"));
+                string jstr = JsonUtils.ObjectToJson(mUserRoutineConfig);
+                if (jstr == null) {
                     return ARESULT.E_FAIL;
+                }
 
                 // 生成告警图片
-                Byte[] data = mRealtimeImage;
-                /*
-                Boolean ret = ImageGenerater.DrawSecondAnalysisImage(
+                byte[] data = mRealtimeImage;
+
+                bool ret = ImageGenerator.CreateImage(
                     data,
                     selections,
                     mCell.mIRCameraWidth,
@@ -288,21 +287,21 @@ namespace IRMonitor
                     imagePath,
                     jstr,
                     IRPalette.PaletteType.Red);
-                if (ret == false)
+                if (!ret)
                     return ARESULT.E_FAIL;
-                */
+
                 // 未开启告警录像，录像起始Id为 -1
-                Int64 recordId = -1;
+                long recordId = -1;
                 info.mIsRecord = false;
-                if (((alarmMode == (Int32)AlarmMode.Selection) && mAlarmNoticeConfig.mIsSelectionRecord)
-                    || ((alarmMode == (Int32)AlarmMode.GroupSelection) && mAlarmNoticeConfig.mIsGroupSelectionRecord)) {
+                if (((alarmMode == (int)AlarmMode.Selection) && mAlarmNoticeConfig.mIsSelectionRecord)
+                    || ((alarmMode == (int)AlarmMode.GroupSelection) && mAlarmNoticeConfig.mIsGroupSelectionRecord)) {
                     mRecordingWorker.StartRecord();
                     recordId = mCurrentRecordId;
                     info.mIsRecord = true;
                 }
 
                 // 拼接告警详情
-                String alarmDatail = AlarmMsgBuilder.GetAlarmDetail(
+                string alarmDatail = AlarmMsgBuilder.GetAlarmDetail(
                     selectionName,
                     alarmTemperature,
                     alarmMode,
@@ -336,7 +335,7 @@ namespace IRMonitor
 
                 // 告警短信
                 if (mAlarmNoticeConfig.mIsAlarmSend) {
-                    String content = AlarmMsgBuilder.GetShowMessage(
+                    string content = AlarmMsgBuilder.GetShowMessage(
                         mUserRoutineConfig.mSubstation,
                         mUserRoutineConfig.mDevicePosition,
                         alarmMode,
@@ -349,29 +348,30 @@ namespace IRMonitor
                 }
 
                 // 推送报表数据
-                ReportData reportData = new ReportData();
-                reportData.mType = alarmMode;
-                reportData.mId = selectionId;
-                reportData.mProvince = mUserRoutineConfig.mProvince;
-                reportData.mCity = mUserRoutineConfig.mCity;
-                reportData.mDeviceName = mUserRoutineConfig.mDevicePosition;
-                reportData.mReportType = 0;
-                reportData.mUnit = mUserRoutineConfig.mCompany;
-                reportData.mTestPersonName = mUserRoutineConfig.mTestPersonnel;
-                reportData.mChargePersonName = mUserRoutineConfig.mProjectLeader;
-                reportData.mSubstation = mUserRoutineConfig.mSubstation;
-                reportData.mImageData = Convert.ToBase64String(Utils.GetBytesByImagePath(imagePath));
-                reportData.mDatetime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                reportData.mIRParam = mIRParam;
-                reportData.mDeviceInfo = mDeviceInfo;
+                ReportData reportData = new ReportData {
+                    mType = alarmMode,
+                    mId = selectionId,
+                    mProvince = mUserRoutineConfig.mProvince,
+                    mCity = mUserRoutineConfig.mCity,
+                    mDeviceName = mUserRoutineConfig.mDevicePosition,
+                    mReportType = 0,
+                    mUnit = mUserRoutineConfig.mCompany,
+                    mTestPersonName = mUserRoutineConfig.mTestPersonnel,
+                    mChargePersonName = mUserRoutineConfig.mProjectLeader,
+                    mSubstation = mUserRoutineConfig.mSubstation,
+                    mImageData = Convert.ToBase64String(Utils.GetBytesByImagePath(imagePath)),
+                    mDatetime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    mIRParam = mIRParam,
+                    mDeviceInfo = mDeviceInfo
+                };
                 OnReportDataCallback?.Invoke(reportData);
 
                 // 索引自增
                 mSyncAlarmId++;
                 return ARESULT.S_OK;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
         }
@@ -381,10 +381,10 @@ namespace IRMonitor
         /// </summary>
         /// <returns>是否成功</returns>
         public ARESULT UpdateAlarmInfo(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int64 selectionId,
-            String selectionData,
+            int alarmMode,
+            int alarmType,
+            long selectionId,
+            string selectionData,
             AlarmInfo alarmInfo)
         {
             if (!alarmInfo.mIsTimeout) {
@@ -413,14 +413,14 @@ namespace IRMonitor
         /// 告警超时, 如果有录像则停止录像
         /// </summary>
         public ARESULT AlarmTimeout(
-            Int32 alarmMode,
-            Int32 alarmType,
-            Int64 selectionId,
-            String selectionData,
+            int alarmMode,
+            int alarmType,
+            long selectionId,
+            string selectionData,
             AlarmInfo alarmInfo)
         {
             // 未开启告警录像，录像起始Id为 -1
-            Int64 recordId = -1;
+            long recordId = -1;
             if (alarmInfo.mIsRecord) {
                 mRecordingWorker.StopRecord();
                 recordId = mCurrentRecordId;
@@ -449,9 +449,9 @@ namespace IRMonitor
         /// <param name="data">选区信息Json字符串</param>
         /// <returns>选区索引</returns>
         public ARESULT AddNewSelection(
-            Boolean isGlobalSelection,
-            String data,
-            ref Int64 id)
+            bool isGlobalSelection,
+            string data,
+            ref long id)
         {
             mSyncSelectionId++;
 
@@ -499,7 +499,7 @@ namespace IRMonitor
         /// <summary>
         /// 更新选区
         /// </summary>
-        public ARESULT UpdateSelection(String data)
+        public ARESULT UpdateSelection(string data)
         {
             mSyncSelectionId++;
             DateTime t1 = DateTime.Now;
@@ -544,7 +544,7 @@ namespace IRMonitor
                                 ClearGroupSelectionAlarm(groupSelection);
                             }
                             else {
-                                for (Int32 i = 0; i < groupSelection.mSelectionIds.Count; i++) {
+                                for (int i = 0; i < groupSelection.mSelectionIds.Count; i++) {
                                     if (groupSelection.mSelectionIds[i] == selection.mSelectionId) {
                                         ClearGroupSelectionAlarm(groupSelection);
                                         break;
@@ -556,7 +556,7 @@ namespace IRMonitor
                 }
 
                 DateTime t2 = DateTime.Now;
-                Tracker.LogI(String.Format("UpdateSelection Use Time:{0}", t2 - t1));
+                Tracker.LogI(string.Format("UpdateSelection Use Time:{0}", t2 - t1));
                 return SelectionDAO.UpdateSelection(update.mId, update.mData);
             }
             catch (Exception ex) {
@@ -570,7 +570,7 @@ namespace IRMonitor
         /// </summary>
         /// <param name="id">选区索引</param>
         /// <returns>是否成功</returns>
-        public ARESULT RemoveSelection(Int64 id)
+        public ARESULT RemoveSelection(long id)
         {
             mSyncSelectionId++;
 
@@ -578,11 +578,11 @@ namespace IRMonitor
                 if (ARESULT.AFAILED(SelectionDAO.RemoveSelection(id)))
                     return ARESULT.E_FAIL;
 
-                Boolean continueFlag = false;
+                bool continueFlag = false;
                 lock (mSelectionGroupList) {
                     foreach (GroupSelection groupSelection in mSelectionGroupList) {
                         lock (groupSelection) {
-                            for (Int32 i = 0; i < groupSelection.mSelectionIds.Count; i++) {
+                            for (int i = 0; i < groupSelection.mSelectionIds.Count; i++) {
                                 if (groupSelection.mSelectionIds[i] == id) {
                                     ClearGroupSelectionAlarm(groupSelection);
 
@@ -592,10 +592,10 @@ namespace IRMonitor
                                         mSyncSelectionGroupId++;
                                     }
                                     else {
-                                        for (Int32 k = i; k < groupSelection.mSelectionIds.Count - 1; k++)
+                                        for (int k = i; k < groupSelection.mSelectionIds.Count - 1; k++)
                                             groupSelection.mSelectionIds[k] = groupSelection.mSelectionIds[k + 1];
 
-                                        String data = groupSelection.Serialize();
+                                        string data = groupSelection.Serialize();
                                         if (data != null)
                                             GroupSelectionDAO.UpdateGroupSelection(groupSelection.mId, data);
                                     }
@@ -634,7 +634,7 @@ namespace IRMonitor
         /// <summary>
         /// 更新选区告警配置
         /// </summary>
-        public ARESULT UpdateSelectionConfig(String data)
+        public ARESULT UpdateSelectionConfig(string data)
         {
             SelectionConfigUpdate config = JsonUtils.ObjectFromJson<SelectionConfigUpdate>(data);
             if (config == null)
@@ -669,8 +669,8 @@ namespace IRMonitor
 
                     if (selection.mAlarmInfo.mMaxTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.Selection,
-                            (Int32)SelectionAlarmType.MaxTemp,
+                            (int)AlarmMode.Selection,
+                            (int)SelectionAlarmType.MaxTemp,
                             selection.mSelectionId,
                             selection.Serialize(),
                             selection.mAlarmInfo.mMaxTempAlarmInfo);
@@ -682,8 +682,8 @@ namespace IRMonitor
                 if (!selection.mAlarmConfig.mMinTempConfig.Equals(alramconfig.mMinTempConfig)) {
                     if (selection.mAlarmInfo.mMinTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.Selection,
-                            (Int32)SelectionAlarmType.MinTemp,
+                            (int)AlarmMode.Selection,
+                            (int)SelectionAlarmType.MinTemp,
                             selection.mSelectionId,
                             selection.Serialize(),
                             selection.mAlarmInfo.mMinTempAlarmInfo);
@@ -695,8 +695,8 @@ namespace IRMonitor
                 if (!selection.mAlarmConfig.mAvgTempConfig.Equals(alramconfig.mAvgTempConfig)) {
                     if (selection.mAlarmInfo.mAvgTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.Selection,
-                            (Int32)SelectionAlarmType.AvgTemp,
+                            (int)AlarmMode.Selection,
+                            (int)SelectionAlarmType.AvgTemp,
                             selection.mSelectionId,
                             selection.Serialize(),
                             selection.mAlarmInfo.mAvgTempAlarmInfo);
@@ -718,8 +718,8 @@ namespace IRMonitor
         /// 添加组选区
         /// </summary>
         public ARESULT AddNewGroupSelection(
-            String data,
-            ref Int64 id)
+            string data,
+            ref long id)
         {
             mSyncSelectionGroupId++;
             GroupSelection groupSelection = new GroupSelection();
@@ -729,7 +729,7 @@ namespace IRMonitor
             if (ARESULT.AFAILED(groupSelection.Deserialize(data)))
                 return ARESULT.E_INVALIDARG;
 
-            Int64 groupSelectionId = -1;
+            long groupSelectionId = -1;
             if (ARESULT.AFAILED(GroupSelectionDAO.AddNewGroupSelection(mCell.mCellId, data, ref groupSelectionId)))
                 return ARESULT.E_FAIL;
 
@@ -747,7 +747,7 @@ namespace IRMonitor
         /// <summary>
         /// 更新组选区
         /// </summary>
-        public ARESULT UpdateGroupSelectionConfig(String data)
+        public ARESULT UpdateGroupSelectionConfig(string data)
         {
             GroupSelectionUpdateParam gupdate = JsonUtils.ObjectFromJson<GroupSelectionUpdateParam>(data);
             if (gupdate == null)
@@ -780,8 +780,8 @@ namespace IRMonitor
                     // 正在告警时, 结束当前告警
                     if (groupSelection.mAlarmInfo.mMaxTempAlarm.mAlarmStatus == AlarmStatus.Alarming)
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.GroupSelection,
-                            (Int32)GroupAlarmType.MaxTemperature,
+                            (int)AlarmMode.GroupSelection,
+                            (int)GroupAlarmType.MaxTemperature,
                             groupSelection.mId,
                             groupSelection.Serialize(),
                             groupSelection.mAlarmInfo.mMaxTempAlarm);
@@ -793,8 +793,8 @@ namespace IRMonitor
                 if (!groupSelection.mAlarmConfig.mMaxTempeRiseConfig.Equals(alramconfig.mMaxTempeRiseConfig)) {
                     if (groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.GroupSelection,
-                            (Int32)GroupAlarmType.MaxTempRise,
+                            (int)AlarmMode.GroupSelection,
+                            (int)GroupAlarmType.MaxTempRise,
                             groupSelection.mId,
                             groupSelection.Serialize(),
                             groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo);
@@ -806,8 +806,8 @@ namespace IRMonitor
                 if (!groupSelection.mAlarmConfig.mMaxTempDifConfig.Equals(alramconfig.mMaxTempDifConfig)) {
                     if (groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.GroupSelection,
-                            (Int32)GroupAlarmType.MaxTempDif,
+                            (int)AlarmMode.GroupSelection,
+                            (int)GroupAlarmType.MaxTempDif,
                             groupSelection.mId,
                             groupSelection.Serialize(),
                             groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo);
@@ -820,8 +820,8 @@ namespace IRMonitor
                 if (!groupSelection.mAlarmConfig.mRelativeTempDifConfig.Equals(alramconfig.mRelativeTempDifConfig)) {
                     if (groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                         UpdateAlarmInfo(
-                            (Int32)AlarmMode.GroupSelection,
-                            (Int32)GroupAlarmType.RelativeTempDif,
+                            (int)AlarmMode.GroupSelection,
+                            (int)GroupAlarmType.RelativeTempDif,
                             groupSelection.mId,
                             groupSelection.Serialize(),
                             groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo);
@@ -844,7 +844,7 @@ namespace IRMonitor
         /// 删除组选区
         /// </summary>
         public ARESULT RemoveGroupSelection(
-            Int64 id)
+            long id)
         {
             mSyncSelectionGroupId++;
             if (ARESULT.AFAILED(GroupSelectionDAO.RemoveGroupSelection(id)))
@@ -866,26 +866,10 @@ namespace IRMonitor
         /// <summary>
         /// 获取所有选区信息
         /// </summary>
-        /// <returns>Json字符串</returns>
-        public String GetAllSelectionInfo()
+        /// <returns>JSON字符串</returns>
+        public string GetAllSelectionInfo()
         {
-            String str = null;
-            lock (mSelectionList) {
-                if (mSelectionList.Count > 0) {
-                    str = "";
-                    foreach (Selection selection in mSelectionList) {
-                        str += selection.Serialize();
-                        str += ",";
-                    }
-
-                    if (!String.IsNullOrEmpty(str)) {
-                        str = str.Remove(str.Length - 1);
-                        str = String.Format("[{0}]", str);
-                    }
-                }
-            }
-
-            return str;
+            return JsonConvert.SerializeObject(mSelectionList);
         }
 
         /// <summary>
@@ -903,8 +887,8 @@ namespace IRMonitor
             // 正在告警时, 结束当前告警
             if (selection.mAlarmInfo.mMaxTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)SelectionAlarmType.MaxTemp,
+                    (int)AlarmMode.Selection,
+                    (int)SelectionAlarmType.MaxTemp,
                     selection.mSelectionId,
                     selection.Serialize(),
                     selection.mAlarmInfo.mMaxTempAlarmInfo);
@@ -912,8 +896,8 @@ namespace IRMonitor
 
             if (selection.mAlarmInfo.mMinTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)SelectionAlarmType.MinTemp,
+                    (int)AlarmMode.Selection,
+                    (int)SelectionAlarmType.MinTemp,
                     selection.mSelectionId,
                     selection.Serialize(),
                     selection.mAlarmInfo.mMinTempAlarmInfo);
@@ -921,8 +905,8 @@ namespace IRMonitor
 
             if (selection.mAlarmInfo.mAvgTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.Selection,
-                    (Int32)SelectionAlarmType.AvgTemp,
+                    (int)AlarmMode.Selection,
+                    (int)SelectionAlarmType.AvgTemp,
                     selection.mSelectionId,
                     selection.Serialize(),
                     selection.mAlarmInfo.mAvgTempAlarmInfo);
@@ -951,8 +935,8 @@ namespace IRMonitor
             // 正在告警时, 结束当前告警
             if (groupSelection.mAlarmInfo.mMaxTempAlarm.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)GroupAlarmType.MaxTemperature,
+                    (int)AlarmMode.GroupSelection,
+                    (int)GroupAlarmType.MaxTemperature,
                     groupSelection.mId,
                     groupSelection.Serialize(),
                     groupSelection.mAlarmInfo.mMaxTempAlarm);
@@ -960,8 +944,8 @@ namespace IRMonitor
 
             if (groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)GroupAlarmType.MaxTempRise,
+                    (int)AlarmMode.GroupSelection,
+                    (int)GroupAlarmType.MaxTempRise,
                     groupSelection.mId,
                     groupSelection.Serialize(),
                     groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo);
@@ -969,8 +953,8 @@ namespace IRMonitor
 
             if (groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)GroupAlarmType.MaxTempDif,
+                    (int)AlarmMode.GroupSelection,
+                    (int)GroupAlarmType.MaxTempDif,
                     groupSelection.mId,
                     groupSelection.Serialize(),
                     groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo);
@@ -978,8 +962,8 @@ namespace IRMonitor
 
             if (groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
                 UpdateAlarmInfo(
-                    (Int32)AlarmMode.GroupSelection,
-                    (Int32)GroupAlarmType.RelativeTempDif,
+                    (int)AlarmMode.GroupSelection,
+                    (int)GroupAlarmType.RelativeTempDif,
                     groupSelection.mId,
                     groupSelection.Serialize(),
                     groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo);
@@ -1002,25 +986,9 @@ namespace IRMonitor
         /// 获取所有组选区信息
         /// </summary>
         /// <returns>Json字符串</returns>
-        public String GetAllGroupSelectionInfo()
+        public string GetAllGroupSelectionInfo()
         {
-            String str = null;
-            lock (mSelectionGroupList) {
-                if (mSelectionGroupList.Count > 0) {
-                    str = "";
-                    foreach (GroupSelection groupSelection in mSelectionGroupList) {
-                        str += groupSelection.Serialize();
-                        str += ",";
-                    }
-
-                    if (!String.IsNullOrEmpty(str)) {
-                        str = str.Remove(str.Length - 1);
-                        str = String.Format("[{0}]", str);
-                    }
-                }
-            }
-
-            return str;
+            return JsonConvert.SerializeObject(mSelectionGroupList);
         }
 
         /// <summary>
@@ -1028,13 +996,13 @@ namespace IRMonitor
         /// </summary>
         /// <param name="temperature">大气温度</param>
         /// <returns>是否成功</returns>
-        public Int32 GetAtmosphericTemperature(
-            ref Single temperature)
+        public int GetAtmosphericTemperature(
+            ref float temperature)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.AtmosphericTemperature, temperature, out useLen))
                             return -1;
                     }
@@ -1050,7 +1018,7 @@ namespace IRMonitor
         /// <param name="temperature">大气温度</param>
         /// <returns>是否成功</returns>
         public ARESULT SetAtmosphericTemperature(
-            Single temperature)
+            float temperature)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1072,12 +1040,12 @@ namespace IRMonitor
         /// <param name="relativeHumidity">相对湿度</param>
         /// <returns>是否成功</returns>
         public ARESULT GetRelativeHumidity(
-            ref Single relativeHumidity)
+            ref float relativeHumidity)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.RelativeHumidity, relativeHumidity, out useLen))
                             return ARESULT.E_FAIL;
                         else
@@ -1095,7 +1063,7 @@ namespace IRMonitor
         /// <param name="relativeHumidity">相对湿度</param>
         /// <returns>是否成功</returns>
         public ARESULT SetRelativeHumidity(
-            Single relativeHumidity)
+            float relativeHumidity)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1117,12 +1085,12 @@ namespace IRMonitor
         /// <param name="reflectedTemperature">相对温度值</param>
         /// <returns>是否成功</returns>
         public ARESULT GetReflectedTemperature(
-            ref Single reflectedTemperature)
+            ref float reflectedTemperature)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.ReflectedTemperature, reflectedTemperature, out useLen))
                             return ARESULT.E_FAIL;
                         else
@@ -1140,7 +1108,7 @@ namespace IRMonitor
         /// <param name="reflectedTemperature"></param>
         /// <returns>是否成功</returns>
         public ARESULT SetReflectedTemperature(
-            Single reflectedTemperature)
+            float reflectedTemperature)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1162,12 +1130,12 @@ namespace IRMonitor
         /// <param name="distance">距离值</param>
         /// <returns>是否成功</returns>
         public ARESULT GetDistance(
-            ref Single distance)
+            ref float distance)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.ObjectDistance, distance, out useLen))
                             return ARESULT.E_FAIL;
                         else
@@ -1185,7 +1153,7 @@ namespace IRMonitor
         /// <param name="distance">距离值</param>
         /// <returns>是否成功</returns>
         public ARESULT SetDistance(
-            Single distance)
+            float distance)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1208,12 +1176,12 @@ namespace IRMonitor
         /// <param name="emissivity">辐射率</param>
         /// <returns>是否成功</returns>
         public ARESULT GetEmissivity(
-            ref Single emissivity)
+            ref float emissivity)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.Emissivity, emissivity, out useLen))
                             return ARESULT.E_FAIL;
                         else
@@ -1231,7 +1199,7 @@ namespace IRMonitor
         /// <param name="emissivity">辐射率</param>
         /// <returns>是否成功</returns>
         public ARESULT SetEmissivity(
-            Single emissivity)
+            float emissivity)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1253,12 +1221,12 @@ namespace IRMonitor
         /// <param name="transmission">透射</param>
         /// <returns>是否成功</returns>
         public ARESULT GetTransmission(
-            ref Single transmission)
+            ref float transmission)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Int32 useLen;
+                        int useLen;
                         if (!device.Read(ReadMode.Transmission, transmission, out useLen))
                             return ARESULT.E_FAIL;
                         else
@@ -1276,7 +1244,7 @@ namespace IRMonitor
         /// <param name="transmission">透射</param>
         /// <returns>是否成功</returns>
         public ARESULT SetTransmission(
-            Single transmission)
+            float transmission)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
@@ -1357,12 +1325,12 @@ namespace IRMonitor
         /// </summary>
         /// <param name="rate">采样率</param>
         /// <returns>是否成功</returns>
-        public ARESULT SetDeviceSampleRate(Int32 rate)
+        public ARESULT SetDeviceSampleRate(int rate)
         {
             lock (mDeviceList) {
                 foreach (IDevice device in mDeviceList) {
                     if (device.GetDeviceType() == DeviceType.IrCamera) {
-                        Byte[] buffer = BitConverter.GetBytes(rate);
+                        byte[] buffer = BitConverter.GetBytes(rate);
                         if (!device.Write(WriteMode.FrameRate, buffer))
                             return ARESULT.E_FAIL;
                         else
@@ -1382,11 +1350,11 @@ namespace IRMonitor
         /// 开启手动录像
         /// </summary>
         /// <returns></returns>
-        public ARESULT StartManualRecord(ref Int64 recordId)
+        public ARESULT StartManualRecord(ref long recordId)
         {
             mRecordingWorker.StartRecord();
 
-            Int64 id = -1;
+            long id = -1;
             if (ARESULT.AFAILED(AddManualRecord(ref id))) {
                 mRecordingWorker.StopRecord();
                 return ARESULT.E_FAIL;
@@ -1400,7 +1368,7 @@ namespace IRMonitor
         /// 关闭手动录像
         /// </summary>
         /// <returns></returns>
-        public ARESULT StopManualRecord(Int64 recordId)
+        public ARESULT StopManualRecord(long recordId)
         {
             mRecordingWorker.StopRecord();
 
@@ -1419,10 +1387,10 @@ namespace IRMonitor
         /// <param name="tableFileName"></param>
         /// <returns></returns>
         public ARESULT AddRecord(
-            String videoFileName,
-            String selectionFileName)
+            string videoFileName,
+            string selectionFileName)
         {
-            Int64 id = -1;
+            long id = -1;
 
             if (ARESULT.AFAILED(RecordDAO.AddRecord(
                 mCell.mCellId,
@@ -1440,9 +1408,9 @@ namespace IRMonitor
         /// 添加手动录像
         /// </summary>
         /// <returns></returns>
-        public ARESULT AddManualRecord(ref Int64 recordId)
+        public ARESULT AddManualRecord(ref long recordId)
         {
-            Int64 id = -1;
+            long id = -1;
             if (ARESULT.AFAILED(ManualRecordDAO.AddManualRecord(mCell.mCellId, mCurrentRecordId, ref id)))
                 return ARESULT.E_FAIL;
             else {
@@ -1455,7 +1423,7 @@ namespace IRMonitor
         /// 更新手动录像
         /// </summary>
         /// <returns></returns>
-        public ARESULT UpdateManualRecord(Int64 recordId)
+        public ARESULT UpdateManualRecord(long recordId)
         {
             return ManualRecordDAO.UpdateManualRecord(recordId, mCurrentRecordId);
         }
@@ -1480,7 +1448,7 @@ namespace IRMonitor
         /// <summary>
         /// 获取用户常规信息
         /// </summary>
-        public ARESULT GetUserRotineInfo(ref String str)
+        public ARESULT GetUserRotineInfo(ref string str)
         {
             str = JsonUtils.ObjectToJson(mUserRoutineConfig);
             if (str != null)
@@ -1493,13 +1461,13 @@ namespace IRMonitor
         /// 更新用户常规信息
         /// </summary>
         public ARESULT UpdateUserRoutineInfo(
-            String data)
+            string data)
         {
             UserRoutineConfig config = JsonUtils.ObjectFromJson<UserRoutineConfig>(data);
             if (config == null)
                 return ARESULT.E_FAIL;
 
-            Int32 id = 0;
+            int id = 0;
             ARESULT ret = UserRotineDAO.UpdateUserRoutineInfo(
                 config.mProvince,
                 config.mCity,
@@ -1513,7 +1481,7 @@ namespace IRMonitor
             if (ARESULT.AFAILED(ret))
                 return ARESULT.E_FAIL;
 
-            Boolean isSend = false;
+            bool isSend = false;
             lock (mUserRoutineConfig) {
                 if (!mUserRoutineConfig.mProvince.Equals(config.mProvince) || !mUserRoutineConfig.mCity.Equals(config.mCity)) {
                     isSend = true;
@@ -1546,17 +1514,19 @@ namespace IRMonitor
         public ARESULT LoadAlarmNoticeConfigInfo()
         {
             AlarmNoticeConfig alarmConfig = AlarmNoticeConfigDAO.GetAlarmNoticeConfigInfo();
-            if (alarmConfig == null)
+            if (alarmConfig == null) {
                 return ARESULT.E_FAIL;
+            }
 
             mAlarmNoticeConfig = alarmConfig;
+
             return ARESULT.S_OK;
         }
 
         /// <summary>
         /// 获取告警通知配置信息
         /// </summary>
-        public ARESULT GetAlarmNoticeConfigInfo(ref String str)
+        public ARESULT GetAlarmNoticeConfigInfo(ref string str)
         {
             str = JsonUtils.ObjectToJson<AlarmNoticeConfig>(mAlarmNoticeConfig);
             if (str != null)
@@ -1569,7 +1539,7 @@ namespace IRMonitor
         /// 更新告警通知配置信息
         /// </summary>
         public ARESULT UpdateAlarmNoticeConfig(
-            String data)
+            string data)
         {
             AlarmNoticeConfig config = JsonUtils.ObjectFromJson<AlarmNoticeConfig>(data);
             if (config == null)
@@ -1610,8 +1580,8 @@ namespace IRMonitor
         /// <summary>
         /// 获取选区温度
         /// </summary>
-        public String GetSelectionTemperature(
-            String data)
+        public string GetSelectionTemperature(
+            string data)
         {
             try {
                 SearchCurve curve = JsonUtils.ObjectFromJson<SearchCurve>(data);
@@ -1630,8 +1600,8 @@ namespace IRMonitor
 
                 if (curve.mPointCount < curveList.Count) {
                     List<SelectionTempCurve> tempCurveList = new List<SelectionTempCurve>();
-                    Int32 count = curveList.Count / curve.mPointCount;
-                    for (Int32 i = 0; i < curve.mPointCount; i++)
+                    int count = curveList.Count / curve.mPointCount;
+                    for (int i = 0; i < curve.mPointCount; i++)
                         tempCurveList.Add(curveList[i * count]);
 
                     return JsonUtils.ObjectToJson<List<SelectionTempCurve>>(tempCurveList);
@@ -1648,8 +1618,8 @@ namespace IRMonitor
         /// <summary>
         /// 获取组选区温度
         /// </summary>
-        public String GetGroupSelectionTemperature(
-            String data)
+        public string GetGroupSelectionTemperature(
+            string data)
         {
             try {
                 SearchCurve curve = JsonUtils.ObjectFromJson<SearchCurve>(data);
@@ -1668,8 +1638,8 @@ namespace IRMonitor
 
                 if (curve.mPointCount < curveList.Count) {
                     List<GroupSelectionTempCurve> tempCurveList = new List<GroupSelectionTempCurve>();
-                    Int32 count = curveList.Count / curve.mPointCount;
-                    for (Int32 i = 0; i < curve.mPointCount; i++)
+                    int count = curveList.Count / curve.mPointCount;
+                    for (int i = 0; i < curve.mPointCount; i++)
                         tempCurveList.Add(curveList[i * count]);
 
                     return JsonUtils.ObjectToJson<List<GroupSelectionTempCurve>>(tempCurveList);
@@ -1693,11 +1663,11 @@ namespace IRMonitor
         /// <param name="aveTemperature"></param>
         /// <returns></returns>
         public ARESULT AddSelectionTemperature(
-            Int64 selectionId,
+            long selectionId,
             DateTime time,
-            Single maxTemperature,
-            Single minTemperature,
-            Single avgTemperature)
+            float maxTemperature,
+            float minTemperature,
+            float avgTemperature)
         {
             TempCurve curve = new TempCurve();
             curve.mType = 0;
@@ -1723,11 +1693,11 @@ namespace IRMonitor
         /// <param name="temperaturerise"></param>
         /// <returns></returns>
         public ARESULT AddGroupSelectionTemperature(
-            Int64 groupSelectionId,
+            long groupSelectionId,
             DateTime time,
-            Single maxTemperature,
-            Single temperaturedifference,
-            Single temperaturerise)
+            float maxTemperature,
+            float temperaturedifference,
+            float temperaturerise)
         {
             TempCurve curve = new TempCurve();
             curve.mType = 0;
@@ -1766,7 +1736,7 @@ namespace IRMonitor
         /// 获取温度曲线采样率
         /// </summary>
         /// <returns></returns>
-        public ARESULT GetCurveSample(ref String str)
+        public ARESULT GetCurveSample(ref string str)
         {
             str = JsonUtils.ObjectToJson<TempCurveSample>(mTempCurveSample);
             if (str != null)
@@ -1778,7 +1748,7 @@ namespace IRMonitor
         /// <summary>
         /// 更新采样率
         /// </summary>
-        public ARESULT UpdateCurveSample(String data)
+        public ARESULT UpdateCurveSample(string data)
         {
             TempCurveSample param = JsonUtils.ObjectFromJson<TempCurveSample>(data);
             if (param == null)
@@ -1796,8 +1766,8 @@ namespace IRMonitor
             if (ARESULT.AFAILED(ret))
                 return ARESULT.E_FAIL;
 
-            Int32 groupSelectionSample = mTempCurveSample.mGroupSelectionSample;
-            Int32 selectionSample = mTempCurveSample.mSelectionSample;
+            int groupSelectionSample = mTempCurveSample.mGroupSelectionSample;
+            int selectionSample = mTempCurveSample.mSelectionSample;
             lock (mTempCurveSample) {
                 mTempCurveSample.mGroupSelectionSample = param.mGroupSelectionSample;
                 mTempCurveSample.mSelectionSample = param.mSelectionSample;
@@ -1833,9 +1803,9 @@ namespace IRMonitor
         /// 获取红外参数
         /// </summary>
         /// <returns></returns>
-        public ARESULT GetIRParam(ref String str)
+        public ARESULT GetIRParam(ref string str)
         {
-            str = JsonUtils.ObjectToJson<IRParam>(mIRParam);
+            str = JsonUtils.ObjectToJson(mIRParam);
             if (str != null)
                 return ARESULT.S_OK;
             else
@@ -1846,13 +1816,13 @@ namespace IRMonitor
         /// 更新红外参数
         /// </summary>
         /// <returns></returns>
-        public ARESULT UpateIRParam(String data)
+        public ARESULT UpateIRParam(string data)
         {
             IRParam param = JsonUtils.ObjectFromJson<IRParam>(data);
             if (param == null)
                 return ARESULT.E_FAIL;
 
-            Int32 id = 0;
+            int id = 0;
             ARESULT ret = IRParamDAO.UpateIRParam(param.mEmissivity,
                 param.mReflectedTemperature,
                 param.mTransmission,
@@ -1895,14 +1865,14 @@ namespace IRMonitor
         private ARESULT LoadSelectionList()
         {
             try {
-                List<String> strList = SelectionDAO.GetSelectionList(mCell.mCellId);
+                List<string> strList = SelectionDAO.GetSelectionList(mCell.mCellId);
                 if (strList != null) {
-                    foreach (String str in strList)
+                    foreach (string str in strList)
                         AddSelectionList(str);
                 }
 
                 // 检查是否有全局选区
-                Boolean isAdd = true;
+                bool isAdd = true;
                 lock (mSelectionList) {
                     foreach (Selection selection in mSelectionList) {
                         if (selection.mIsGlobalSelection) {
@@ -1916,9 +1886,9 @@ namespace IRMonitor
                     // 补充添加全局选区
                     RectangleSelection selection = new RectangleSelection();
                     selection.mIsGlobalSelection = true;
-                    selection.mRectangle = new System.Drawing.Rectangle(0, 0, mCell.mIRCameraWidth, mCell.mIRCameraHeight);
-                    String data = selection.Serialize();
-                    Int64 id = -1;
+                    selection.mRectangle = new Rectangle(0, 0, mCell.mIRCameraWidth, mCell.mIRCameraHeight);
+                    string data = selection.Serialize();
+                    long id = -1;
                     if (ARESULT.AFAILED(SelectionDAO.AddNewSelection(mCell.mCellId, data, true, ref id)))
                         return ARESULT.E_FAIL;
 
@@ -1945,11 +1915,11 @@ namespace IRMonitor
         /// <returns>是否成功</returns>
         private ARESULT LoadGroupSelectionList()
         {
-            List<String> strList = GroupSelectionDAO.GetGroupSelectionList(mCell.mCellId);
+            List<string> strList = GroupSelectionDAO.GetGroupSelectionList(mCell.mCellId);
             if (strList == null)
                 return ARESULT.S_OK;
 
-            foreach (String str in strList)
+            foreach (string str in strList)
                 AddGroupSelectionList(str);
 
             return ARESULT.S_OK;
@@ -1961,18 +1931,18 @@ namespace IRMonitor
         /// <param name="SelectionData">所有的选区信息</param>
         /// <returns>是否成功</returns>
         private ARESULT AddSelectionList(
-            String selectionData)
+            string selectionData)
         {
-            Int32 pos = selectionData.IndexOf(",");
+            int pos = selectionData.IndexOf(",");
             if (pos < 0)
                 return ARESULT.E_FAIL;
 
-            String str = selectionData.Substring(0, pos);
-            if (String.IsNullOrEmpty(str))
+            string str = selectionData.Substring(0, pos);
+            if (string.IsNullOrEmpty(str))
                 return ARESULT.E_FAIL;
 
-            Int64 id = -1;
-            if (!Int64.TryParse(str, out id))
+            long id = -1;
+            if (!long.TryParse(str, out id))
                 return ARESULT.E_FAIL;
 
             selectionData = selectionData.Substring(pos + 1);
@@ -2019,18 +1989,18 @@ namespace IRMonitor
         /// <param name="groupSelectionData">所有的选区信息</param>
         /// <returns>是否成功</returns>
         private ARESULT AddGroupSelectionList(
-            String groupSelectionData)
+            string groupSelectionData)
         {
-            Int32 pos = groupSelectionData.IndexOf(",");
+            int pos = groupSelectionData.IndexOf(",");
             if (pos < 0)
                 return ARESULT.E_FAIL;
 
-            String str = groupSelectionData.Substring(0, pos);
-            if (String.IsNullOrEmpty(str))
+            string str = groupSelectionData.Substring(0, pos);
+            if (string.IsNullOrEmpty(str))
                 return ARESULT.E_FAIL;
 
-            Int64 id = -1;
-            if (!Int64.TryParse(str, out id))
+            long id = -1;
+            if (!long.TryParse(str, out id))
                 return ARESULT.E_FAIL;
 
             groupSelectionData = groupSelectionData.Substring(pos + 1);
@@ -2055,15 +2025,15 @@ namespace IRMonitor
         /// <summary>
         /// 自动回复回调
         /// </summary>
-        private void OnAutoReplyShortMessageCallback(String phone)
+        private void OnAutoReplyShortMessageCallback(string phone)
         {
             if (!mAlarmNoticeConfig.mIsAutoReply)
                 return;
 
-            Boolean hasFind = false;
-            Single maxTemp = 0.0f;
-            Single minTemp = 0.0f;
-            Single avgTemp = 0.0f;
+            bool hasFind = false;
+            float maxTemp = 0.0f;
+            float minTemp = 0.0f;
+            float avgTemp = 0.0f;
 
             lock (mSelectionList) {
                 foreach (Selection item in mSelectionList) {
@@ -2079,12 +2049,12 @@ namespace IRMonitor
             if (!hasFind)
                 return;
 
-            String msg = String.Format("最高温:{0:F2}℃\n", maxTemp)
-                + String.Format("最低温:{0:F2}℃\n", minTemp)
-                + String.Format("平均温:{0:F2}℃\n", avgTemp)
-                + String.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+            string msg = string.Format("最高温:{0:F2}℃\n", maxTemp)
+                + string.Format("最低温:{0:F2}℃\n", minTemp)
+                + string.Format("平均温:{0:F2}℃\n", avgTemp)
+                + string.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
 
-            SmsServiceWorker.Instance.SendMessage(new List<String> { phone }, msg);
+            SmsServiceWorker.Instance.SendMessage(new List<string> { phone }, msg);
         }
 
         /// <summary>
@@ -2095,10 +2065,10 @@ namespace IRMonitor
             if (!mAlarmNoticeConfig.mIsHourSend && !mAlarmNoticeConfig.mIsRegularTimeSend)
                 return ARESULT.E_FAIL;
 
-            Boolean hasFind = false;
-            Single maxTemp = 0.0f;
-            Single minTemp = 0.0f;
-            Single avgTemp = 0.0f;
+            bool hasFind = false;
+            float maxTemp = 0.0f;
+            float minTemp = 0.0f;
+            float avgTemp = 0.0f;
 
             lock (mSelectionList) {
                 foreach (Selection item in mSelectionList) {
@@ -2114,10 +2084,10 @@ namespace IRMonitor
             if (!hasFind)
                 return ARESULT.E_FAIL;
 
-            String msg = String.Format("最高温:{0:F2}℃\n", maxTemp)
-                + String.Format("最低温:{0:F2}℃\n", minTemp)
-                + String.Format("平均温:{0:F2}℃\n", avgTemp)
-                + String.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+            string msg = string.Format("最高温:{0:F2}℃\n", maxTemp)
+                + string.Format("最低温:{0:F2}℃\n", minTemp)
+                + string.Format("平均温:{0:F2}℃\n", avgTemp)
+                + string.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
 
             SmsServiceWorker.Instance.SendMessage(mAlarmNoticeConfig.mSendUser, msg);
 
@@ -2146,7 +2116,7 @@ namespace IRMonitor
         /// 获取关于信息
         /// </summary>
         /// <returns></returns>
-        public ARESULT GetDeviceInfo(ref String str)
+        public ARESULT GetDeviceInfo(ref string str)
         {
             str = JsonUtils.ObjectToJson<DeviceInfo>(mDeviceInfo);
             return (str != null ? ARESULT.S_OK : ARESULT.E_FAIL);
@@ -2186,15 +2156,15 @@ namespace IRMonitor
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public ARESULT SendReplySMS(ref String str)
+        public ARESULT SendReplySMS(ref string str)
         {
             if (!mAlarmNoticeConfig.mIsAutoReply)
                 return ARESULT.E_INVALIDARG;
 
-            Boolean hasFind = false;
-            Single maxTemp = 0.0f;
-            Single minTemp = 0.0f;
-            Single avgTemp = 0.0f;
+            bool hasFind = false;
+            float maxTemp = 0.0f;
+            float minTemp = 0.0f;
+            float avgTemp = 0.0f;
 
             lock (mSelectionList) {
                 foreach (Selection item in mSelectionList) {
@@ -2210,10 +2180,10 @@ namespace IRMonitor
             if (!hasFind)
                 return ARESULT.E_FAIL;
 
-            str = String.Format("最高温:{0:F2}℃\n", maxTemp)
-                + String.Format("最低温:{0:F2}℃\n", minTemp)
-                + String.Format("平均温:{0:F2}℃\n", avgTemp)
-                + String.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+            str = string.Format("最高温:{0:F2}℃\n", maxTemp)
+                + string.Format("最低温:{0:F2}℃\n", minTemp)
+                + string.Format("平均温:{0:F2}℃\n", avgTemp)
+                + string.Format("时间:{0}\n", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
 
             return ARESULT.S_OK;
         }
@@ -2222,7 +2192,7 @@ namespace IRMonitor
         /// 获取设备序列号
         /// </summary>
         /// <returns></returns>
-        public String GetDeviceSN()
+        public string GetDeviceSN()
         {
             return mDeviceInfo?.mSerialNumber;
         }
@@ -2232,9 +2202,9 @@ namespace IRMonitor
         /// </summary>
         public void SendRealTemperatureInfo(
             DateTime time,
-            Single maxTemperature,
-            Single minTemperature,
-            Single avgTemperature)
+            float maxTemperature,
+            float minTemperature,
+            float avgTemperature)
         {
             TempCurve curve = new TempCurve();
             curve.mType = 0;
@@ -2265,7 +2235,7 @@ namespace IRMonitor
         /// <returns></returns>
         private ARESULT FixSelection()
         {
-            String data = SelectionDAO.GetGlobalSelectionData(mCell.mCellId);
+            string data = SelectionDAO.GetGlobalSelectionData(mCell.mCellId);
             if (data == null)
                 return ARESULT.S_OK;
 
@@ -2297,7 +2267,7 @@ namespace IRMonitor
         /// 发送报表
         /// </summary>
         /// <param name="selectionId"></param>
-        private void SendReportData(Int64 selectionId)
+        private void SendReportData(long selectionId)
         {
             ReportData reportData = new ReportData();
             reportData.mType = 0;

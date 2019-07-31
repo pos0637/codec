@@ -19,15 +19,13 @@ namespace Repository.DAO
                 return null;
 
             try {
-                String queryString = "SELECT * FROM cell";
-                DataTable dt = DbFactory.Instance.CreateSqlHelper(connection, queryString)
-                   .ToDataTable();
-
-                if ((dt == null) || (dt.Rows.Count <= 0))
+                string queryString = "SELECT * FROM cell";
+                DataTable dt = DbFactory.Instance.CreateSqlHelper(connection, queryString).ToDataTable();
+                if ((dt == null) || (dt.Rows.Count <= 0)) {
                     return null;
+                }
 
                 List<Cell> cellList = new List<Cell>();
-
                 foreach (DataRow dr in dt.Rows) {
                     Cell cell = new Cell();
                     cell.mCellId = Int64.Parse(dr["id"].ToString());
@@ -47,8 +45,8 @@ namespace Repository.DAO
                 }
                 return cellList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {

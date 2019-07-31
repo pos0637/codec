@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace IRMonitor.Worker
+namespace IRMonitor.CellService.Worker
 {
     /// <summary>
     /// 获取红外数据线程
@@ -30,28 +30,28 @@ namespace IRMonitor.Worker
         private IDevice mDevice;
 
         // 缓存区
-        private Byte[] mImageBuffer;
-        private Single[] mTemperatureBuffer;
+        private byte[] mImageBuffer;
+        private float[] mTemperatureBuffer;
         private GCHandle mImageHandle, mTemperatureHandle;
         private IntPtr mImageAddr, mTemperatureAddr;
 
         // 宽度
-        private Int32 mWidth;
+        private int mWidth;
 
         // 高度
-        private Int32 mHeight;
+        private int mHeight;
 
         // 图像帧率
-        private Int32 mVideoFrameRate;
+        private int mVideoFrameRate;
 
         // 温度帧率
-        private Int32 mTempertureFrameRate;
+        private int mTempertureFrameRate;
 
         // 图像睡眠时间
-        private Int32 mVideoDuration;
+        private int mVideoDuration;
 
         // 温度睡眠时间
-        private Int32 mTempertureDuration;
+        private int mTempertureDuration;
 
         #endregion
 
@@ -65,11 +65,11 @@ namespace IRMonitor.Worker
         }
 
         public ARESULT Init(
-            Int32 width,
-            Int32 height,
-            String ipAddr,
-            Int32 videoFrameRate,
-            Int32 tempFrameRate,
+            int width,
+            int height,
+            string ipAddr,
+            int videoFrameRate,
+            int tempFrameRate,
             IDevice device)
         {
             mDevice = device;
@@ -80,11 +80,11 @@ namespace IRMonitor.Worker
             mWidth = width;
             mHeight = height;
 
-            mImageBuffer = new Byte[mWidth * mHeight];
+            mImageBuffer = new byte[mWidth * mHeight];
             mImageHandle = GCHandle.Alloc(mImageBuffer, GCHandleType.Pinned);
             mImageAddr = mImageHandle.AddrOfPinnedObject();
 
-            mTemperatureBuffer = new Single[mWidth * mHeight];
+            mTemperatureBuffer = new float[mWidth * mHeight];
             mTemperatureHandle = GCHandle.Alloc(mTemperatureBuffer, GCHandleType.Pinned);
             mTemperatureAddr = mTemperatureHandle.AddrOfPinnedObject();
 
@@ -100,7 +100,7 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 设置图像获取频率
         /// </summary>
-        public void SetVideoDuration(Int32 rate)
+        public void SetVideoDuration(int rate)
         {
             mVideoFrameRate = rate;
             mVideoDuration = 1000 / mVideoFrameRate;
@@ -110,7 +110,7 @@ namespace IRMonitor.Worker
         /// <summary>
         /// 设置温度获取频率
         /// </summary>
-        public void SetTemperatureDuration(Int32 rate)
+        public void SetTemperatureDuration(int rate)
         {
             mTempertureFrameRate = rate;
             mTempertureDuration = 1000 / mTempertureFrameRate;
@@ -121,8 +121,8 @@ namespace IRMonitor.Worker
             // 开启设备
             mDevice.Open();
 
-            Int32 sum = 0;
-            Int32 used = 0;
+            int sum = 0;
+            int used = 0;
             // 实时获取设备数据
             while (!IsTerminated()) {
                 // 检查设备运行状态
@@ -141,9 +141,9 @@ namespace IRMonitor.Worker
                     if (mDevice.Read(
                         ReadMode.TemperatureArray,
                         mTemperatureAddr,
-                        mTemperatureBuffer.Length * sizeof(Single))) {
+                        mTemperatureBuffer.Length * sizeof(float))) {
                         // 温度回调
-                        Single[] buf = (Single[])mTemperatureBuffer.Clone();
+                        float[] buf = (float[])mTemperatureBuffer.Clone();
                         OnTemperatureCallback?.Invoke(buf);
                     }
                     else if (mDevice.Read(
@@ -151,7 +151,7 @@ namespace IRMonitor.Worker
                         mTemperatureBuffer,
                         out used)) {
                         // 温度回调
-                        Single[] buf = (Single[])mTemperatureBuffer.Clone();
+                        float[] buf = (float[])mTemperatureBuffer.Clone();
                         OnTemperatureCallback?.Invoke(buf);
                     }
                 }
@@ -162,7 +162,7 @@ namespace IRMonitor.Worker
                     mImageAddr,
                     mImageBuffer.Length)) {
                     // 灰度数据回调,加快视频帧转换速度不做保护
-                    // Byte[] temp = (Byte[])mImageBuffer.Clone();
+                    // byte[] temp = (byte[])mImageBuffer.Clone();
                     OnImageCallback?.Invoke(mImageBuffer);
                 }
                 else if (mDevice.Read(
@@ -170,13 +170,13 @@ namespace IRMonitor.Worker
                         mImageBuffer,
                         out used)) {
                     // 灰度数据回调,加快视频帧转换速度不做保护
-                    // Byte[] buf = (Byte[])mImageBuffer.Clone();
+                    // byte[] buf = (byte[])mImageBuffer.Clone();
                     OnImageCallback?.Invoke(mImageBuffer);
                 }
 
                 DateTime end = DateTime.Now;
                 TimeSpan timeUsed = end - begin;
-                Int32 sleepTime = mVideoDuration - (Int32)timeUsed.TotalMilliseconds;
+                int sleepTime = mVideoDuration - (int)timeUsed.TotalMilliseconds;
                 if (sleepTime > 0)
                     Thread.Sleep(sleepTime);
 
