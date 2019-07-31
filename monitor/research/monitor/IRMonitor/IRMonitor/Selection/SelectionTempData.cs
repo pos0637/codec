@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.Primitives;
 using System.Runtime.Serialization;
 
 namespace IRMonitor
@@ -12,11 +11,11 @@ namespace IRMonitor
     {
         // 所属选区ID
         [DataMember(Name = "SelectionId")]
-        public Int64 mSelectionId;
+        public long mSelectionId;
 
         // 选区最低温度
         [DataMember(Name = "MinTemperature")]
-        public Single mMinTemperature;
+        public float mMinTemperature;
 
         // 选区最低温度位置
         [DataMember(Name = "MinPoint")]
@@ -24,7 +23,7 @@ namespace IRMonitor
 
         // 选区最高温度
         [DataMember(Name = "MaxTemperature")]
-        public Single mMaxTemperature;
+        public float mMaxTemperature;
 
         // 选区最高温度位置
         [DataMember(Name = "MaxPoint")]
@@ -32,6 +31,6 @@ namespace IRMonitor
 
         // 选区平均温度
         [DataMember(Name = "AvgTemperature")]
-        public Single mAvgTemperature;
+        public float mAvgTemperature;
     }
 }
