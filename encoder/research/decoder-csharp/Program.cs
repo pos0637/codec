@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
-using System.Linq;
+using System.IO;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using static decoder_csharp.Decoder;
 
@@ -29,7 +30,9 @@ namespace decoder_csharp
                     Array.Copy(data, pos + 4, content, 0, 4);
 
                     int length = BitConverter.ToInt32(content, 0);
-                    string userData = System.Text.Encoding.UTF8.GetString(data, pos + 4 + 4, length);
+                    content = new byte[length];
+                    Buffer.BlockCopy(data, pos + 4 + 4, content, 0, length);
+                    string userData = System.Text.Encoding.UTF8.GetString(Decompress(content));
                     Console.WriteLine($"SEI length: {length}, {userData}");
 
                     startIndex = pos + 4 + 4 + length;
@@ -72,6 +75,23 @@ namespace decoder_csharp
 
             decoder.Stop();
             decoder.Dispose();
+        }
+
+        /// <summary>
+        /// 解压缩
+        /// </summary>
+        /// <param name="bytes">压缩数据</param>
+        /// <returns>原始数据</returns>
+        public static byte[] Decompress(byte[] bytes)
+        {
+            using (var compressStream = new MemoryStream(bytes)) {
+                using (var zipStream = new GZipStream(compressStream, CompressionMode.Decompress)) {
+                    using (var resultStream = new MemoryStream()) {
+                        zipStream.CopyTo(resultStream);
+                        return resultStream.ToArray();
+                    }
+                }
+            }
         }
     }
 }

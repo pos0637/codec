@@ -1,6 +1,6 @@
 ﻿using Codec;
 using Common;
-using IRMonitor.ServiceManager;
+using IRMonitor.Miscs;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -103,9 +103,6 @@ namespace IRMonitor.Services.LiveStreaming
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Start()
         {
-            // TODO: fix it
-            encoder.Start("rtmp://localhost:1935/live/test");
-
             worker = new BaseWorker(this);
             worker.Start();
         }
@@ -118,14 +115,44 @@ namespace IRMonitor.Services.LiveStreaming
 
         public void Run(BaseWorker worker)
         {
+            bool isOpen = false;
+
             while (!worker.IsTerminated()) {
-                IntPtr addr = imageGCHandle.AddrOfPinnedObject();
-                encoder.Encode(addr, addr + imageSize, addr + imageSize + imageSize / 4);
+                if (!isOpen) {
+                    try {
+                        // TODO: fix it
+                        encoder.Start("rtmp://localhost:1935/live/test");
+                        isOpen = true;
+                    }
+                    catch (Exception e) {
+                        Tracker.LogE(e);
+                        Thread.Sleep(3000);
+                        continue;
+                    }
+                }
+
+                try {
+                    IntPtr addr = imageGCHandle.AddrOfPinnedObject();
+                    encoder.Encode(addr, addr + imageSize, addr + imageSize + imageSize / 4);
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                    encoder.Stop();
+                    isOpen = false;
+                    Thread.Sleep(3000);
+                    continue;
+                }
+
                 Thread.Sleep(1000 / cell.mCell.mIRCameraVideoFrameRate);
             }
 
-            encoder.Encode(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
-            encoder.Stop();
+            try {
+                encoder.Encode(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                encoder.Stop();
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -152,7 +179,15 @@ namespace IRMonitor.Services.LiveStreaming
                 selections = cell.GetAllSelectionInfo(),
                 groupSelections = cell.GetAllGroupSelectionInfo()
             };
-            encoder.EncodeSEI(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userData)));
+            var content = CompressUtils.Compress(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userData)));
+            var header = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
+            var length = BitConverter.GetBytes(content.Length);
+
+            var sei = new byte[header.Length + length.Length + content.Length];
+            Buffer.BlockCopy(header, 0, sei, 0, header.Length);
+            Buffer.BlockCopy(length, 0, sei, header.Length, length.Length);
+            Buffer.BlockCopy(content, 0, sei, header.Length + length.Length, content.Length);
+            encoder.EncodeSEI(sei);
         }
 
         /// <summary>

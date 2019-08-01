@@ -253,6 +253,10 @@ namespace Codec
             content.CopyTo(data, 6 + seiPayloadSizeLength + 16);
             data[6 + seiPayloadSizeLength + 16 + length] = 0x80;
 
+            if (userData.ContainsKey(pts)) {
+                userData.Remove(pts);
+            }
+
             userData.Add(pts, data);
         }
     }

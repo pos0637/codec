@@ -3,6 +3,7 @@ using IRMonitor.ServiceManager;
 using IRMonitor.Services.LiveStreaming;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace IRMonitor
 {
@@ -32,6 +33,10 @@ namespace IRMonitor
             SmsServiceWorker.Instance.Start();
             SmsServiceWorker.Instance.Join();
             */
+
+            while (true) {
+                Thread.Sleep(3000);
+            }
         }
     }
 }
