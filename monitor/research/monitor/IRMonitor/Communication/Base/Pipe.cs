@@ -38,13 +38,13 @@ namespace Communication.Base
         public delegate void DgOnCompletedCallback();
 
         /// <summary>
-        /// 定义发送回调函数代理
+        /// 定义发送数据回调函数代理
         /// </summary>
         /// <param name="state">状态信息</param>
         public delegate void DgOnSendCompletedCallback(object state);
 
         /// <summary>
-        /// 定义接收回调函数代理
+        /// 定义接收数据回调函数代理
         /// </summary>
         /// <param name="response">响应信息</param>
         /// <param name="buffer">接收缓冲区</param>

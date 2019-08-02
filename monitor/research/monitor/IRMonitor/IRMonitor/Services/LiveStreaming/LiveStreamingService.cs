@@ -1,5 +1,6 @@
 ﻿using Codec;
 using Common;
+using IRMonitor.Common;
 using IRMonitor.Miscs;
 using Newtonsoft.Json;
 using System;
@@ -69,6 +70,11 @@ namespace IRMonitor.Services.LiveStreaming
         private RTMPEncoder encoder = new RTMPEncoder();
 
         /// <summary>
+        /// 流索引
+        /// </summary>
+        private string streamId;
+
+        /// <summary>
         /// 工作线程
         /// </summary>
         private BaseWorker worker;
@@ -93,6 +99,8 @@ namespace IRMonitor.Services.LiveStreaming
         public override void Initialize(Dictionary<string, object> arguments)
         {
             cell = arguments["Cell"] as CellService.CellService;
+            streamId = arguments["StreamId"] as string;
+
             cell.OnImageCallback += OnImageCallback;
             cell.OnTempertureCallback += OnTemperatureCallback;
 
@@ -120,8 +128,7 @@ namespace IRMonitor.Services.LiveStreaming
             while (!worker.IsTerminated()) {
                 if (!isOpen) {
                     try {
-                        // TODO: fix it
-                        encoder.Start("rtmp://localhost:1935/live/test");
+                        encoder.Start($"rtmp://{Global.gCloudIP}:{Global.gCloudRtmpPort}/live/{streamId}");
                         isOpen = true;
                     }
                     catch (Exception e) {

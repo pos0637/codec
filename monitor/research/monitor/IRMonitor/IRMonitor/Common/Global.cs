@@ -26,6 +26,11 @@ namespace IRMonitor.Common
         public static Int32 gCloudPort = Int32.Parse(ConfigurationManager.AppSettings["CloudPort"]);
 
         /// <summary>
+        /// 云端RTMP端口
+        /// </summary>
+        public static Int32 gCloudRtmpPort = Int32.Parse(ConfigurationManager.AppSettings["CloudRtmpPort"]);
+
+        /// <summary>
         /// 探测端口
         /// </summary>
         public static Int32 gDiscoveryPort = Int32.Parse(ConfigurationManager.AppSettings["DiscoveryPort"]);

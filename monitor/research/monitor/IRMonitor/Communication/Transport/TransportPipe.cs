@@ -57,17 +57,19 @@ namespace Communication.Transport
         public TransportPipe(SessionPipe pipe)
         {
             this.pipe = pipe;
-            pipe.OnConnectedCallback = OnConnected;
-            pipe.OnDisconnectedCallback = OnDisconnected;
-            pipe.OnSendCompletedCallback = OnSendCompleted;
-            pipe.OnReceiveCallback = OnReceive;
-            pipe.OnExceptionCallback = OnException;
+            this.pipe.OnConnectedCallback = OnConnected;
+            this.pipe.OnDisconnectedCallback = OnDisconnected;
+            this.pipe.OnSendCompletedCallback = OnSendCompleted;
+            this.pipe.OnReceiveCallback = OnReceive;
+            this.pipe.OnExceptionCallback = OnException;
+            SessionId = pipe.SessionId;
 
             if (!ThreadPool.QueueUserWorkItem(SendDataThread)) {
                 throw new OverflowException();
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Dispose()
         {
             runningFlag = false;
@@ -137,6 +139,7 @@ namespace Communication.Transport
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected override void HandleReceiveData(Response response, byte[] buffer, int length)
         {
+            pipe?.Context?.OnReceived(response, buffer, length);
             string data = Encoding.UTF8.GetString(buffer);
             Console.WriteLine(data);
         }

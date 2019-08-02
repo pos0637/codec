@@ -66,9 +66,11 @@ namespace Communication.Session
         /// <summary>
         /// 释放资源
         /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual void Dispose()
         {
             runningFlag = false;
+            sessionList.ForEach(pipe => pipe.Dispose());
         }
 
         /// <summary>
@@ -91,8 +93,10 @@ namespace Communication.Session
             // 添加并同步SessionId
             sessions.Add(sessionId, pipe);
             sessionList.Add(pipe);
-            pipe.KeepAlive();
             OnNewSessionCallback?.Invoke(pipe);
+
+            pipe.Connect(null);
+            pipe.KeepAlive();
         }
 
         /// <summary>
@@ -166,18 +170,21 @@ namespace Communication.Session
                 while (runningFlag) {
                     DateTime now = DateTime.Now;
                     lock (this) {
-                        var enumerator = sessions.GetEnumerator();
-                        while (enumerator.MoveNext()) {
-                            var pipe = enumerator.Value as SessionPipe;
+                        var list = new List<SessionPipe>();
+                        sessionList.ForEach(pipe => {
                             if ((now - pipe.GetLastActiveTime()).Milliseconds > MAX_KEEP_ALIVE_DURATION) {
-                                pipe.Dispose();
-                                sessions.Remove(enumerator.Key);
-                                sessionList.Remove(pipe);
-                                OnSessionClosedCallback?.Invoke(pipe);
+                                list.Add(pipe);
                             }
                             else {
                                 pipe.KeepAlive();
                             }
+                        });
+
+                        foreach (var pipe in list) {
+                            pipe.Dispose();
+                            sessions.Remove(pipe.SessionId);
+                            sessionList.Remove(pipe);
+                            OnSessionClosedCallback?.Invoke(pipe);
                         }
                     }
 

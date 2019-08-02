@@ -18,9 +18,15 @@ namespace Communication.Session
         {
             public MQTTSessionPipe(Pipe pipe, string targetClientId, string sessionId) : base(pipe, targetClientId, sessionId) { }
 
-            public override void Connect(Dictionary<string, object> arguments) { }
+            public override void Connect(Dictionary<string, object> arguments)
+            {
+                Context?.OnSessionConnected(this);
+            }
 
-            public override void Disconnect() { }
+            public override void Disconnect()
+            {
+                Context?.OnSessionClosed(this);
+            }
         }
 
         /// <summary>

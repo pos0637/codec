@@ -29,6 +29,11 @@ namespace Communication.Session
         public string SessionId { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
 
         /// <summary>
+        /// 会话上下文
+        /// </summary>
+        public ISessionContext Context { [MethodImpl(MethodImplOptions.Synchronized)] get; [MethodImpl(MethodImplOptions.Synchronized)] set; }
+
+        /// <summary>
         /// 通讯管道
         /// </summary>
         private Pipe pipe;
@@ -57,6 +62,13 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
+        public override void Dispose()
+        {
+            Context?.Dispose();
+            base.Dispose();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Connect(Dictionary<string, object> arguments)
         {
             pipe.Connect(arguments);
@@ -65,12 +77,14 @@ namespace Communication.Session
             pipe.OnSendCompletedCallback = OnSendCompleted;
             pipe.OnReceiveCallback = OnReceive;
             pipe.OnExceptionCallback = OnException;
+            Context?.OnSessionConnected(this);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Disconnect()
         {
             pipe.Disconnect();
+            Context?.OnSessionClosed(this);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
