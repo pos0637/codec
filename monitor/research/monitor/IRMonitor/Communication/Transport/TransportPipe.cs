@@ -96,9 +96,9 @@ namespace Communication.Transport
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void InjectReceiveData(Response response, byte[] buffer, int length)
+        public override void InjectReceiveData(Request request, byte[] buffer, int length)
         {
-            pipe.InjectReceiveData(response, buffer, length);
+            pipe.InjectReceiveData(request, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -137,9 +137,9 @@ namespace Communication.Transport
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected override void HandleReceiveData(Response response, byte[] buffer, int length)
+        protected override void HandleReceiveData(Request request, byte[] buffer, int length)
         {
-            pipe?.Context?.OnReceived(response, buffer, length);
+            Context?.OnReceived(request, buffer, length);
             string data = Encoding.UTF8.GetString(buffer);
             Console.WriteLine(data);
         }
@@ -180,9 +180,9 @@ namespace Communication.Transport
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnReceive(Response response, byte[] buffer, int length)
+        private void OnReceive(Request request, byte[] buffer, int length)
         {
-            HandleReceiveData(response, buffer, length);
+            HandleReceiveData(request, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

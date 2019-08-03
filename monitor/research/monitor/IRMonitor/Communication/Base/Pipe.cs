@@ -12,9 +12,9 @@ namespace Communication.Base
     public abstract class Pipe : IDisposable
     {
         /// <summary>
-        /// 响应信息
+        /// 请求信息
         /// </summary>
-        public class Response
+        public class Request
         {
             /// <summary>
             /// 用户索引
@@ -46,10 +46,10 @@ namespace Communication.Base
         /// <summary>
         /// 定义接收数据回调函数代理
         /// </summary>
-        /// <param name="response">响应信息</param>
+        /// <param name="request">请求信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        public delegate void DgOnReceiveCallback(Response response, byte[] buffer, int length);
+        public delegate void DgOnReceiveCallback(Request request, byte[] buffer, int length);
 
         /// <summary>
         /// 定义异常回调函数代理
@@ -141,13 +141,13 @@ namespace Communication.Base
         /// <summary>
         /// 注入接收数据
         /// </summary>
-        /// <param name="response">响应信息</param>
+        /// <param name="request">请求信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public virtual void InjectReceiveData(Response response, byte[] buffer, int length)
+        public virtual void InjectReceiveData(Request request, byte[] buffer, int length)
         {
-            HandleReceiveData(response, buffer, length);
+            HandleReceiveData(request, buffer, length);
         }
 
         /// <summary>
@@ -163,11 +163,11 @@ namespace Communication.Base
         /// <summary>
         /// 处理接收数据
         /// </summary>
-        /// <param name="response">响应信息</param>
+        /// <param name="request">请求信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected virtual void HandleReceiveData(Response response, byte[] buffer, int length)
+        protected virtual void HandleReceiveData(Request request, byte[] buffer, int length)
         {
             int headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH;
             if (length < headerLength) {
@@ -180,7 +180,7 @@ namespace Communication.Base
             }
 
             var data = buffer.SubArray(headerLength, length - headerLength);
-            OnReceiveCallback?.Invoke(new Response() { clientId = Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH) }, data, length - headerLength);
+            OnReceiveCallback?.Invoke(new Request() { clientId = Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH) }, data, length - headerLength);
         }
     }
 }

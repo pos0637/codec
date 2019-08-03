@@ -1,6 +1,8 @@
 ﻿using Common;
+using Communication.Session;
+using IRMonitor.Common;
+using IRMonitor.Controllers;
 using IRMonitor.ServiceManager;
-using IRMonitor.Services.LiveStreaming;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -17,10 +19,18 @@ namespace IRMonitor
                 return;
             }
 
-            string serviceId = LiveStreamingServiceManager.Instance.AddService(new Dictionary<string, object>() {
-                { "Cell", CellServiceManager.gIRServiceList[0] }
+            var sessionManager = MQTTSessionManager.Instance;
+            sessionManager.OnNewSessionCallback = (pipe) => {
+                Tracker.LogNW($"OnNewSession: {pipe.SessionId}");
+                pipe.Context = new SessionContext(pipe);
+            };
+
+            sessionManager.Initialize(new Dictionary<string, object>() {
+                { "Server", Global.gCloudIP },
+                { "Port", Global.gCloudPort },
+                { "Topic", "Topic1" },
+                { "ClientId", "1234" }
             });
-            LiveStreamingServiceManager.Instance.GetService(serviceId).Start();
 
             /*
             ServiceInstanceManager manager = new ServiceInstanceManager();

@@ -16,10 +16,10 @@ namespace Communication.Session
         /// <summary>
         /// 接收数据回调函数
         /// </summary>
-        /// <param name="response">响应信息</param>
+        /// <param name="request">请求信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
-        void OnReceived(Response response, byte[] buffer, int length);
+        void OnReceived(Request request, byte[] buffer, int length);
 
         /// <summary>
         /// 会话通讯管道连接

@@ -1,4 +1,5 @@
-﻿using Communication.Base;
+﻿using Common;
+using Communication.Base;
 using Communication.Transport;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace Communication.Session
     /// <summary>
     /// MQTT会话管理器
     /// </summary>
-    public class MQTTSessionManager : SessionManager
+    public class _MQTTSessionManager : SessionManager
     {
         /// <summary>
         /// MQTT会话通讯管道
@@ -62,9 +63,9 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected override void OnReceive(Base.Pipe.Response response, byte[] buffer, int length)
+        protected override void OnReceive(Base.Pipe.Request request, byte[] buffer, int length)
         {
-            base.OnReceive(response, buffer, length);
+            base.OnReceive(request, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -91,4 +92,9 @@ namespace Communication.Session
             sessionList.ForEach(pipe => pipe.OnExceptionCallback?.Invoke(e));
         }
     }
+
+    /// <summary>
+    /// MQTT会话管理器
+    /// </summary>
+    public class MQTTSessionManager : Singleton<_MQTTSessionManager> { }
 }

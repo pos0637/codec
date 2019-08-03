@@ -1,13 +1,16 @@
-﻿using Communication.Base;
+﻿using Common;
+using Communication.Base;
 using Communication.Session;
-using IRMonitor.ServiceManager;
+using IRMonitor.Miscs;
 using IRMonitor.Services.LiveStreaming;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
-namespace IRMonitor.Services
+namespace IRMonitor.Controllers
 {
     /// <summary>
     /// 会话上下文
@@ -24,6 +27,13 @@ namespace IRMonitor.Services
         /// </summary>
         private Hashtable hashtable = Hashtable.Synchronized(new Hashtable());
 
+        public SessionContext(SessionPipe pipe)
+        {
+            this.pipe = pipe;
+        }
+
+        private SessionContext() { }
+
         public void Dispose()
         {
             StopLiveStreaming();
@@ -31,12 +41,24 @@ namespace IRMonitor.Services
 
         public void Initialize()
         {
-            throw new NotImplementedException();
         }
 
-        public void OnReceived(Pipe.Response response, byte[] buffer, int length)
+        public void OnReceived(Pipe.Request request, byte[] buffer, int length)
         {
-            throw new NotImplementedException();
+            try {
+                var data = Encoding.UTF8.GetString(buffer);
+                var arguments = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+                var result = MethodUtils.Invoke(this, arguments["method"] as string, arguments);
+                if (result != null) {
+                    buffer = GetResponse(true, result);
+                    pipe?.Send(buffer, 0, buffer.Length, null);
+                }
+            }
+            catch (Exception e) {
+                buffer = GetResponse(false, e);
+                pipe?.Send(buffer, 0, buffer.Length, null);
+                Tracker.LogE(e);
+            }
         }
 
         public void OnSessionClosed(SessionPipe pipe)
@@ -48,22 +70,39 @@ namespace IRMonitor.Services
             this.pipe = pipe;
         }
 
+        /// <summary>
+        /// 获取响应信息
+        /// </summary>
+        /// <param name="success">是否成功</param>
+        /// <param name="result">返回值</param>
+        /// <returns>响应信息</returns>
+        private byte[] GetResponse(bool success, object result)
+        {
+            if (success) {
+                return Encoding.UTF8.GetBytes($"{{ code: 200, data: \"{JsonConvert.SerializeObject(result)}\",  message: \"\" }}");
+            }
+            else {
+                return Encoding.UTF8.GetBytes($"{{ code: 500, data: \"\",  message: \"{JsonConvert.SerializeObject(result)}\" }}");
+            }
+        }
+
         #region 实时推流服务
 
         /// <summary>
         /// 启动实时推流服务
         /// </summary>
+        /// <param name="cellId">设备单元索引</param>
+        /// <returns>流索引</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private string StartLiveStreaming()
+        public string StartLiveStreaming(int cellId)
         {
             if (hashtable.ContainsKey("LiveStreamingService")) {
                 return null;
             }
 
-            // 移动式红外监控系统仅有一个设备单元
             var guid = Guid.NewGuid().ToString();
             var serviceId = LiveStreamingServiceManager.Instance.AddService(new Dictionary<string, object>() {
-                { "Cell", CellServiceManager.gIRServiceList[0] },
+                { "CellId", cellId },
                 { "StreamId", guid }
             });
             LiveStreamingServiceManager.Instance.GetService(serviceId).Start();
@@ -76,7 +115,7 @@ namespace IRMonitor.Services
         /// 停止实时推流服务
         /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void StopLiveStreaming()
+        public void StopLiveStreaming()
         {
             if (!hashtable.ContainsKey("LiveStreamingService")) {
                 return;

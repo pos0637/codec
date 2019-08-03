@@ -120,11 +120,11 @@ namespace Communication.Session
         /// <summary>
         /// 接收数据
         /// </summary>
-        /// <param name="response">响应信息</param>
+        /// <param name="request">请求信息</param>
         /// <param name="buffer">接收缓冲区</param>
         /// <param name="length">接收字节数</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected virtual void OnReceive(Base.Pipe.Response response, byte[] buffer, int length)
+        protected virtual void OnReceive(Base.Pipe.Request request, byte[] buffer, int length)
         {
             const int headerLength = SessionPipe.SESSION_ID_LENGTH;
             if (length < headerLength) {
@@ -136,12 +136,12 @@ namespace Communication.Session
             var pipe = GetSession(sessionId);
             if (pipe != null) {
                 // 调用对应会话
-                pipe.InjectReceiveData(response, buffer, length);
+                pipe.InjectReceiveData(request, buffer, length);
             }
             else {
                 // 添加会话
                 sessionId = GenerateSessionId();
-                AddSession(sessionId, OnNewSession(response.clientId, sessionId));
+                AddSession(sessionId, OnNewSession(request.clientId, sessionId));
             }
         }
 

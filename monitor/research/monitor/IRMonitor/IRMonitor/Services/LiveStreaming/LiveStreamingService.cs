@@ -2,6 +2,7 @@
 using Common;
 using IRMonitor.Common;
 using IRMonitor.Miscs;
+using IRMonitor.ServiceManager;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -98,7 +99,7 @@ namespace IRMonitor.Services.LiveStreaming
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Initialize(Dictionary<string, object> arguments)
         {
-            cell = arguments["Cell"] as CellService.CellService;
+            cell = CellServiceManager.gIRServiceList[(int)arguments["CellId"]];
             streamId = arguments["StreamId"] as string;
 
             cell.OnImageCallback += OnImageCallback;
@@ -128,7 +129,8 @@ namespace IRMonitor.Services.LiveStreaming
             while (!worker.IsTerminated()) {
                 if (!isOpen) {
                     try {
-                        encoder.Start($"rtmp://{Global.gCloudIP}:{Global.gCloudRtmpPort}/live/{streamId}");
+                        // encoder.Start($"rtmp://{Global.gCloudIP}:{Global.gCloudRtmpPort}/live/{streamId}");
+                        encoder.Start($"rtmp://localhost:{Global.gCloudRtmpPort}/live/{streamId}");
                         isOpen = true;
                     }
                     catch (Exception e) {

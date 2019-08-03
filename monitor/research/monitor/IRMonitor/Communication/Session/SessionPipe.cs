@@ -124,16 +124,16 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected override void HandleReceiveData(Response response, byte[] buffer, int length)
+        protected override void HandleReceiveData(Request request, byte[] buffer, int length)
         {
             if (length < SESSION_ID_LENGTH) {
                 return;
             }
 
-            response.sessionId = Encoding.UTF8.GetString(buffer, 0, SESSION_ID_LENGTH);
+            request.sessionId = Encoding.UTF8.GetString(buffer, 0, SESSION_ID_LENGTH);
             var data = buffer.SubArray(SESSION_ID_LENGTH, length - SESSION_ID_LENGTH);
             lastActiveTime = DateTime.Now;
-            OnReceiveCallback?.Invoke(response, data, data.Length);
+            OnReceiveCallback?.Invoke(request, data, data.Length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -155,9 +155,9 @@ namespace Communication.Session
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnReceive(Response response, byte[] buffer, int length)
+        private void OnReceive(Request request, byte[] buffer, int length)
         {
-            HandleReceiveData(response, buffer, length);
+            HandleReceiveData(request, buffer, length);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
