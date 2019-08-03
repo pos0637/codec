@@ -129,11 +129,8 @@ namespace Communication.Base
             Array.Copy(buffer, offset, data, CLIENT_ID_LENGTH + CLIENT_ID_LENGTH, length);
 
             for (var i = 0; i < retry; ++i) {
-                try {
-                    SendData(data, state);
+                if (SendData(data, state)) {
                     return;
-                }
-                catch {
                 }
             }
         }
@@ -154,8 +151,9 @@ namespace Communication.Base
         /// 发送数据
         /// </summary>
         /// <param name="buffer">数据</param>
-        /// <param name="state">状态</param>        
-        protected virtual void SendData(byte[] buffer, object state)
+        /// <param name="state">状态</param>
+        /// <returns>是否成功</returns>
+        protected virtual bool SendData(byte[] buffer, object state)
         {
             throw new NotImplementedException();
         }

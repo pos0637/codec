@@ -86,23 +86,13 @@ namespace Communication.Base
             mqttClient.DisconnectAsync();
         }
 
-        protected override async void SendData(byte[] buffer, object state)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        protected override bool SendData(byte[] buffer, object state)
         {
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(buffer)
-                .WithExactlyOnceQoS()
-                .Build();
+            bool? result = false;
+            SendData(buffer, state, result);
 
-            try {
-                await mqttClient.PublishAsync(message);
-                OnSendCompletedCallback?.Invoke(state);
-            }
-            catch (Exception e) {
-                Tracker.LogE(TAG, e);
-                OnExceptionCallback?.Invoke(e);
-                throw new Exception("send fail");
-            }
+            return result.Value;
         }
 
         /// <summary>
@@ -157,6 +147,32 @@ namespace Communication.Base
                     OnExceptionCallback?.Invoke(e);
                     await Task.Delay(TimeSpan.FromMilliseconds(RETRY_DURATION));
                 }
+            }
+        }
+
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="buffer">数据</param>
+        /// <param name="state">状态</param>
+        /// <param name="result">是否成功</param>
+        protected async void SendData(byte[] buffer, object state, bool? result)
+        {
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(buffer)
+                .WithExactlyOnceQoS()
+                .Build();
+
+            try {
+                await mqttClient.PublishAsync(message);
+                OnSendCompletedCallback?.Invoke(state);
+                result = true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(TAG, e);
+                OnExceptionCallback?.Invoke(e);
+                result = false;
             }
         }
     }
