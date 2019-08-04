@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace IRMonitor.Miscs
 {
@@ -48,6 +49,37 @@ namespace IRMonitor.Miscs
             }
 
             return methodInfo.Invoke(instance, list.ToArray());
+        }
+
+        /// <summary>
+        /// 解锁器
+        /// </summary>
+        public sealed class Unlocker : IDisposable
+        {
+            private bool isLocked;
+            private object locker;
+
+            /// <summary>
+            /// 构造函数
+            /// </summary>
+            /// <param name="locker">锁</param>
+            public Unlocker(object locker)
+            {
+                isLocked = Monitor.IsEntered(locker);
+                if (isLocked) {
+                    Monitor.Exit(locker);
+                    this.locker = locker;
+                }
+            }
+
+            private Unlocker() { }
+
+            public void Dispose()
+            {
+                if (isLocked) {
+                    Monitor.Enter(locker);
+                }
+            }
         }
     }
 }

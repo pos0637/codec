@@ -1,6 +1,7 @@
 ﻿using Common;
 using Communication.Base;
 using Communication.Transport;
+using IRMonitor.Miscs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -71,25 +72,41 @@ namespace Communication.Session
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnConnected()
         {
-            sessionList.ForEach(pipe => pipe.OnConnectedCallback?.Invoke());
+            sessionList.ForEach(pipe => {
+                using (new MethodUtils.Unlocker(this)) {
+                    pipe.OnConnectedCallback?.Invoke();
+                }
+            });
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnDisconnected()
         {
-            sessionList.ForEach(pipe => pipe.OnDisconnectedCallback?.Invoke());
+            sessionList.ForEach(pipe => {
+                using (new MethodUtils.Unlocker(this)) {
+                    pipe.OnDisconnectedCallback?.Invoke();
+                }
+            });
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnSendCompleted(object state)
         {
-            sessionList.ForEach(pipe => pipe.OnSendCompletedCallback?.Invoke(state));
+            sessionList.ForEach(pipe => {
+                using (new MethodUtils.Unlocker(this)) {
+                    pipe.OnSendCompletedCallback?.Invoke(state);
+                }
+            });
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnException(Exception e)
         {
-            sessionList.ForEach(pipe => pipe.OnExceptionCallback?.Invoke(e));
+            sessionList.ForEach(pipe => {
+                using (new MethodUtils.Unlocker(this)) {
+                    pipe.OnExceptionCallback?.Invoke(e);
+                }
+            });
         }
     }
 

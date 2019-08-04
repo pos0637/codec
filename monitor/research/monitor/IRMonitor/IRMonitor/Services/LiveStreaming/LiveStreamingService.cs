@@ -129,8 +129,8 @@ namespace IRMonitor.Services.LiveStreaming
             while (!worker.IsTerminated()) {
                 if (!isOpen) {
                     try {
-                        // encoder.Start($"rtmp://{Global.gCloudIP}:{Global.gCloudRtmpPort}/live/{streamId}");
-                        encoder.Start($"rtmp://localhost:{Global.gCloudRtmpPort}/live/{streamId}");
+                        encoder.Stop();
+                        encoder.Start($"rtmp://{Global.gCloudRtmpIP}:{Global.gCloudRtmpPort}/live/{streamId}");
                         isOpen = true;
                     }
                     catch (Exception e) {

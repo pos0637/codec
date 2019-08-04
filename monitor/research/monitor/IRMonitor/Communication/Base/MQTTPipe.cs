@@ -1,4 +1,5 @@
 ﻿using Common;
+using IRMonitor.Miscs;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
@@ -61,7 +62,9 @@ namespace Communication.Base
             // 设置断线重连
             mqttClient.UseDisconnectedHandler(async e => {
                 Tracker.LogNW(TAG, "disconnected");
-                OnDisconnectedCallback?.Invoke();
+                using (new MethodUtils.Unlocker(this)) {
+                    OnDisconnectedCallback?.Invoke();
+                }
                 await Task.Delay(TimeSpan.FromMilliseconds(RETRY_DURATION));
                 await ConnectAsync();
             });
@@ -89,10 +92,25 @@ namespace Communication.Base
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected override bool SendData(byte[] buffer, object state)
         {
-            bool? result = false;
-            SendData(buffer, state, result);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(buffer)
+                .WithExactlyOnceQoS()
+                .Build();
 
-            return result.Value;
+            if (!mqttClient.PublishAsync(message).Wait(TIMEOUT, cancellationToken.Token)) {
+                var e = new TimeoutException();
+                Tracker.LogE(TAG, e);
+                using (new MethodUtils.Unlocker(this)) {
+                    OnExceptionCallback?.Invoke(e);
+                }
+                return false;
+            }
+
+            using (new MethodUtils.Unlocker(this)) {
+                OnSendCompletedCallback?.Invoke(state);
+            }
+            return true;
         }
 
         /// <summary>
@@ -123,7 +141,7 @@ namespace Communication.Base
             // 接收数据
             mqttClient.UseApplicationMessageReceivedHandler(e => {
                 Tracker.LogNW(TAG, $"received[{e.ApplicationMessage.Topic}]: {string.Concat(e.ApplicationMessage.Payload?.Select(b => b.ToString("X2")).ToArray())}");
-                HandleReceiveData(null, e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length);
+                ThreadPool.QueueUserWorkItem(state => HandleReceiveData(null, e.ApplicationMessage.Payload, e.ApplicationMessage.Payload.Length));
             });
 
             await ConnectAsync();
@@ -138,41 +156,19 @@ namespace Communication.Base
                 try {
                     // 连接
                     await mqttClient.ConnectAsync(options, cancellationToken.Token);
-                    OnConnectedCallback?.Invoke();
+                    using (new MethodUtils.Unlocker(this)) {
+                        OnConnectedCallback?.Invoke();
+                    }
 
                     return;
                 }
                 catch (Exception e) {
                     Tracker.LogNW(TAG, "connect fail");
-                    OnExceptionCallback?.Invoke(e);
+                    using (new MethodUtils.Unlocker(this)) {
+                        OnExceptionCallback?.Invoke(e);
+                    }
                     await Task.Delay(TimeSpan.FromMilliseconds(RETRY_DURATION));
                 }
-            }
-        }
-
-        /// <summary>
-        /// 发送数据
-        /// </summary>
-        /// <param name="buffer">数据</param>
-        /// <param name="state">状态</param>
-        /// <param name="result">是否成功</param>
-        protected async void SendData(byte[] buffer, object state, bool? result)
-        {
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(buffer)
-                .WithExactlyOnceQoS()
-                .Build();
-
-            try {
-                await mqttClient.PublishAsync(message);
-                OnSendCompletedCallback?.Invoke(state);
-                result = true;
-            }
-            catch (Exception e) {
-                Tracker.LogE(TAG, e);
-                OnExceptionCallback?.Invoke(e);
-                result = false;
             }
         }
     }

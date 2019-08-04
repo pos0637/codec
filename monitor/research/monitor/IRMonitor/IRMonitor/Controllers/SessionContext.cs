@@ -48,6 +48,12 @@ namespace IRMonitor.Controllers
             try {
                 var data = Encoding.UTF8.GetString(buffer);
                 var arguments = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+                if ((arguments == null) || (!arguments.ContainsKey("method"))) {
+                    buffer = GetResponse(false, "invalid arguments!");
+                    pipe?.Send(buffer, 0, buffer.Length, null);
+                    return;
+                }
+
                 var result = MethodUtils.Invoke(this, arguments["method"] as string, arguments);
                 if (result != null) {
                     buffer = GetResponse(true, result);
@@ -97,7 +103,7 @@ namespace IRMonitor.Controllers
         public string StartLiveStreaming(int cellId)
         {
             if (hashtable.ContainsKey("LiveStreamingService")) {
-                return null;
+                return hashtable["LiveStreamingService"] as string;
             }
 
             var guid = Guid.NewGuid().ToString();

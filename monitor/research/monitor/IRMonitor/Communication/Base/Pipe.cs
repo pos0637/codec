@@ -1,4 +1,5 @@
 ﻿using Common;
+using IRMonitor.Miscs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -178,7 +179,9 @@ namespace Communication.Base
             }
 
             var data = buffer.SubArray(headerLength, length - headerLength);
-            OnReceiveCallback?.Invoke(new Request() { clientId = Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH) }, data, length - headerLength);
+            using (new MethodUtils.Unlocker(this)) {
+                OnReceiveCallback?.Invoke(new Request() { clientId = Encoding.UTF8.GetString(buffer, 0, CLIENT_ID_LENGTH) }, data, length - headerLength);
+            }
         }
     }
 }

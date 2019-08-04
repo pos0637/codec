@@ -1,4 +1,5 @@
 ﻿using Common;
+using IRMonitor.Miscs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,7 +94,9 @@ namespace Communication.Session
             // 添加并同步SessionId
             sessions.Add(sessionId, pipe);
             sessionList.Add(pipe);
-            OnNewSessionCallback?.Invoke(pipe);
+            using (new MethodUtils.Unlocker(this)) {
+                OnNewSessionCallback?.Invoke(pipe);
+            }
 
             pipe.Connect(null);
             pipe.KeepAlive();
@@ -184,7 +187,9 @@ namespace Communication.Session
                             pipe.Dispose();
                             sessions.Remove(pipe.SessionId);
                             sessionList.Remove(pipe);
-                            OnSessionClosedCallback?.Invoke(pipe);
+                            using (new MethodUtils.Unlocker(this)) {
+                                OnSessionClosedCallback?.Invoke(pipe);
+                            }
                         }
                     }
 

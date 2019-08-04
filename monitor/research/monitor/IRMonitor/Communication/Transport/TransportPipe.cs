@@ -1,5 +1,6 @@
 ﻿using Common;
 using Communication.Session;
+using IRMonitor.Miscs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -164,19 +165,25 @@ namespace Communication.Transport
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnConnected()
         {
-            OnConnectedCallback?.Invoke();
+            using (new MethodUtils.Unlocker(this)) {
+                OnConnectedCallback?.Invoke();
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnDisconnected()
         {
-            OnDisconnectedCallback?.Invoke();
+            using (new MethodUtils.Unlocker(this)) {
+                OnDisconnectedCallback?.Invoke();
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnSendCompleted(object state)
         {
-            OnSendCompletedCallback?.Invoke(state);
+            using (new MethodUtils.Unlocker(this)) {
+                OnSendCompletedCallback?.Invoke(state);
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -188,7 +195,9 @@ namespace Communication.Transport
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnException(Exception e)
         {
-            OnExceptionCallback?.Invoke(e);
+            using (new MethodUtils.Unlocker(this)) {
+                OnExceptionCallback?.Invoke(e);
+            }
         }
     }
 }

@@ -39,9 +39,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "Repository\Re
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VirtualDevice", "VirtualDevice", "{C181DB62-616C-46E2-BBAF-88A68BEA5F55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualIrDevice", "Vendors\IrCamera\VirtualDevice\VirtualIrDevice\VirtualIrDevice.csproj", "{05BC4112-38AA-4EE3-B13F-E397D5D741C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualIrDevice", "Vendors\IrCamera\VirtualDevice\VirtualIrDevice\VirtualIrDevice.csproj", "{05BC4112-38AA-4EE3-B13F-E397D5D741C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec", "Codec\Codec.csproj", "{9AA1FEAE-FDA0-4243-9497-8409947363A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec", "Codec\Codec.csproj", "{9AA1FEAE-FDA0-4243-9497-8409947363A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miscs", "Miscs\Miscs.csproj", "{5243803D-EAF9-4473-8F5A-1A88405AEB2F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +185,18 @@ Global
 		{9AA1FEAE-FDA0-4243-9497-8409947363A0}.Release|x64.Build.0 = Release|Any CPU
 		{9AA1FEAE-FDA0-4243-9497-8409947363A0}.Release|x86.ActiveCfg = Release|Any CPU
 		{9AA1FEAE-FDA0-4243-9497-8409947363A0}.Release|x86.Build.0 = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|x64.Build.0 = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Debug|x86.Build.0 = Debug|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|x64.ActiveCfg = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|x64.Build.0 = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|x86.ActiveCfg = Release|Any CPU
+		{5243803D-EAF9-4473-8F5A-1A88405AEB2F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

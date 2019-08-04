@@ -1,5 +1,6 @@
 ﻿using Common;
 using Communication.Base;
+using IRMonitor.Miscs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,25 +134,33 @@ namespace Communication.Session
             request.sessionId = Encoding.UTF8.GetString(buffer, 0, SESSION_ID_LENGTH);
             var data = buffer.SubArray(SESSION_ID_LENGTH, length - SESSION_ID_LENGTH);
             lastActiveTime = DateTime.Now;
-            OnReceiveCallback?.Invoke(request, data, data.Length);
+            using (new MethodUtils.Unlocker(this)) {
+                OnReceiveCallback?.Invoke(request, data, data.Length);
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnConnected()
         {
-            OnConnectedCallback?.Invoke();
+            using (new MethodUtils.Unlocker(this)) {
+                OnConnectedCallback?.Invoke();
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnDisconnected()
         {
-            OnDisconnectedCallback?.Invoke();
+            using (new MethodUtils.Unlocker(this)) {
+                OnDisconnectedCallback?.Invoke();
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnSendCompleted(object state)
         {
-            OnSendCompletedCallback?.Invoke(state);
+            using (new MethodUtils.Unlocker(this)) {
+                OnSendCompletedCallback?.Invoke(state);
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -163,7 +172,9 @@ namespace Communication.Session
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnException(Exception e)
         {
-            OnExceptionCallback?.Invoke(e);
+            using (new MethodUtils.Unlocker(this)) {
+                OnExceptionCallback?.Invoke(e);
+            }
         }
     }
 }
