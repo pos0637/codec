@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace IRMonitor.Controllers
@@ -36,7 +35,7 @@ namespace IRMonitor.Controllers
 
         public void Dispose()
         {
-            StopLiveStreaming();
+            StopLiveStreaming(this);
         }
 
         public void Initialize()
@@ -54,14 +53,15 @@ namespace IRMonitor.Controllers
                     return;
                 }
 
-                var result = MethodUtils.Invoke(this, arguments["method"] as string, arguments);
+                arguments.Add("context", this);
+                var result = MethodUtils.Invoke(GetType(), arguments["method"] as string, arguments);
                 if (result != null) {
                     buffer = GetResponse(true, result);
                     pipe?.Send(buffer, 0, buffer.Length, null);
                 }
             }
             catch (Exception e) {
-                buffer = GetResponse(false, e);
+                buffer = GetResponse(false, e.Message);
                 pipe?.Send(buffer, 0, buffer.Length, null);
                 Tracker.LogE(e);
             }
@@ -97,13 +97,13 @@ namespace IRMonitor.Controllers
         /// <summary>
         /// 启动实时推流服务
         /// </summary>
+        /// <param name="context">上下文</param>
         /// <param name="cellId">设备单元索引</param>
         /// <returns>流索引</returns>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public string StartLiveStreaming(int cellId)
+        public static string StartLiveStreaming(SessionContext context, int cellId)
         {
-            if (hashtable.ContainsKey("LiveStreamingService")) {
-                return hashtable["LiveStreamingService"] as string;
+            if (context.hashtable.ContainsKey("LiveStreamingService")) {
+                return context.hashtable["LiveStreamingService"] as string;
             }
 
             var guid = Guid.NewGuid().ToString();
@@ -112,7 +112,7 @@ namespace IRMonitor.Controllers
                 { "StreamId", guid }
             });
             LiveStreamingServiceManager.Instance.GetService(serviceId).Start();
-            hashtable["LiveStreamingService"] = serviceId;
+            context.hashtable["LiveStreamingService"] = serviceId;
 
             return guid;
         }
@@ -120,15 +120,15 @@ namespace IRMonitor.Controllers
         /// <summary>
         /// 停止实时推流服务
         /// </summary>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void StopLiveStreaming()
+        /// <param name="context">上下文</param>
+        public static void StopLiveStreaming(SessionContext context)
         {
-            if (!hashtable.ContainsKey("LiveStreamingService")) {
+            if (!context.hashtable.ContainsKey("LiveStreamingService")) {
                 return;
             }
 
-            LiveStreamingServiceManager.Instance.RemoveService(hashtable["LiveStreamingService"] as string);
-            hashtable.Remove("LiveStreamingService");
+            LiveStreamingServiceManager.Instance.RemoveService(context.hashtable["LiveStreamingService"] as string);
+            context.hashtable.Remove("LiveStreamingService");
         }
 
         #endregion

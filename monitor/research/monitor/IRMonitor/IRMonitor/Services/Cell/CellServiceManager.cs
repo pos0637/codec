@@ -1,12 +1,11 @@
 ﻿using Common;
 using IRMonitor.Common;
-using Models;
 using Repository.DAO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace IRMonitor.ServiceManager
+namespace IRMonitor.Services.Cell
 {
     /// <summary>
     /// 设备单元服务管理器
@@ -16,7 +15,7 @@ namespace IRMonitor.ServiceManager
         /// <summary>
         /// 底层服务链表
         /// </summary>
-        public static List<CellService.CellService> gIRServiceList = new List<CellService.CellService>();
+        public static List<CellService> gIRServiceList = new List<CellService>();
 
         private CellServiceManager() { }
 
@@ -25,7 +24,7 @@ namespace IRMonitor.ServiceManager
         /// </summary>
         public ARESULT LoadConfig()
         {
-            List<Cell> cellList = CellDAO.GetAllCells();
+            List<Models.Cell> cellList = CellDAO.GetAllCells();
             if ((cellList == null) || (cellList.Count <= 0)) {
                 Tracker.LogI("LoadConfig FAILED");
                 return ARESULT.E_FAIL;
@@ -41,8 +40,8 @@ namespace IRMonitor.ServiceManager
 
             Tracker.LogI(String.Format("LoadConfig SUCCEED, Cell Count Is ({0})", cellList.Count));
 
-            foreach (Cell item in cellList) {
-                var service = new CellService.CellService();
+            foreach (Models.Cell item in cellList) {
+                var service = new CellService();
 
                 // 初始化设备单元服务
                 if (ARESULT.AFAILED(service.Initialize(item))) {
@@ -70,7 +69,7 @@ namespace IRMonitor.ServiceManager
         /// </summary>
         private ARESULT CheckConfig()
         {
-            foreach (Cell item in Global.gCellList) {
+            foreach (var item in Global.gCellList) {
                 if ((item.mIRCameraTemperatureFrameRate <= 0) || (item.mIRCameraTemperatureFrameRate >= 4))
                     return ARESULT.E_FAIL;
 

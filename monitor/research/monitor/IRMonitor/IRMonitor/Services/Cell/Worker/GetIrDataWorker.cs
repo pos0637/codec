@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace IRMonitor.CellService.Worker
+namespace IRMonitor.Services.Cell.Worker
 {
     /// <summary>
     /// 获取红外数据线程
@@ -64,7 +64,17 @@ namespace IRMonitor.CellService.Worker
                 mTemperatureHandle.Free();
         }
 
-        public ARESULT Init(
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="ipAddr">设备地址</param>
+        /// <param name="videoFrameRate">视频帧率</param>
+        /// <param name="tempFrameRate">温度帧率</param>
+        /// <param name="device">设备</param>
+        /// <returns>是否成功</returns>
+        public ARESULT Initialize(
             int width,
             int height,
             string ipAddr,
@@ -73,7 +83,6 @@ namespace IRMonitor.CellService.Worker
             IDevice device)
         {
             mDevice = device;
-
             mDevice.Write(WriteMode.ConnectionString, ipAddr);
             mDevice.Write(WriteMode.FrameRate, tempFrameRate);
 
@@ -90,7 +99,6 @@ namespace IRMonitor.CellService.Worker
 
             mVideoFrameRate = videoFrameRate;
             mTempertureFrameRate = tempFrameRate;
-
             mVideoDuration = 1000 / videoFrameRate;
             mTempertureDuration = 1000 / tempFrameRate;
 
@@ -121,8 +129,8 @@ namespace IRMonitor.CellService.Worker
             // 开启设备
             mDevice.Open();
 
-            int sum = 0;
-            int used = 0;
+            var sum = 0;
+            var used = 0;
             // 实时获取设备数据
             while (!IsTerminated()) {
                 // 检查设备运行状态
@@ -133,7 +141,7 @@ namespace IRMonitor.CellService.Worker
                     continue;
                 }
 
-                DateTime begin = DateTime.Now;
+                var begin = DateTime.Now;
 
                 // 读取温度数据
                 if (sum >= mTempertureDuration) {
@@ -174,11 +182,12 @@ namespace IRMonitor.CellService.Worker
                     OnImageCallback?.Invoke(mImageBuffer);
                 }
 
-                DateTime end = DateTime.Now;
-                TimeSpan timeUsed = end - begin;
+                var end = DateTime.Now;
+                var timeUsed = end - begin;
                 int sleepTime = mVideoDuration - (int)timeUsed.TotalMilliseconds;
-                if (sleepTime > 0)
+                if (sleepTime > 0) {
                     Thread.Sleep(sleepTime);
+                }
 
                 sum += mVideoDuration;
             }

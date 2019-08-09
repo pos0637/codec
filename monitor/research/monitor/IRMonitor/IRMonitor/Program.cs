@@ -2,7 +2,7 @@
 using Communication.Session;
 using IRMonitor.Common;
 using IRMonitor.Controllers;
-using IRMonitor.ServiceManager;
+using IRMonitor.Services.Cell;
 using System;
 using System.Collections.Generic;
 using System.Threading;

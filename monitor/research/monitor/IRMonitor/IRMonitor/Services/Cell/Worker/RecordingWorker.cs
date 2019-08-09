@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace IRMonitor.CellService.Worker
+namespace IRMonitor.Services.Cell.Worker
 {
     /// <summary>
     /// 帧类型

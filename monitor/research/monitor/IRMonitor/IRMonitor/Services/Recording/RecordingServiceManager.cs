@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace IRMonitor.Services.LiveStreaming
+namespace IRMonitor.Services.Recording
 {
     /// <summary>
-    /// 直播推流服务管理器
+    /// 录像服务管理器
     /// </summary>
-    public class _LiveStreamingServiceManager : ServiceManager
+    public class _RecordingServiceManager : ServiceManager
     {
         /// <summary>
         /// 添加服务
@@ -17,7 +17,7 @@ namespace IRMonitor.Services.LiveStreaming
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual string AddService(Dictionary<string, object> arguments)
         {
-            var service = new LiveStreamingService();
+            var service = new RecordingService();
             service.Initialize(arguments);
 
             string serviceId = GenerateServiceId();
@@ -28,7 +28,7 @@ namespace IRMonitor.Services.LiveStreaming
     }
 
     /// <summary>
-    /// 直播推流服务管理器
+    /// 录像服务管理器
     /// </summary>
-    public class LiveStreamingServiceManager : Singleton<_LiveStreamingServiceManager> { }
+    public class RecordingServiceManager : Singleton<_RecordingServiceManager> { }
 }

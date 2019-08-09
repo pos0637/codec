@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 
-namespace IRMonitor.ServiceManager
+namespace IRMonitor.Services
 {
     /// <summary>
     /// 服务管理器

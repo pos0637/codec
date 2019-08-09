@@ -1,7 +1,7 @@
 ﻿using Common;
 using Devices;
-using IRMonitor.CellService.Worker;
 using IRMonitor.Common;
+using IRMonitor.Services.Cell.Worker;
 using Models;
 using Newtonsoft.Json;
 using Repository.DAO;
@@ -9,7 +9,7 @@ using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
 
-namespace IRMonitor.CellService
+namespace IRMonitor.Services.Cell
 {
     /// <summary>
     /// 设备单元服务
@@ -23,7 +23,7 @@ namespace IRMonitor.CellService
         private List<IDevice> mDeviceList = new List<IDevice>(); // 设备列表
         private byte[] mRealtimeImage; // 实时图像缓存
 
-        public Cell mCell; // Cell配置
+        public Models.Cell mCell; // Cell配置
         public int mSyncAlarmId = 0; // 同步告警索引
         public int mSyncSelectionId = 1; // 同步选区信息索引
         public int mSyncSelectionGroupId = 0; // 同步组选区信息索引
@@ -69,7 +69,7 @@ namespace IRMonitor.CellService
         /// <summary>
         /// 初始化
         /// </summary>
-        public ARESULT Initialize(Cell cell)
+        public ARESULT Initialize(Models.Cell cell)
         {
             #region 所有参数初始化
 
@@ -184,13 +184,13 @@ namespace IRMonitor.CellService
             SetDistance(mIRParam.mDistance);
 
             // 数据获取线程初始化
-            mGetIrDataWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraIp, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, device);
+            mGetIrDataWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraIp, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, device);
 
             // 录像线程初始化
             mRecordingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, mCell.mIRCameraVideoFolder, mCell.mIRCameraVideoDuration, mSelectionList);
 
             // 温度处理线程初始化
-            mProcessingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelectionList, mSelectionGroupList);
+            mProcessingWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelectionList, mSelectionGroupList);
 
             // 开启所有线程
             if (ARESULT.AFAILED(mGetIrDataWorker.Start())) {

@@ -1,5 +1,4 @@
 ﻿using Models;
-using System;
 using System.Collections.Generic;
 using System.Configuration;
 
@@ -18,41 +17,46 @@ namespace IRMonitor.Common
         /// <summary>
         /// 云端IP
         /// </summary>
-        public static String gCloudIP = ConfigurationManager.AppSettings["CloudIP"];
+        public static string gCloudIP = ConfigurationManager.AppSettings["CloudIP"];
 
         /// <summary>
         /// 云端端口
         /// </summary>
-        public static Int32 gCloudPort = Int32.Parse(ConfigurationManager.AppSettings["CloudPort"]);
+        public static int gCloudPort = int.Parse(ConfigurationManager.AppSettings["CloudPort"]);
 
         /// <summary>
         /// 云端RTMPIP
         /// </summary>
-        public static String gCloudRtmpIP = ConfigurationManager.AppSettings["CloudRtmpIP"];
+        public static string gCloudRtmpIP = ConfigurationManager.AppSettings["CloudRtmpIP"];
 
         /// <summary>
         /// 云端RTMP端口
         /// </summary>
-        public static Int32 gCloudRtmpPort = Int32.Parse(ConfigurationManager.AppSettings["CloudRtmpPort"]);
+        public static int gCloudRtmpPort = int.Parse(ConfigurationManager.AppSettings["CloudRtmpPort"]);
 
         /// <summary>
         /// 探测端口
         /// </summary>
-        public static Int32 gDiscoveryPort = Int32.Parse(ConfigurationManager.AppSettings["DiscoveryPort"]);
+        public static int gDiscoveryPort = int.Parse(ConfigurationManager.AppSettings["DiscoveryPort"]);
 
         /// <summary>
         /// 上网卡名称
         /// </summary>
-        public static String gModemName = ConfigurationManager.AppSettings["ModemName"];
+        public static string gModemName = ConfigurationManager.AppSettings["ModemName"];
 
         /// <summary>
         /// 上网卡比特率
         /// </summary>
-        public static Int32 gBaudRate = Int32.Parse(ConfigurationManager.AppSettings["BaudRate"]);
+        public static int gBaudRate = int.Parse(ConfigurationManager.AppSettings["BaudRate"]);
 
         /// <summary>
         /// 是否Modem发送短信
         /// </summary>
-        public static Boolean gIsModemSend = Boolean.Parse(ConfigurationManager.AppSettings["IsModemSend"]);
+        public static bool gIsModemSend = bool.Parse(ConfigurationManager.AppSettings["IsModemSend"]);
+
+        /// <summary>
+        /// 录像保存目录
+        /// </summary>
+        public static string gRecordingsFolder = ConfigurationManager.AppSettings["RecordingsFolder"];
     }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace IRMonitor.CellService.Worker
+namespace IRMonitor.Services.Cell.Worker
 {
     /// <summary>
     /// 温度处理线程
@@ -61,7 +61,12 @@ namespace IRMonitor.CellService.Worker
         /// <summary>
         /// 初始化
         /// </summary>
-        public ARESULT Init(
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="selectionList">选区列表</param>
+        /// <param name="groupList">组选区列表</param>
+        /// <returns></returns>
+        public ARESULT Initialize(
             int width,
             int height,
             List<Selection> selectionList,
@@ -75,6 +80,7 @@ namespace IRMonitor.CellService.Worker
             mNextGroupSample = DateTime.Now;
             mNextReportSend = DateTime.Now;
             mNextRealTemperatureSend = DateTime.Now;
+
             return ARESULT.S_OK;
         }
 
@@ -98,8 +104,9 @@ namespace IRMonitor.CellService.Worker
                 ret = Monitor.TryEnter(mSyncEvent, 2000);
             }
 
-            if (!ret)
+            if (!ret) {
                 mSyncState = false;
+            }
         }
 
         /// <summary>
@@ -131,7 +138,7 @@ namespace IRMonitor.CellService.Worker
                 }
 
                 // 判断是否要采集数据
-                DateTime time = DateTime.Now;
+                var time = DateTime.Now;
                 mNeedSampleSelction = false;
                 mNeedSampleGroup = false;
                 mNeedReportSend = false;
@@ -156,12 +163,14 @@ namespace IRMonitor.CellService.Worker
                     mNextRealTemperatureSend = time.AddMinutes(mRealTemperatureSendRate);
                 }
 
-                float[] buf = mTempertureQueue.Dequeue();
-                if (buf == null)
+                var buf = mTempertureQueue.Dequeue();
+                if (buf == null) {
                     continue;
+                }
 
-                if (mSelectionList.Count <= 0)
+                if (mSelectionList.Count <= 0) {
                     continue;
+                }
 
                 ProcessTemperature(buf);
 
@@ -170,15 +179,16 @@ namespace IRMonitor.CellService.Worker
                     count = mSelectionList.Count;
                 }
 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     try {
                         Selection selection;
                         lock (mSelectionList) {
                             selection = mSelectionList[i];
                         }
 
-                        if (selection.mIsGlobalSelection)
+                        if (selection.mIsGlobalSelection) {
                             continue;
+                        }
 
                         ProcessSeletionAlarm(selection);
                     }
@@ -191,7 +201,7 @@ namespace IRMonitor.CellService.Worker
                     count = mSelectionGroupList.Count;
                 }
 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     try {
                         GroupSelection group;
                         lock (mSelectionGroupList) {
@@ -213,12 +223,14 @@ namespace IRMonitor.CellService.Worker
             lock (mSyncEvent) {
                 Monitor.PulseAll(mSyncEvent);
             }
+
             OnAddAlarmInfo = null;
             OnUpdateAlarmInfo = null;
             OnAddSelectionTemperature = null;
             OnAddGroupSelectionTemperature = null;
             OnRealtimeSelectionTemperature = null;
             mTempertureQueue.Notify();
+
             base.Discard();
         }
 
@@ -227,15 +239,16 @@ namespace IRMonitor.CellService.Worker
         /// </summary>
         private void ProcessTemperature(float[] buf)
         {
-            DateTime time = DateTime.Now;
-            string selectionData = "", groupData = "";
+            var time = DateTime.Now;
+            var selectionData = "";
+            var groupData = "";
 
             int count = 0;
             lock (mSelectionList) {
                 count = mSelectionList.Count;
             }
 
-            for (int i = 0; i < count; i++) {
+            for (var i = 0; i < count; i++) {
                 try {
                     Selection selection;
                     lock (mSelectionList) {
@@ -284,7 +297,7 @@ namespace IRMonitor.CellService.Worker
                 count = mSelectionGroupList.Count;
             }
 
-            for (int i = 0; i < count; i++) {
+            for (var i = 0; i < count; i++) {
                 try {
                     GroupSelection group;
                     lock (mSelectionGroupList) {
@@ -501,9 +514,9 @@ namespace IRMonitor.CellService.Worker
         private void SubProcessSeletionAlarm(SelectionAlarmType alarmType, Selection select)
         {
             AlarmConfigData alarmSet;
-            float temperature = 0.0f;
             AlarmInfo info;
 
+            var temperature;
             switch (alarmType) {
                 case SelectionAlarmType.MaxTemp:
                     alarmSet = select.mAlarmConfig.mMaxTempConfig;

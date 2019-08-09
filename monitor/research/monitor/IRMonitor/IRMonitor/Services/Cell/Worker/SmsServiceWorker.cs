@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace IRMonitor.CellService.Worker
+namespace IRMonitor.Services.Cell.Worker
 {
     /// <summary>
     /// 短信服务线程

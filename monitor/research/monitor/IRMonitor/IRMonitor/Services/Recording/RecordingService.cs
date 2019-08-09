@@ -1,23 +1,23 @@
-﻿using Codec;
-using Common;
+﻿using Common;
 using IRMonitor.Common;
 using IRMonitor.Miscs;
 using IRMonitor.Services.Cell;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using static Common.BaseWorker;
 
-namespace IRMonitor.Services.LiveStreaming
+namespace IRMonitor.Services.Recording
 {
     /// <summary>
-    /// 直播推流服务
+    /// 录像服务
     /// </summary>
-    public class LiveStreamingService : Service, IExecutor, IDisposable
+    public class RecordingService : Service, IExecutor, IDisposable
     {
         /// <summary>
         /// 用户数据
@@ -68,12 +68,7 @@ namespace IRMonitor.Services.LiveStreaming
         /// <summary>
         /// 编码器
         /// </summary>
-        private RTMPEncoder encoder = new RTMPEncoder();
-
-        /// <summary>
-        /// 流索引
-        /// </summary>
-        private string streamId;
+        private Codec.Encoder encoder = new Codec.Encoder();
 
         /// <summary>
         /// 工作线程
@@ -100,8 +95,6 @@ namespace IRMonitor.Services.LiveStreaming
         public override void Initialize(Dictionary<string, object> arguments)
         {
             cell = CellServiceManager.gIRServiceList[(int)arguments["CellId"]];
-            streamId = arguments["StreamId"] as string;
-
             cell.OnImageCallback += OnImageCallback;
             cell.OnTempertureCallback += OnTemperatureCallback;
 
@@ -129,8 +122,15 @@ namespace IRMonitor.Services.LiveStreaming
             while (!worker.IsTerminated()) {
                 if (!isOpen) {
                     try {
+                        // 创建目录
+                        var now = DateTime.Now;
+                        var folder = $"{Global.gRecordingsFolder}/{now.Year}-{now.Month}-{now.Day}";
+                        if (!Directory.Exists(folder)) {
+                            Directory.CreateDirectory(folder);
+                        }
+
                         encoder.Stop();
-                        encoder.Start($"rtmp://{Global.gCloudRtmpIP}:{Global.gCloudRtmpPort}/live/{streamId}");
+                        encoder.Start($"{folder}/{now.ToString("yyyyMMddHHmmss")}.h264");
                         isOpen = true;
                     }
                     catch (Exception e) {
