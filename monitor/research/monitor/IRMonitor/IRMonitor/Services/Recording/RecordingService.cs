@@ -103,7 +103,7 @@ namespace IRMonitor.Services.Recording
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Start()
+        protected override void OnStart()
         {
             worker = new BaseWorker(this);
             worker.Start();

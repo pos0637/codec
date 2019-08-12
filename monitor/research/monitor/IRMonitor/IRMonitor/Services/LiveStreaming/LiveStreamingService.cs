@@ -107,39 +107,38 @@ namespace IRMonitor.Services.LiveStreaming
 
             CreateImageBuffer(cell.mCell.mIRCameraWidth * cell.mCell.mIRCameraHeight);
             encoder.Initialize(cell.mCell.mIRCameraWidth, cell.mCell.mIRCameraHeight, cell.mCell.mIRCameraVideoFrameRate);
+
+            base.Initialize(arguments);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Start()
+        protected override void OnStart()
         {
             worker = new BaseWorker(this);
             worker.Start();
+            base.OnStart();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Stop()
         {
             worker.Discard();
+            base.Stop();
         }
 
         public void Run(BaseWorker worker)
         {
-            bool isOpen = false;
+            try {
+                encoder.Stop();
+                encoder.Start($"rtmp://{Global.gCloudRtmpIP}:{Global.gCloudRtmpPort}/live/{streamId}");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                OnFault();
+                return;
+            }
 
             while (!worker.IsTerminated()) {
-                if (!isOpen) {
-                    try {
-                        encoder.Stop();
-                        encoder.Start($"rtmp://{Global.gCloudRtmpIP}:{Global.gCloudRtmpPort}/live/{streamId}");
-                        isOpen = true;
-                    }
-                    catch (Exception e) {
-                        Tracker.LogE(e);
-                        Thread.Sleep(3000);
-                        continue;
-                    }
-                }
-
                 try {
                     IntPtr addr = imageGCHandle.AddrOfPinnedObject();
                     encoder.Encode(addr, addr + imageSize, addr + imageSize + imageSize / 4);
@@ -147,9 +146,8 @@ namespace IRMonitor.Services.LiveStreaming
                 catch (Exception e) {
                     Tracker.LogE(e);
                     encoder.Stop();
-                    isOpen = false;
-                    Thread.Sleep(3000);
-                    continue;
+                    OnFault();
+                    return;
                 }
 
                 Thread.Sleep(1000 / cell.mCell.mIRCameraVideoFrameRate);
@@ -158,6 +156,7 @@ namespace IRMonitor.Services.LiveStreaming
             try {
                 encoder.Encode(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 encoder.Stop();
+                Stop();
             }
             catch (Exception e) {
                 Tracker.LogE(e);

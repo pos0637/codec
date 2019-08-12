@@ -13,6 +13,7 @@ namespace IRMonitor
     {
         static void Main(string[] args)
         {
+            // 加载所有配置
             if (ARESULT.AFAILED(CellServiceManager.Instance.LoadConfig())) {
                 Console.WriteLine("IRServiceManager初始化失败");
                 Console.ReadLine();
