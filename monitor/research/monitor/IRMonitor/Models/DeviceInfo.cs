@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Models
 {
@@ -10,30 +9,30 @@ namespace Models
         /// 设备型号
         /// </summary>
         [DataMember(Name = "EquipmentModel")]
-        public String mEquipmentModel;
+        public string mEquipmentModel;
 
         /// <summary>
         /// 版本
         /// </summary>
         [DataMember(Name = "Version")]
-        public String mVersion;
+        public string mVersion;
 
         /// <summary>
         /// 序列号
         /// </summary>
         [DataMember(Name = "SerialNumber")]
-        public String mSerialNumber;
+        public string mSerialNumber;
 
         /// <summary>
         /// 分辨率
         /// </summary>
         [DataMember(Name = "Resolution")]
-        public String mResolution;
+        public string mResolution;
 
         /// <summary>
         /// 探测器类型
         /// </summary>
         [DataMember(Name = "DetectorType")]
-        public String mDetectorType;
+        public string mDetectorType;
     }
 }

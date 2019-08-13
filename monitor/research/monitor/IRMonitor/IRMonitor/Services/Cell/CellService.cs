@@ -3,7 +3,6 @@ using Devices;
 using IRMonitor.Common;
 using IRMonitor.Services.Cell.Worker;
 using Models;
-using Newtonsoft.Json;
 using Repository.DAO;
 using SixLabors.Primitives;
 using System;
@@ -14,19 +13,32 @@ namespace IRMonitor.Services.Cell
     /// <summary>
     /// 设备单元服务
     /// </summary>
-    public class CellService
+    public partial class CellService
     {
         #region 参数
 
-        private List<Selection> mSelectionList = new List<Selection>(); // 选区列表
-        private List<GroupSelection> mSelectionGroupList = new List<GroupSelection>(); // 组选区列表
-        private List<IDevice> mDeviceList = new List<IDevice>(); // 设备列表
-        private byte[] mRealtimeImage; // 实时图像缓存
+        /// <summary>
+        /// 设备单元配置
+        /// </summary>
+        internal Models.Cell mCell;
 
-        public Models.Cell mCell; // Cell配置
-        public int mSyncAlarmId = 0; // 同步告警索引
-        public int mSyncSelectionId = 1; // 同步选区信息索引
-        public int mSyncSelectionGroupId = 0; // 同步组选区信息索引
+        /// <summary>
+        /// 选区列表
+        /// </summary>
+        private List<Selection> mSelections = new List<Selection>();
+
+        /// <summary>
+        /// 组选区列表
+        /// </summary>
+        private List<SelectionGroup> mSelectionGroups = new List<SelectionGroup>();
+
+        /// <summary>
+        /// 设备列表
+        /// </summary>
+        private List<IDevice> mDeviceList = new List<IDevice>();
+
+        private byte[] mRealtimeImage; // 实时图像缓存        
+
         private long mCurrentRecordId = -1; // 告警录像索引
         private AlarmNoticeConfig mAlarmNoticeConfig; // 告警通知
         private TempCurveSample mTempCurveSample; // 采样频率
@@ -189,7 +201,7 @@ namespace IRMonitor.Services.Cell
             mRecordingWorker.Initialize(this);
 
             // 温度处理线程初始化
-            mProcessingWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelectionList, mSelectionGroupList);
+            mProcessingWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelections, mSelectionGroups);
 
             // 开启所有线程
             if (ARESULT.AFAILED(mGetIrDataWorker.Start())) {
@@ -243,6 +255,39 @@ namespace IRMonitor.Services.Cell
             }
 
             return ARESULT.S_OK;
+        }
+
+        /// <summary>
+        /// 创建选区
+        /// </summary>
+        /// <param name="type">选区类型</param>
+        /// <returns>选区</returns>
+        private Selection CreateSelection(SelectionType type)
+        {
+            switch (type) {
+                case SelectionType.Point:
+                    return new PointSelection();
+                case SelectionType.Rectangle:
+                    return new RectangleSelection();
+                case SelectionType.Ellipse:
+                    return new EllipseSelection();
+                case SelectionType.Line:
+                    return new LineSelection();
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// 创建选区
+        /// </summary>
+        /// <param name="type">选区类型</param>
+        /// <returns>选区</returns>        
+        private Selection GetSelection(long id)
+        {
+            lock (mSelections) {
+                return mSelections.Find(selection => selection.mSelectionId == id);
+            }
         }
 
         #region 告警
@@ -365,8 +410,6 @@ namespace IRMonitor.Services.Cell
                 };
                 OnReportDataCallback?.Invoke(reportData);
 
-                // 索引自增
-                mSyncAlarmId++;
                 return ARESULT.S_OK;
             }
             catch (Exception e) {
@@ -403,8 +446,6 @@ namespace IRMonitor.Services.Cell
             if (ARESULT.AFAILED(ret))
                 return ARESULT.E_FAIL;
 
-            // 索引自增
-            mSyncAlarmId++;
             return ARESULT.S_OK;
         }
 
@@ -440,26 +481,104 @@ namespace IRMonitor.Services.Cell
 
         #endregion
 
-        #region 选区操作
+        #region 选区列表
 
         /// <summary>
-        /// 添加选区
+        /// 加载选区列表
         /// </summary>
-        /// <param name="data">选区信息Json字符串</param>
-        /// <returns>选区索引</returns>
-        public ARESULT AddNewSelection(
-            bool isGlobalSelection,
-            string data,
-            ref long id)
+        /// <returns>是否成功</returns>
+        private ARESULT LoadSelectionList()
         {
-            mSyncSelectionId++;
+            try {
+                List<string> strList = SelectionDAO.GetSelectionList(mCell.mCellId);
+                if (strList != null) {
+                    foreach (string str in strList)
+                        AddSelectionList(str);
+                }
 
-            SelectionType type = Selection.GetType(data);
-            if (type == SelectionType.Unknown)
+                // 检查是否有全局选区
+                bool isAdd = true;
+                lock (mSelections) {
+                    foreach (Selection selection in mSelections) {
+                        if (selection.mIsGlobalSelection) {
+                            isAdd = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isAdd) {
+                    // 补充添加全局选区
+                    var selection = new RectangleSelection {
+                        mIsGlobalSelection = true,
+                        mRectangle = new Rectangle(0, 0, mCell.mIRCameraWidth, mCell.mIRCameraHeight)
+                    };
+                    selection.MakeSelectionArea();
+
+                    long id = -1;
+                    if (ARESULT.AFAILED(SelectionDAO.AddSelection(mCell.mCellId, selection.Serialize(), true, ref id))) {
+                        return ARESULT.E_FAIL;
+                    }
+
+                    lock (mSelections) {
+                        mSelections.Add(selection.SetId(id));
+                    }
+                }
+
+                return ARESULT.S_OK;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return ARESULT.E_FAIL;
+            }
+        }
+
+        /// <summary>
+        /// 加载选区组列表
+        /// </summary>
+        /// <returns>是否成功</returns>
+        private ARESULT LoadGroupSelectionList()
+        {
+            List<string> strList = GroupSelectionDAO.GetGroupSelectionList(mCell.mCellId);
+            if (strList == null)
+                return ARESULT.S_OK;
+
+            foreach (string str in strList)
+                AddGroupSelectionList(str);
+
+            return ARESULT.S_OK;
+        }
+
+        /// <summary>
+        /// 添加选区列表
+        /// </summary>
+        /// <param name="SelectionData">所有的选区信息</param>
+        /// <returns>是否成功</returns>
+        private ARESULT AddSelectionList(
+            string selectionData)
+        {
+            int pos = selectionData.IndexOf(",");
+            if (pos < 0) {
+                return ARESULT.E_FAIL;
+            }
+
+            string str = selectionData.Substring(0, pos);
+            if (string.IsNullOrEmpty(str)) {
+                return ARESULT.E_FAIL;
+            }
+
+            long id;
+            if (!long.TryParse(str, out id)) {
+                return ARESULT.E_FAIL;
+            }
+
+            selectionData = selectionData.Substring(pos + 1);
+            SelectionType type = Selection.GetType(selectionData);
+            if (type == SelectionType.Unknown) {
                 return ARESULT.E_INVALIDARG;
+            }
 
             Selection selection;
-
             switch (type) {
                 case SelectionType.Point:
                     selection = new PointSelection();
@@ -475,520 +594,58 @@ namespace IRMonitor.Services.Cell
                     break;
 
                 default:
-                    return ARESULT.E_NOIMPL;
+                    return ARESULT.E_INVALIDARG;
             }
 
-            if (ARESULT.AFAILED(selection.Deserialize(data)))
+            if (ARESULT.AFAILED(selection.Deserialize(selectionData))) {
                 return ARESULT.E_INVALIDARG;
+            }
 
-            if (ARESULT.AFAILED(SelectionDAO.AddNewSelection(mCell.mCellId, data,
-                selection.mIsGlobalSelection, ref id)))
-                return ARESULT.E_FAIL;
-
-            selection.mSelectionId = id;
-            selection.mTemperatureData.mSelectionId = id;
-
-            lock (mSelectionList) {
-                mSelectionList.Add(selection);
+            lock (mSelections) {
+                mSelections.Add(selection.SetId(id));
             }
 
             return ARESULT.S_OK;
         }
 
         /// <summary>
-        /// 更新选区
+        /// 添加选区列表
         /// </summary>
-        public ARESULT UpdateSelection(string data)
-        {
-            mSyncSelectionId++;
-            DateTime t1 = DateTime.Now;
-            SelectionUpdateParam update = JsonUtils.ObjectFromJson<SelectionUpdateParam>(data);
-            if (update == null)
-                return ARESULT.E_FAIL;
-
-            try {
-                // 取出普通选区
-                Selection selection = null;
-                lock (mSelectionList) {
-                    foreach (Selection item in mSelectionList) {
-                        if (item.mSelectionId == update.mId) {
-                            selection = item;
-                            break;
-                        }
-                    }
-                }
-                if (selection == null)
-                    return ARESULT.E_FAIL;
-
-                lock (selection) {
-                    // 判断选区有没有改变
-                    if (selection.Serialize() == update.mData)
-                        return ARESULT.S_OK;
-
-                    ClearSelectionAlarm(selection);
-
-                    if (ARESULT.ASUCCEEDED(selection.Deserialize(update.mData))) {
-                        if (selection.mSelectionId != update.mId)
-                            return ARESULT.E_NOIMPL;
-                    }
-                    else
-                        return ARESULT.E_INVALIDARG;
-                }
-
-                // 判断普通选区有没有关联选区组
-                lock (mSelectionGroupList) {
-                    foreach (GroupSelection groupSelection in mSelectionGroupList) {
-                        lock (groupSelection) {
-                            if (groupSelection.mPrimarySelectionId == selection.mSelectionId) {
-                                ClearGroupSelectionAlarm(groupSelection);
-                            }
-                            else {
-                                for (int i = 0; i < groupSelection.mSelectionIds.Count; i++) {
-                                    if (groupSelection.mSelectionIds[i] == selection.mSelectionId) {
-                                        ClearGroupSelectionAlarm(groupSelection);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                DateTime t2 = DateTime.Now;
-                Tracker.LogI(string.Format("UpdateSelection Use Time:{0}", t2 - t1));
-                return SelectionDAO.UpdateSelection(update.mId, update.mData);
-            }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
-                return ARESULT.E_FAIL;
-            }
-        }
-
-        /// <summary>
-        /// 删除选区
-        /// </summary>
-        /// <param name="id">选区索引</param>
+        /// <param name="groupSelectionData">所有的选区信息</param>
         /// <returns>是否成功</returns>
-        public ARESULT RemoveSelection(long id)
+        private ARESULT AddGroupSelectionList(
+            string groupSelectionData)
         {
-            mSyncSelectionId++;
-
-            try {
-                if (ARESULT.AFAILED(SelectionDAO.RemoveSelection(id)))
-                    return ARESULT.E_FAIL;
-
-                bool continueFlag = false;
-                lock (mSelectionGroupList) {
-                    foreach (GroupSelection groupSelection in mSelectionGroupList) {
-                        lock (groupSelection) {
-                            for (int i = 0; i < groupSelection.mSelectionIds.Count; i++) {
-                                if (groupSelection.mSelectionIds[i] == id) {
-                                    ClearGroupSelectionAlarm(groupSelection);
-
-                                    if (groupSelection.mSelectionIds.Count == 1) {
-                                        GroupSelectionDAO.RemoveGroupSelection(groupSelection.mId);
-                                        mSelectionGroupList.Remove(groupSelection);
-                                        mSyncSelectionGroupId++;
-                                    }
-                                    else {
-                                        for (int k = i; k < groupSelection.mSelectionIds.Count - 1; k++)
-                                            groupSelection.mSelectionIds[k] = groupSelection.mSelectionIds[k + 1];
-
-                                        string data = groupSelection.Serialize();
-                                        if (data != null)
-                                            GroupSelectionDAO.UpdateGroupSelection(groupSelection.mId, data);
-                                    }
-
-                                    continueFlag = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (continueFlag)
-                            break;
-                    }
-                }
-
-                lock (mSelectionList) {
-                    foreach (Selection selection in mSelectionList) {
-                        lock (selection) {
-                            if (selection.mSelectionId == id) {
-                                ClearSelectionAlarm(selection);
-                                mSelectionList.Remove(selection);
-                                return ARESULT.S_OK;
-                            }
-                        }
-                    }
-                }
-
-                return ARESULT.E_FAIL;
-            }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
-                return ARESULT.E_FAIL;
-            }
-        }
-
-        /// <summary>
-        /// 更新选区告警配置
-        /// </summary>
-        public ARESULT UpdateSelectionConfig(string data)
-        {
-            SelectionConfigUpdate config = JsonUtils.ObjectFromJson<SelectionConfigUpdate>(data);
-            if (config == null)
+            int pos = groupSelectionData.IndexOf(",");
+            if (pos < 0)
                 return ARESULT.E_FAIL;
 
-            SelectionAlarmConfig alramconfig = JsonUtils.ObjectFromJson<SelectionAlarmConfig>(config.mData);
-            if (config == null)
+            string str = groupSelectionData.Substring(0, pos);
+            if (string.IsNullOrEmpty(str))
                 return ARESULT.E_FAIL;
 
-            Selection selection = null;
-            lock (mSelectionList) {
-                foreach (Selection item in mSelectionList) {
-                    if (item.mSelectionId == config.mId) {
-                        selection = item;
-                        break;
-                    }
-                }
-            }
-
-            if (selection == null)
+            long id = -1;
+            if (!long.TryParse(str, out id))
                 return ARESULT.E_FAIL;
 
-            #region 更新告警设置
-
-            lock (selection) {
-                selection.mSelectionName = config.mName;
-
-                // 暂停温度处理线程
-                mProcessingWorker.WaitFor();
-
-                if (!selection.mAlarmConfig.mMaxTempConfig.Equals(alramconfig.mMaxTempConfig)) {
-
-                    if (selection.mAlarmInfo.mMaxTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.Selection,
-                            (int)SelectionAlarmType.MaxTemp,
-                            selection.mSelectionId,
-                            selection.Serialize(),
-                            selection.mAlarmInfo.mMaxTempAlarmInfo);
-
-                    selection.mAlarmConfig.mMaxTempConfig = alramconfig.mMaxTempConfig;
-                    selection.mAlarmInfo.mMaxTempAlarmInfo.Reset();
-                }
-
-                if (!selection.mAlarmConfig.mMinTempConfig.Equals(alramconfig.mMinTempConfig)) {
-                    if (selection.mAlarmInfo.mMinTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.Selection,
-                            (int)SelectionAlarmType.MinTemp,
-                            selection.mSelectionId,
-                            selection.Serialize(),
-                            selection.mAlarmInfo.mMinTempAlarmInfo);
-
-                    selection.mAlarmConfig.mMinTempConfig = alramconfig.mMinTempConfig;
-                    selection.mAlarmInfo.mMinTempAlarmInfo.Reset();
-                }
-
-                if (!selection.mAlarmConfig.mAvgTempConfig.Equals(alramconfig.mAvgTempConfig)) {
-                    if (selection.mAlarmInfo.mAvgTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.Selection,
-                            (int)SelectionAlarmType.AvgTemp,
-                            selection.mSelectionId,
-                            selection.Serialize(),
-                            selection.mAlarmInfo.mAvgTempAlarmInfo);
-
-                    selection.mAlarmConfig.mAvgTempConfig = alramconfig.mAvgTempConfig;
-                    selection.mAlarmInfo.mAvgTempAlarmInfo.Reset();
-                }
-
-                // 取消暂停
-                mProcessingWorker.CancelWaitFor();
-            }
-
-            #endregion
-
-            return SelectionDAO.UpdateSelection(selection.mSelectionId, selection.Serialize());
-        }
-
-        /// <summary>
-        /// 添加组选区
-        /// </summary>
-        public ARESULT AddNewGroupSelection(
-            string data,
-            ref long id)
-        {
-            mSyncSelectionGroupId++;
-            GroupSelection groupSelection = new GroupSelection();
-            if (groupSelection == null)
-                return ARESULT.E_OUTOFMEMORY;
-
-            if (ARESULT.AFAILED(groupSelection.Deserialize(data)))
-                return ARESULT.E_INVALIDARG;
-
-            long groupSelectionId = -1;
-            if (ARESULT.AFAILED(GroupSelectionDAO.AddNewGroupSelection(mCell.mCellId, data, ref groupSelectionId)))
+            groupSelectionData = groupSelectionData.Substring(pos + 1);
+            SelectionGroup groupSelection = new SelectionGroup();
+            if (ARESULT.AFAILED(groupSelection.Deserialize(groupSelectionData)))
                 return ARESULT.E_FAIL;
 
-            groupSelection.mId = groupSelectionId;
-            groupSelection.mTemperatureData.mGroupId = groupSelectionId;
-            id = groupSelectionId;
+            groupSelection.mId = id;
+            groupSelection.mTemperatureData.mGroupId = id;
 
-            lock (mSelectionGroupList) {
-                mSelectionGroupList.Add(groupSelection);
+            lock (mSelectionGroups) {
+                mSelectionGroups.Add(groupSelection);
             }
 
             return ARESULT.S_OK;
-        }
-
-        /// <summary>
-        /// 更新组选区
-        /// </summary>
-        public ARESULT UpdateGroupSelectionConfig(string data)
-        {
-            GroupSelectionUpdateParam gupdate = JsonUtils.ObjectFromJson<GroupSelectionUpdateParam>(data);
-            if (gupdate == null)
-                return ARESULT.E_FAIL;
-
-            GroupAlarmConfig alramconfig = JsonUtils.ObjectFromJson<GroupAlarmConfig>(gupdate.mData);
-            if (alramconfig == null)
-                return ARESULT.E_FAIL;
-
-            GroupSelection groupSelection = null;
-            lock (mSelectionGroupList) {
-                foreach (GroupSelection item in mSelectionGroupList) {
-                    if (item.mId == gupdate.mId) {
-                        groupSelection = item;
-                        break;
-                    }
-                }
-            }
-
-            if (groupSelection == null)
-                return ARESULT.E_FAIL;
-
-            #region 更新告警设置
-
-            lock (groupSelection) {
-                // 暂停温度处理线程
-                mProcessingWorker.WaitFor();
-
-                if (!groupSelection.mAlarmConfig.mMaxTempConfig.Equals(alramconfig.mMaxTempConfig)) {
-                    // 正在告警时, 结束当前告警
-                    if (groupSelection.mAlarmInfo.mMaxTempAlarm.mAlarmStatus == AlarmStatus.Alarming)
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.GroupSelection,
-                            (int)GroupAlarmType.MaxTemperature,
-                            groupSelection.mId,
-                            groupSelection.Serialize(),
-                            groupSelection.mAlarmInfo.mMaxTempAlarm);
-
-                    groupSelection.mAlarmConfig.mMaxTempConfig = alramconfig.mMaxTempConfig;
-                    groupSelection.mAlarmInfo.mMaxTempAlarm.Reset();
-                }
-
-                if (!groupSelection.mAlarmConfig.mMaxTempeRiseConfig.Equals(alramconfig.mMaxTempeRiseConfig)) {
-                    if (groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.mAlarmStatus == AlarmStatus.Alarming)
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.GroupSelection,
-                            (int)GroupAlarmType.MaxTempRise,
-                            groupSelection.mId,
-                            groupSelection.Serialize(),
-                            groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo);
-
-                    groupSelection.mAlarmConfig.mMaxTempeRiseConfig = alramconfig.mMaxTempeRiseConfig;
-                    groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.Reset();
-                }
-
-                if (!groupSelection.mAlarmConfig.mMaxTempDifConfig.Equals(alramconfig.mMaxTempDifConfig)) {
-                    if (groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.GroupSelection,
-                            (int)GroupAlarmType.MaxTempDif,
-                            groupSelection.mId,
-                            groupSelection.Serialize(),
-                            groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo);
-                    }
-
-                    groupSelection.mAlarmConfig.mMaxTempDifConfig = alramconfig.mMaxTempDifConfig;
-                    groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.Reset();
-                }
-
-                if (!groupSelection.mAlarmConfig.mRelativeTempDifConfig.Equals(alramconfig.mRelativeTempDifConfig)) {
-                    if (groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                        UpdateAlarmInfo(
-                            (int)AlarmMode.GroupSelection,
-                            (int)GroupAlarmType.RelativeTempDif,
-                            groupSelection.mId,
-                            groupSelection.Serialize(),
-                            groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo);
-                    }
-
-                    groupSelection.mAlarmConfig.mRelativeTempDifConfig = alramconfig.mRelativeTempDifConfig;
-                    groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.Reset();
-                }
-
-                // 取消暂停
-                mProcessingWorker.CancelWaitFor();
-            }
-
-            #endregion
-
-            return GroupSelectionDAO.UpdateGroupSelection(groupSelection.mId, groupSelection.Serialize());
-        }
-
-        /// <summary>
-        /// 删除组选区
-        /// </summary>
-        public ARESULT RemoveGroupSelection(
-            long id)
-        {
-            mSyncSelectionGroupId++;
-            if (ARESULT.AFAILED(GroupSelectionDAO.RemoveGroupSelection(id)))
-                return ARESULT.E_FAIL;
-
-            lock (mSelectionGroupList) {
-                foreach (GroupSelection groupSelection in mSelectionGroupList) {
-                    if (groupSelection.mId == id) {
-                        ClearGroupSelectionAlarm(groupSelection);
-                        mSelectionGroupList.Remove(groupSelection);
-                        return ARESULT.S_OK;
-                    }
-                }
-            }
-
-            return ARESULT.E_FAIL;
-        }
-
-        /// <summary>
-        /// 获取所有选区信息
-        /// </summary>
-        /// <returns>JSON字符串</returns>
-        public string GetAllSelectionInfo()
-        {
-            return JsonConvert.SerializeObject(mSelectionList);
-        }
-
-        /// <summary>
-        /// 清除选区报警信息
-        /// </summary>
-        /// <param name="selection">选区</param>
-        private void ClearSelectionAlarm(Selection selection)
-        {
-            if ((selection.mAlarmInfo == null))
-                return;
-
-            // 等待温度处理线程暂停
-            mProcessingWorker.WaitFor();
-
-            // 正在告警时, 结束当前告警
-            if (selection.mAlarmInfo.mMaxTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.Selection,
-                    (int)SelectionAlarmType.MaxTemp,
-                    selection.mSelectionId,
-                    selection.Serialize(),
-                    selection.mAlarmInfo.mMaxTempAlarmInfo);
-            }
-
-            if (selection.mAlarmInfo.mMinTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.Selection,
-                    (int)SelectionAlarmType.MinTemp,
-                    selection.mSelectionId,
-                    selection.Serialize(),
-                    selection.mAlarmInfo.mMinTempAlarmInfo);
-            }
-
-            if (selection.mAlarmInfo.mAvgTempAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.Selection,
-                    (int)SelectionAlarmType.AvgTemp,
-                    selection.mSelectionId,
-                    selection.Serialize(),
-                    selection.mAlarmInfo.mAvgTempAlarmInfo);
-            }
-
-            selection.mAlarmInfo.mMaxTempAlarmInfo.Reset();
-            selection.mAlarmInfo.mMinTempAlarmInfo.Reset();
-            selection.mAlarmInfo.mAvgTempAlarmInfo.Reset();
-
-            // 取消暂停
-            mProcessingWorker.CancelWaitFor();
-        }
-
-        /// <summary>
-        /// 清除选区组报警信息
-        /// </summary>
-        /// <param name="selectionGroupData">选区组</param>
-        private void ClearGroupSelectionAlarm(GroupSelection groupSelection)
-        {
-            if (groupSelection.mAlarmInfo == null)
-                return;
-
-            // 等待温度处理线程暂停
-            mProcessingWorker.WaitFor();
-
-            // 正在告警时, 结束当前告警
-            if (groupSelection.mAlarmInfo.mMaxTempAlarm.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.GroupSelection,
-                    (int)GroupAlarmType.MaxTemperature,
-                    groupSelection.mId,
-                    groupSelection.Serialize(),
-                    groupSelection.mAlarmInfo.mMaxTempAlarm);
-            }
-
-            if (groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.GroupSelection,
-                    (int)GroupAlarmType.MaxTempRise,
-                    groupSelection.mId,
-                    groupSelection.Serialize(),
-                    groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo);
-            }
-
-            if (groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.GroupSelection,
-                    (int)GroupAlarmType.MaxTempDif,
-                    groupSelection.mId,
-                    groupSelection.Serialize(),
-                    groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo);
-            }
-
-            if (groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.mAlarmStatus == AlarmStatus.Alarming) {
-                UpdateAlarmInfo(
-                    (int)AlarmMode.GroupSelection,
-                    (int)GroupAlarmType.RelativeTempDif,
-                    groupSelection.mId,
-                    groupSelection.Serialize(),
-                    groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo);
-            }
-
-            groupSelection.mAlarmInfo.mMaxTempAlarm.Reset();
-            groupSelection.mAlarmInfo.mMaxTempRiseAlarmInfo.Reset();
-            groupSelection.mAlarmInfo.mMaxTempDifAlarmInfo.Reset();
-            groupSelection.mAlarmInfo.mRelativeTempDifAlarmInfo.Reset();
-
-            // 取消暂停
-            mProcessingWorker.CancelWaitFor();
         }
 
         #endregion
 
-        #region 摄像头操作
-
-        /// <summary>
-        /// 获取所有组选区信息
-        /// </summary>
-        /// <returns>Json字符串</returns>
-        public string GetAllGroupSelectionInfo()
-        {
-            return JsonConvert.SerializeObject(mSelectionGroupList);
-        }
+        #region 摄像头操作        
 
         /// <summary>
         /// 获取大气温度
@@ -1597,8 +1254,8 @@ namespace IRMonitor.Services.Cell
                 else
                     return JsonUtils.ObjectToJson<List<SelectionTempCurve>>(curveList);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
         }
@@ -1635,8 +1292,8 @@ namespace IRMonitor.Services.Cell
                 else
                     return JsonUtils.ObjectToJson<List<GroupSelectionTempCurve>>(curveList);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
         }
@@ -1844,170 +1501,6 @@ namespace IRMonitor.Services.Cell
 
         #endregion
 
-        #region 选区列表
-
-        /// <summary>
-        /// 加载选区列表
-        /// </summary>
-        /// <returns>是否成功</returns>
-        private ARESULT LoadSelectionList()
-        {
-            try {
-                List<string> strList = SelectionDAO.GetSelectionList(mCell.mCellId);
-                if (strList != null) {
-                    foreach (string str in strList)
-                        AddSelectionList(str);
-                }
-
-                // 检查是否有全局选区
-                bool isAdd = true;
-                lock (mSelectionList) {
-                    foreach (Selection selection in mSelectionList) {
-                        if (selection.mIsGlobalSelection) {
-                            isAdd = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (isAdd) {
-                    // 补充添加全局选区
-                    RectangleSelection selection = new RectangleSelection();
-                    selection.mIsGlobalSelection = true;
-                    selection.mRectangle = new Rectangle(0, 0, mCell.mIRCameraWidth, mCell.mIRCameraHeight);
-                    string data = selection.Serialize();
-                    long id = -1;
-                    if (ARESULT.AFAILED(SelectionDAO.AddNewSelection(mCell.mCellId, data, true, ref id)))
-                        return ARESULT.E_FAIL;
-
-                    selection.mSelectionId = id;
-                    selection.mTemperatureData.mSelectionId = id;
-                    selection.MakeSelectionArea();
-
-                    lock (mSelectionList) {
-                        mSelectionList.Add(selection);
-                    }
-                }
-
-                return ARESULT.S_OK;
-            }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
-                return ARESULT.E_FAIL;
-            }
-        }
-
-        /// <summary>
-        /// 加载选区组列表
-        /// </summary>
-        /// <returns>是否成功</returns>
-        private ARESULT LoadGroupSelectionList()
-        {
-            List<string> strList = GroupSelectionDAO.GetGroupSelectionList(mCell.mCellId);
-            if (strList == null)
-                return ARESULT.S_OK;
-
-            foreach (string str in strList)
-                AddGroupSelectionList(str);
-
-            return ARESULT.S_OK;
-        }
-
-        /// <summary>
-        /// 添加选区列表
-        /// </summary>
-        /// <param name="SelectionData">所有的选区信息</param>
-        /// <returns>是否成功</returns>
-        private ARESULT AddSelectionList(
-            string selectionData)
-        {
-            int pos = selectionData.IndexOf(",");
-            if (pos < 0)
-                return ARESULT.E_FAIL;
-
-            string str = selectionData.Substring(0, pos);
-            if (string.IsNullOrEmpty(str))
-                return ARESULT.E_FAIL;
-
-            long id = -1;
-            if (!long.TryParse(str, out id))
-                return ARESULT.E_FAIL;
-
-            selectionData = selectionData.Substring(pos + 1);
-            SelectionType type = Selection.GetType(selectionData);
-            if (type == SelectionType.Unknown)
-                return ARESULT.E_INVALIDARG;
-
-            Selection selection;
-
-            switch (type) {
-                case SelectionType.Point:
-                    selection = new PointSelection();
-                    break;
-                case SelectionType.Rectangle:
-                    selection = new RectangleSelection();
-                    break;
-                case SelectionType.Ellipse:
-                    selection = new EllipseSelection();
-                    break;
-                case SelectionType.Line:
-                    selection = new LineSelection();
-                    break;
-
-                default:
-                    return ARESULT.E_INVALIDARG;
-            }
-
-            if (ARESULT.AFAILED(selection.Deserialize(selectionData)))
-                return ARESULT.E_INVALIDARG;
-
-            selection.mSelectionId = id;
-            selection.mTemperatureData.mSelectionId = id;
-
-            lock (mSelectionList) {
-                mSelectionList.Add(selection);
-            }
-
-            return ARESULT.S_OK;
-        }
-
-        /// <summary>
-        /// 添加选区列表
-        /// </summary>
-        /// <param name="groupSelectionData">所有的选区信息</param>
-        /// <returns>是否成功</returns>
-        private ARESULT AddGroupSelectionList(
-            string groupSelectionData)
-        {
-            int pos = groupSelectionData.IndexOf(",");
-            if (pos < 0)
-                return ARESULT.E_FAIL;
-
-            string str = groupSelectionData.Substring(0, pos);
-            if (string.IsNullOrEmpty(str))
-                return ARESULT.E_FAIL;
-
-            long id = -1;
-            if (!long.TryParse(str, out id))
-                return ARESULT.E_FAIL;
-
-            groupSelectionData = groupSelectionData.Substring(pos + 1);
-            GroupSelection groupSelection = new GroupSelection();
-            if (ARESULT.AFAILED(groupSelection.Deserialize(groupSelectionData)))
-                return ARESULT.E_FAIL;
-
-            groupSelection.mId = id;
-            groupSelection.mTemperatureData.mGroupId = id;
-
-            lock (mSelectionGroupList) {
-                mSelectionGroupList.Add(groupSelection);
-            }
-
-            return ARESULT.S_OK;
-        }
-
-        #endregion
-
         #region 实时通知
 
         /// <summary>
@@ -2023,8 +1516,8 @@ namespace IRMonitor.Services.Cell
             float minTemp = 0.0f;
             float avgTemp = 0.0f;
 
-            lock (mSelectionList) {
-                foreach (Selection item in mSelectionList) {
+            lock (mSelections) {
+                foreach (Selection item in mSelections) {
                     if (item.mIsGlobalSelection) {
                         hasFind = true;
                         maxTemp = item.mTemperatureData.mMaxTemperature;
@@ -2058,8 +1551,8 @@ namespace IRMonitor.Services.Cell
             float minTemp = 0.0f;
             float avgTemp = 0.0f;
 
-            lock (mSelectionList) {
-                foreach (Selection item in mSelectionList) {
+            lock (mSelections) {
+                foreach (Selection item in mSelections) {
                     if (item.mIsGlobalSelection) {
                         hasFind = true;
                         maxTemp = item.mTemperatureData.mMaxTemperature;
@@ -2117,8 +1610,8 @@ namespace IRMonitor.Services.Cell
         /// </summary>
         public void SendReport()
         {
-            lock (mSelectionList) {
-                foreach (Selection selection in mSelectionList) {
+            lock (mSelections) {
+                foreach (Selection selection in mSelections) {
                     if (selection.mIsGlobalSelection)
                         continue;
 
@@ -2154,8 +1647,8 @@ namespace IRMonitor.Services.Cell
             float minTemp = 0.0f;
             float avgTemp = 0.0f;
 
-            lock (mSelectionList) {
-                foreach (Selection item in mSelectionList) {
+            lock (mSelections) {
+                foreach (Selection item in mSelections) {
                     if (item.mIsGlobalSelection) {
                         hasFind = true;
                         maxTemp = item.mTemperatureData.mMaxTemperature;

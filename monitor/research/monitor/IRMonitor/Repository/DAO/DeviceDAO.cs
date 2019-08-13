@@ -32,8 +32,8 @@ namespace Repository.DAO
 
                 return device;
             }
-            catch (Exception ex){
-                Tracker.LogE(ex);
+            catch (Exception e){
+                Tracker.LogE(e);
                 return null;
             }
             finally {

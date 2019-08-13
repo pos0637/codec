@@ -34,7 +34,7 @@ namespace IRMonitor.Services.Cell.Worker
         private bool mNeedSampleGroup; // 是否需要添加选区组历史数据
         private DateTime mNextGroupSample; // 下一次添加选区组数据的时间
         private List<Selection> mSelectionList; // 选区链表
-        private List<GroupSelection> mSelectionGroupList; // 选区组链表
+        private List<SelectionGroup> mSelectionGroupList; // 选区组链表
         private int mWidth; // 宽度
         private int mHeight; // 高度
         private float mMaxTemperature; // 全局最高温
@@ -70,7 +70,7 @@ namespace IRMonitor.Services.Cell.Worker
             int width,
             int height,
             List<Selection> selectionList,
-            List<GroupSelection> groupList)
+            List<SelectionGroup> groupList)
         {
             mWidth = width;
             mHeight = height;
@@ -95,7 +95,7 @@ namespace IRMonitor.Services.Cell.Worker
         /// <summary>
         /// 暂停
         /// </summary>
-        public void WaitFor()
+        public void Pause()
         {
             bool ret = false;
             lock (mSyncEvent) {
@@ -112,7 +112,7 @@ namespace IRMonitor.Services.Cell.Worker
         /// <summary>
         /// 取消暂停
         /// </summary>
-        public void CancelWaitFor()
+        public void Resume()
         {
             lock (mSyncEvent) {
                 mSyncState = false;
@@ -203,7 +203,7 @@ namespace IRMonitor.Services.Cell.Worker
 
                 for (var i = 0; i < count; i++) {
                     try {
-                        GroupSelection group;
+                        SelectionGroup group;
                         lock (mSelectionGroupList) {
                             group = mSelectionGroupList[i];
                         }
@@ -255,7 +255,7 @@ namespace IRMonitor.Services.Cell.Worker
                         selection = mSelectionList[i];
                     }
 
-                    if (ARESULT.AFAILED(selection.CalcSelectionAreaValue(buf, mWidth, mWidth, mHeight)))
+                    if (ARESULT.AFAILED(selection.CalcTemperature(buf, mWidth, mWidth, mHeight)))
                         continue;
 
                     if (selection.mIsGlobalSelection) {
@@ -299,13 +299,13 @@ namespace IRMonitor.Services.Cell.Worker
 
             for (var i = 0; i < count; i++) {
                 try {
-                    GroupSelection group;
+                    SelectionGroup group;
                     lock (mSelectionGroupList) {
                         group = mSelectionGroupList[i];
                     }
 
                     lock (mSelectionList) {
-                        if (ARESULT.AFAILED(group.CalcSelectionAreaValue(mSelectionList)))
+                        if (ARESULT.AFAILED(group.CalcTemperature(mSelectionList)))
                             continue;
                     }
 
@@ -338,7 +338,7 @@ namespace IRMonitor.Services.Cell.Worker
         /// <summary>
         /// 处理选区组告警
         /// </summary>
-        private void ProcessGroupAlarm(GroupSelection group)
+        private void ProcessGroupAlarm(SelectionGroup group)
         {
             SubProcessGroupAlarm(GroupAlarmType.MaxTemperature, group); // 高温
             SubProcessGroupAlarm(GroupAlarmType.MaxTempRise, group); // 温升
@@ -351,7 +351,7 @@ namespace IRMonitor.Services.Cell.Worker
         /// </summary>
         private void SubProcessGroupAlarm(
             GroupAlarmType alarmType,
-            GroupSelection group)
+            SelectionGroup group)
         {
             AlarmConfigData alarmSet;
             AlarmInfo info;
@@ -425,7 +425,7 @@ namespace IRMonitor.Services.Cell.Worker
                     temperatureInfo,
                     mMaxTemperature,
                     mMinTemperature,
-                    group.mSelectionList,
+                    group.mSelections,
                     info);
             }
             else if (info.mAlarmStatus == AlarmStatus.AlarmEnd) {
@@ -477,7 +477,7 @@ namespace IRMonitor.Services.Cell.Worker
                     temperatureInfo,
                     mMaxTemperature,
                     mMinTemperature,
-                    group.mSelectionList,
+                    group.mSelections,
                     info);
             }
             else if ((info.mAlarmStatus == AlarmStatus.Alarming

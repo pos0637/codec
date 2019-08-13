@@ -23,9 +23,9 @@ namespace IRMonitor
     /// </summary>
     public struct Segment
     {
-        public Int32 mXStart;
-        public Int32 mXEnd;
-        public Int32 mYAxis;
+        public int mXStart;
+        public int mXEnd;
+        public int mYAxis;
     }
 
     /// <summary>
@@ -34,29 +34,53 @@ namespace IRMonitor
     [DataContract]
     public abstract class Selection
     {
+        /// <summary>
+        /// 类型
+        /// </summary>
         [DataMember(Name = "SelectionType")]
-        public SelectionType mType; // 图形的类型
+        public SelectionType mType;
 
+        /// <summary>
+        /// 索引
+        /// </summary>
         [DataMember(Name = "SelectionId")]
-        public Int64 mSelectionId; // 图形索引
+        public long mSelectionId;
 
+        /// <summary>
+        /// 名称
+        /// </summary>
         [DataMember(Name = "SelectionName")]
-        public String mSelectionName;
+        public string mSelectionName;
 
+        /// <summary>
+        /// 是否为全局选区
+        /// </summary>
         [DataMember(Name = "IsGlobalSelection")]
-        public Boolean mIsGlobalSelection = false;
+        public bool mIsGlobalSelection = false;
 
+        /// <summary>
+        /// 告警配置
+        /// </summary>
         [DataMember(Name = "AlarmConfig")]
         public SelectionAlarmConfig mAlarmConfig = new SelectionAlarmConfig();
 
+        /// <summary>
+        /// 温度数据
+        /// </summary>
         [NonSerialized]
-        public SelectionTempData mTemperatureData = new SelectionTempData();
+        public SelectionTemperature mTemperatureData = new SelectionTemperature();
 
+        /// <summary>
+        /// 告警信息
+        /// </summary>
         [NonSerialized]
         public SelectionAlarmInfo mAlarmInfo = new SelectionAlarmInfo();
 
+        /// <summary>
+        /// 区域内像素点的数量
+        /// </summary>
         [NonSerialized]
-        public Int32 mPixelCount; // 区域内像素点的数量
+        public int mPixelCount;
 
         /// <summary>
         /// 构造函数
@@ -65,7 +89,7 @@ namespace IRMonitor
         public Selection(SelectionType SelectionType)
         {
             mType = SelectionType;
-            mPixelCount = 1; // 像素点数量
+            mPixelCount = 1;
         }
 
         /// <summary>
@@ -73,27 +97,43 @@ namespace IRMonitor
         /// </summary>
         /// <param name="data">图形信息</param>
         /// <returns>图形类型</returns>
-        public static SelectionType GetType(
-             String data)
+        public static SelectionType GetType(string data)
         {
-            if (String.IsNullOrEmpty(data))
+            if (string.IsNullOrEmpty(data)) {
                 return SelectionType.Unknown;
+            }
 
-            Int32 pos = data.IndexOf("SelectionType") + "SelectionType".Length + 2;
-            if (pos < 0)
+            int pos = data.IndexOf("SelectionType") + "SelectionType".Length + 2;
+            if (pos < 0) {
                 return SelectionType.Unknown;
+            }
 
-            String s = data.Substring(pos);
+            string s = data.Substring(pos);
             pos = s.IndexOf(",");
-            if (pos < 0)
+            if (pos < 0) {
                 return SelectionType.Unknown;
+            }
 
             s = s.Substring(0, pos);
-            Int32 type;
-            if (!Int32.TryParse(s, out type))
+            if (!int.TryParse(s, out int type)) {
                 return SelectionType.Unknown;
-            else
+            }
+            else {
                 return ((SelectionType)type);
+            }
+        }
+
+        /// <summary>
+        /// 设置索引
+        /// </summary>
+        /// <param name="id">索引</param>
+        /// <returns>选定区域</returns>
+        public virtual Selection SetId(long id)
+        {
+            mSelectionId = id;
+            mTemperatureData.mSelectionId = id;
+
+            return this;
         }
 
         /// <summary>
@@ -106,46 +146,37 @@ namespace IRMonitor
         }
 
         /// <summary>
-        /// 计算图形区域内的值
+        /// 计算温度
         /// </summary>
-        /// <param name="buffer">图形</param>
-        /// <param name="width">图形宽度</param>
-        /// <param name="stride">图形对齐宽度</param>
-        /// <param name="height">图形高度</param>
-        /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
-        /// <param name="average">平均值</param>
-        /// <param name="minPoint">最小值位置</param>
-        /// <param name="maxPoint">最大值位置</param>
+        /// <param name="buffer">温度数据</param>
+        /// <param name="width">宽度</param>
+        /// <param name="stride">对齐宽度</param>
+        /// <param name="height">高度</param>
         /// <returns>计算结果</returns>
-        public virtual ARESULT CalcSelectionAreaValue(
-             Single[] buffer,
-             Int32 width,
-             Int32 stride,
-             Int32 height)
+        public virtual ARESULT CalcTemperature(
+             float[] buffer,
+             int width,
+             int stride,
+             int height)
         {
             return ARESULT.E_FAIL;
         }
 
         /// <summary>
-        /// 序列化图形信息
+        /// 序列化
         /// </summary>
-        /// <param name="buffer">传入一块内存</param>
-        /// <param name="length">内存大小</param>
-        /// <param name="buffer">传出写入的长度</param>
         /// <returns>序列化信息串</returns>
-        public virtual String Serialize()
+        public virtual string Serialize()
         {
             return null;
         }
 
         /// <summary>
-        /// 反序列化图形信息
+        /// 反序列化
         /// </summary>
         /// <param name="data">序列化信息串</param>
         /// <returns>结果</returns>
-        public virtual ARESULT Deserialize(
-            String data)
+        public virtual ARESULT Deserialize(string data)
         {
             return ARESULT.E_FAIL;
         }
@@ -175,20 +206,19 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override ARESULT CalcSelectionAreaValue(
-             Single[] buffer,
-             Int32 width,
-             Int32 stride,
-             Int32 height)
+        public override ARESULT CalcTemperature(
+             float[] buffer,
+             int width,
+             int stride,
+             int height)
         {
-            if (buffer == null)
+            if (buffer == null) {
                 return ARESULT.E_INVALIDARG;
+            }
 
-            Single temp = buffer[stride * mPoint.Y + mPoint.X];
+            float temp = buffer[stride * mPoint.Y + mPoint.X];
             if (mTemperatureData == null) {
-                mTemperatureData = new SelectionTempData();
-                if (mTemperatureData == null)
-                    return ARESULT.E_FAIL;
+                mTemperatureData = new SelectionTemperature();
             }
 
             mTemperatureData.mMinTemperature = temp;
@@ -204,24 +234,23 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override String Serialize()
+        public override string Serialize()
         {
             return JsonUtils.ObjectToJson(this);
         }
 
-        public override ARESULT Deserialize(
-            String data)
+        public override ARESULT Deserialize(string data)
         {
             PointSelection selection;
             try {
                 selection = JsonUtils.ObjectFromJson<PointSelection>(data);
+                if (selection == null) {
+                    return ARESULT.E_FAIL;
+                }
             }
             catch {
                 return ARESULT.E_FAIL;
             }
-
-            if (selection == null)
-                return ARESULT.E_FAIL;
 
             mSelectionId = selection.mSelectionId;
             mSelectionName = selection.mSelectionName;
@@ -255,28 +284,28 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override ARESULT CalcSelectionAreaValue(
-             Single[] buffer,
-             Int32 width,
-             Int32 stride,
-             Int32 height)
+        public override ARESULT CalcTemperature(
+             float[] buffer,
+             int width,
+             int stride,
+             int height)
         {
-            if (buffer == null)
+            if (buffer == null) {
                 return ARESULT.E_INVALIDARG;
+            }
 
-            Single temp = 0;
-            Int32 position = stride * mRectangle.Top + mRectangle.Left;
-            Single tempMin = buffer[position];
-            Single tempMax = buffer[position];
+            int position = stride * mRectangle.Top + mRectangle.Left;
+            float tempMin = buffer[position];
+            float tempMax = buffer[position];
             Point minP = new Point(mRectangle.Left, mRectangle.Top);
             Point maxP = new Point(mRectangle.Left, mRectangle.Top);
 
-            Single totalGray = 0;
-            Int32 pitch = stride * mRectangle.Top;
+            float totalGray = 0;
+            int pitch = stride * mRectangle.Top;
 
-            for (Int32 m = mRectangle.Top; m < mRectangle.Bottom; ++m) {
-                for (Int32 n = mRectangle.Left; n < mRectangle.Right; ++n) {
-                    temp = buffer[pitch + n];
+            for (int m = mRectangle.Top; m < mRectangle.Bottom; ++m) {
+                for (int n = mRectangle.Left; n < mRectangle.Right; ++n) {
+                    float temp = buffer[pitch + n];
                     if (tempMin > temp) {
                         tempMin = temp;
                         minP.X = n;
@@ -305,24 +334,23 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override String Serialize()
+        public override string Serialize()
         {
             return JsonUtils.ObjectToJson(this);
         }
 
-        public override ARESULT Deserialize(
-            String data)
+        public override ARESULT Deserialize(string data)
         {
             RectangleSelection selection;
             try {
                 selection = JsonUtils.ObjectFromJson<RectangleSelection>(data);
+                if (selection == null) {
+                    return ARESULT.E_FAIL;
+                }
             }
             catch {
                 return ARESULT.E_FAIL;
             }
-
-            if (selection == null)
-                return ARESULT.E_FAIL;
 
             mIsGlobalSelection = selection.mIsGlobalSelection;
             mSelectionId = selection.mSelectionId;
@@ -344,16 +372,28 @@ namespace IRMonitor
         [DataMember(Name = "Rectangle")]
         public Rectangle mRectangle;
 
+        /// <summary>
+        /// X轴
+        /// </summary>
         [NonSerialized]
-        protected Int32 mXAxis; // X轴
+        protected int mXAxis;
 
+        /// <summary>
+        /// Y轴
+        /// </summary>
         [NonSerialized]
-        protected Int32 mYAxis; // Y轴
+        protected int mYAxis;
 
+        /// <summary>
+        /// 圆心
+        /// </summary>
         [NonSerialized]
-        protected Point mCentrePoint; // 圆心
+        protected Point mCentrePoint;
 
-        protected Segment[] mArea; // 椭圆所在区域点的数组
+        /// <summary>
+        /// 椭圆所在区域点的数组
+        /// </summary>
+        protected Segment[] mArea;
 
         public EllipseSelection()
             : base(SelectionType.Ellipse)
@@ -368,15 +408,12 @@ namespace IRMonitor
             mCentrePoint.X = mRectangle.X + mRectangle.Width / 2;
             mCentrePoint.Y = mRectangle.Y + mRectangle.Height / 2;
 
-            Int32 length = mYAxis + 1;
-            Int32 startY = mCentrePoint.Y - (mYAxis / 2);
+            int length = mYAxis + 1;
+            int startY = mCentrePoint.Y - (mYAxis / 2);
 
             // 申请存放图形区域的动态数组
             mArea = new Segment[length];
-            if (mArea == null)
-                return ARESULT.E_OUTOFMEMORY;
-
-            Double ellipseA, ellipseB, ellipseX, ellipseY;
+            double ellipseA, ellipseB, ellipseX, ellipseY;
 
             ellipseA = mXAxis / 2;
             ellipseA *= ellipseA;
@@ -385,48 +422,52 @@ namespace IRMonitor
             mPixelCount = 0;
 
             // 获取椭圆图形区域
-            for (Int32 i = 0; i < length; ++i) {
-                ellipseY = (Double)mCentrePoint.Y - startY - i;
+            for (int i = 0; i < length; ++i) {
+                ellipseY = (double)mCentrePoint.Y - startY - i;
                 ellipseY *= ellipseY;
                 ellipseX = ellipseA - ((ellipseY * ellipseA) / ellipseB);
                 ellipseX = Math.Sqrt(ellipseX);
-                mArea[i].mXStart = (Int32)(mCentrePoint.X - ellipseX);
-                mArea[i].mXEnd = (Int32)(mCentrePoint.X + ellipseX);
-                mArea[i].mYAxis = (Int32)(startY + i);
+                mArea[i].mXStart = (int)(mCentrePoint.X - ellipseX);
+                mArea[i].mXEnd = (int)(mCentrePoint.X + ellipseX);
+                mArea[i].mYAxis = (int)(startY + i);
                 mPixelCount += mArea[i].mXEnd - mArea[i].mXStart;
             }
 
             return ARESULT.S_OK;
         }
 
-        public override ARESULT CalcSelectionAreaValue(
-             Single[] buffer,
-             Int32 width,
-             Int32 stride,
-             Int32 height)
+        public override ARESULT CalcTemperature(
+             float[] buffer,
+             int width,
+             int stride,
+             int height)
         {
-            if (buffer == null)
+            if (buffer == null) {
                 return ARESULT.E_INVALIDARG;
+            }
 
-            if (mArea == null)
+            if (mArea == null) {
                 return ARESULT.E_INVALID_OPERATION;
+            }
 
-            Int32 length = mYAxis + 1;
-            Single temp = 0;
-            Int32 position = mArea[0].mXStart + stride * mArea[0].mYAxis;
-            Single tempMin = buffer[position];
-            Single tempMax = buffer[position];
-            Point minP = new Point(), maxP = new Point();
-            minP.X = mArea[0].mXStart;
-            minP.Y = mArea[0].mYAxis;
-            maxP.X = mArea[0].mXStart;
-            maxP.Y = mArea[0].mYAxis;
-            Single totalGray = 0;
-            Int32 pitch = stride * mArea[0].mYAxis;
+            int length = mYAxis + 1;
+            int position = mArea[0].mXStart + stride * mArea[0].mYAxis;
+            float tempMin = buffer[position];
+            float tempMax = buffer[position];
+            Point minP = new Point {
+                X = mArea[0].mXStart,
+                Y = mArea[0].mYAxis
+            };
+            Point maxP = new Point {
+                X = mArea[0].mXStart,
+                Y = mArea[0].mYAxis
+            };
+            float totalGray = 0;
+            int pitch = stride * mArea[0].mYAxis;
 
-            for (Int32 m = 0; m < length; ++m) {
-                for (Int32 n = mArea[m].mXStart; n < mArea[m].mXEnd; ++n) {
-                    temp = buffer[n + pitch];
+            for (int m = 0; m < length; ++m) {
+                for (int n = mArea[m].mXStart; n < mArea[m].mXEnd; ++n) {
+                    float temp = buffer[n + pitch];
                     if (tempMin > temp) {
                         tempMin = temp;
                         minP.X = n;
@@ -455,24 +496,23 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override String Serialize()
+        public override string Serialize()
         {
             return JsonUtils.ObjectToJson(this);
         }
 
-        public override ARESULT Deserialize(
-            String data)
+        public override ARESULT Deserialize(string data)
         {
             EllipseSelection selection;
             try {
                 selection = JsonUtils.ObjectFromJson<EllipseSelection>(data);
+                if (selection == null) {
+                    return ARESULT.E_FAIL;
+                }
             }
             catch {
                 return ARESULT.E_FAIL;
             }
-
-            if (selection == null)
-                return ARESULT.E_FAIL;
 
             mSelectionId = selection.mSelectionId;
             mSelectionName = selection.mSelectionName;
@@ -506,55 +546,58 @@ namespace IRMonitor
 
         public override ARESULT MakeSelectionArea()
         {
-            if ((mPoint == null) || (mPoint.Count < 2))
+            if ((mPoint == null) || (mPoint.Count < 2)) {
                 return ARESULT.E_FAIL;
+            }
 
             mStartPoint = mPoint[0];
             mEndPoint = mPoint[1];
 
-            Int32 x = mEndPoint.X - mStartPoint.X;
-            Int32 y = mEndPoint.Y - mEndPoint.Y;
-            mPixelCount = (Int32)Math.Sqrt(x * x + y * y) + 1;
+            int x = mEndPoint.X - mStartPoint.X;
+            int y = mEndPoint.Y - mEndPoint.Y;
+            mPixelCount = (int)Math.Sqrt(x * x + y * y) + 1;
 
             return ARESULT.S_OK;
         }
 
-        public override ARESULT CalcSelectionAreaValue(
-             Single[] buffer,
-             Int32 width,
-             Int32 stride,
-             Int32 height)
+        public override ARESULT CalcTemperature(
+             float[] buffer,
+             int width,
+             int stride,
+             int height)
         {
-            if (buffer == null)
+            if (buffer == null) {
                 return ARESULT.E_INVALIDARG;
+            }
 
-            Int32 position = stride * mStartPoint.Y + mStartPoint.X;
-            Single tempMin = buffer[position];
-            Single tempMax = buffer[position];
+            int position = stride * mStartPoint.Y + mStartPoint.X;
+            float tempMin = buffer[position];
+            float tempMax = buffer[position];
             Point minP = new Point(mStartPoint.X, mStartPoint.Y);
             Point maxP = new Point(mStartPoint.X, mStartPoint.Y);
 
             // a:直线斜率
-            Single a;
-            if (mStartPoint.X != mEndPoint.X)
+            float a;
+            if (mStartPoint.X != mEndPoint.X) {
                 a = (mStartPoint.Y - mEndPoint.Y) * 1.0f / (mStartPoint.X - mEndPoint.X);
-            else
+            }
+            else {
                 a = 0;
+            }
 
             // b:直线截距
-            Single b = mEndPoint.Y - a * mEndPoint.X;
+            float b = mEndPoint.Y - a * mEndPoint.X;
+            int beginX = mStartPoint.X > mEndPoint.X ? mEndPoint.X : mStartPoint.X;
+            int endX = mStartPoint.X < mEndPoint.X ? mEndPoint.X : mStartPoint.X;
+            int beginY = mStartPoint.Y > mEndPoint.Y ? mEndPoint.Y : mStartPoint.Y;
+            int endY = mStartPoint.Y < mEndPoint.Y ? mEndPoint.Y : mStartPoint.Y;
+            int pitch = stride * beginY;
+            float totalGray = 0;
 
-            Int32 beginX = mStartPoint.X > mEndPoint.X ? mEndPoint.X : mStartPoint.X;
-            Int32 endX = mStartPoint.X < mEndPoint.X ? mEndPoint.X : mStartPoint.X;
-            Int32 beginY = mStartPoint.Y > mEndPoint.Y ? mEndPoint.Y : mStartPoint.Y;
-            Int32 endY = mStartPoint.Y < mEndPoint.Y ? mEndPoint.Y : mStartPoint.Y;
-            Int32 pitch = stride * beginY;
-            Single totalGray = 0;
-
-            for (Int32 m = beginY; m <= endY; ++m) {
-                for (Int32 n = beginX; n <= endX; ++n) {
-                    if ((Int32)(a * n + b) == m) {
-                        Single val = buffer[pitch + n];
+            for (int m = beginY; m <= endY; ++m) {
+                for (int n = beginX; n <= endX; ++n) {
+                    if ((int)(a * n + b) == m) {
+                        float val = buffer[pitch + n];
                         if (tempMin > val) {
                             tempMin = val;
                             minP.X = n;
@@ -584,24 +627,23 @@ namespace IRMonitor
             return ARESULT.S_OK;
         }
 
-        public override String Serialize()
+        public override string Serialize()
         {
             return JsonUtils.ObjectToJson(this);
         }
 
-        public override ARESULT Deserialize(
-            String data)
+        public override ARESULT Deserialize(string data)
         {
             LineSelection selection;
             try {
                 selection = JsonUtils.ObjectFromJson<LineSelection>(data);
+                if (selection == null) {
+                    return ARESULT.E_FAIL;
+                }
             }
             catch {
                 return ARESULT.E_FAIL;
             }
-
-            if (selection == null)
-                return ARESULT.E_FAIL;
 
             mSelectionId = selection.mSelectionId;
             mSelectionName = selection.mSelectionName;

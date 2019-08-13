@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace IRMonitor.Common
 {
@@ -7,32 +6,32 @@ namespace IRMonitor.Common
     public class SelectionUpdateParam
     {
         [DataMember(Name = "Id")]
-        public Int64 mId;
+        public long mId;
 
         [DataMember(Name = "Data")]
-        public String mData;
+        public string mData;
     }
 
     [DataContract]
     public class SelectionConfigUpdate
     {
         [DataMember(Name = "Id")]
-        public Int64 mId;
+        public long mId;
 
         [DataMember(Name = "Name")]
-        public String mName;
+        public string mName;
 
         [DataMember(Name = "Data")]
-        public String mData;
+        public string mData;
     }
 
     [DataContract]
     public class GroupSelectionUpdateParam
     {
         [DataMember(Name = "Id")]
-        public Int64 mId;
+        public long mId;
 
         [DataMember(Name = "Data")]
-        public String mData;
+        public string mData;
     }
 }

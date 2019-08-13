@@ -186,7 +186,7 @@ namespace IRMonitor.Services.Cell.Worker
             var userData = new UserData() {
                 temperature = Convert.ToBase64String(temperature),
                 selections = cell.GetAllSelectionInfo(),
-                groupSelections = cell.GetAllGroupSelectionInfo()
+                groupSelections = cell.GetAllSelectionGroupInfo()
             };
             var content = CompressUtils.Compress(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userData)));
             var header = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };

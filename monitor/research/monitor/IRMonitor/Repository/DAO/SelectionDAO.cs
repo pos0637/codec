@@ -11,7 +11,7 @@ namespace Repository.DAO
         /// <summary>
         /// 添加选区
         /// </summary>
-        public static ARESULT AddNewSelection(
+        public static ARESULT AddSelection(
             Int64 cellId,
             String data,
             Boolean isGlobalSelection,
@@ -44,8 +44,8 @@ namespace Repository.DAO
                     return ARESULT.S_OK;
                 }
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -76,8 +76,8 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret == 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -105,8 +105,8 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret == 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -135,8 +135,8 @@ namespace Repository.DAO
 
                 return ARESULT.S_OK;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -163,8 +163,8 @@ namespace Repository.DAO
                     .ToScalar<String>();
                 return global;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -198,8 +198,8 @@ namespace Repository.DAO
                 }
                 return strList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -251,8 +251,8 @@ namespace Repository.DAO
 
                 return ARESULT.S_OK;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL; ;
             }
             finally {

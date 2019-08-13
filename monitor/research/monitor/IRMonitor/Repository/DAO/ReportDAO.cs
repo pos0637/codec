@@ -74,8 +74,8 @@ namespace Repository.DAO
                 }
                 return info;
             }
-            catch (Exception ex){
-                Tracker.LogE(ex);
+            catch (Exception e){
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -149,8 +149,8 @@ namespace Repository.DAO
 
                 return info;
             }
-            catch (Exception ex){
-                Tracker.LogE(ex);
+            catch (Exception e){
+                Tracker.LogE(e);
                 return null;
             }
             finally {

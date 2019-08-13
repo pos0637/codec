@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace IRMonitor
 {
@@ -11,22 +10,22 @@ namespace IRMonitor
     {
         // ID
         [DataMember(Name = "SelectionId")]
-        public Int64 mGroupId;
+        public long mGroupId;
 
         // 最高温度
         [DataMember(Name = "MaxTemperature")]
-        public Single mMaxTemperature;
+        public float mMaxTemperature;
 
         // 温升
         [DataMember(Name = "TemperatureRise")]
-        public Single mTemperatureRise;
+        public float mTemperatureRise;
 
         // 温差
         [DataMember(Name = "TemperatureDif")]
-        public Single mTemperatureDif;
+        public float mTemperatureDif;
 
         // 相对温差
         [DataMember(Name = "RelTemperatureDif")]
-        public Single mRelTemperatureDif;
+        public float mRelTemperatureDif;
     }
 }

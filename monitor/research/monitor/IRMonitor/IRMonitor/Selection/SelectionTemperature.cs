@@ -4,32 +4,44 @@ using System.Runtime.Serialization;
 namespace IRMonitor
 {
     /// <summary>
-    /// 选区温度信息
+    /// 选区温度
     /// </summary>
     [DataContract]
-    public class SelectionTempData
+    public class SelectionTemperature
     {
-        // 所属选区ID
+        /// <summary>
+        /// 所属选区ID
+        /// </summary>
         [DataMember(Name = "SelectionId")]
         public long mSelectionId;
 
-        // 选区最低温度
+        /// <summary>
+        /// 选区最低温度
+        /// </summary>
         [DataMember(Name = "MinTemperature")]
         public float mMinTemperature;
 
-        // 选区最低温度位置
+        /// <summary>
+        /// 选区最低温度位置
+        /// </summary>
         [DataMember(Name = "MinPoint")]
         public Point mMinPoint;
 
-        // 选区最高温度
+        /// <summary>
+        /// 选区最高温度
+        /// </summary>
         [DataMember(Name = "MaxTemperature")]
         public float mMaxTemperature;
 
-        // 选区最高温度位置
+        /// <summary>
+        /// 选区最高温度位置
+        /// </summary>
         [DataMember(Name = "MaxPoint")]
         public Point mMaxPoint;
 
-        // 选区平均温度
+        /// <summary>
+        /// 选区平均温度
+        /// </summary>
         [DataMember(Name = "AvgTemperature")]
         public float mAvgTemperature;
     }

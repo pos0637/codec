@@ -37,8 +37,8 @@ namespace Repository.DAO
 
                 return (ret == 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -81,8 +81,8 @@ namespace Repository.DAO
 
                 return curveList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {

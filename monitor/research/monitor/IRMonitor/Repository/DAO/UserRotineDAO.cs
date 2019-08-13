@@ -38,8 +38,8 @@ namespace Repository.DAO
                 routine.mDevicePosition = dr["deviceposition"].ToString();
                 return routine;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -91,9 +91,9 @@ namespace Repository.DAO
                     return ARESULT.S_OK;
                 }
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {

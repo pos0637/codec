@@ -204,8 +204,8 @@ namespace Common
                 Array.Copy(bytes, 0, buf, 0, buf.Length);
                 return buf;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
         }

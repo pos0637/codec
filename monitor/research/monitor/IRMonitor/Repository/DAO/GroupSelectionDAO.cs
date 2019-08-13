@@ -40,8 +40,8 @@ namespace Repository.DAO
                     return ARESULT.S_OK;
                 }
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -73,8 +73,8 @@ namespace Repository.DAO
 
                 return (ret >= 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 connection.RollbackTransaction();
                 return ARESULT.E_FAIL;
             }
@@ -102,9 +102,9 @@ namespace Repository.DAO
 
                 return (ret >= 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -133,9 +133,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return ARESULT.S_OK;
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -171,8 +171,8 @@ namespace Repository.DAO
 
                 return groupList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {

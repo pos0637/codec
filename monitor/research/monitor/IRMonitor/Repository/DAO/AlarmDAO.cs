@@ -36,8 +36,8 @@ namespace Repository.DAO
                 }
                 return alarmList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -104,9 +104,9 @@ namespace Repository.DAO
 
                 return (ret >= 1 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -143,9 +143,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret > 0 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -175,9 +175,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret >= 0 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -216,9 +216,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret > 0 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -254,9 +254,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return (ret > 0 ? ARESULT.S_OK : ARESULT.E_FAIL);
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -329,8 +329,8 @@ namespace Repository.DAO
                 }
                 return alarmList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -370,9 +370,9 @@ namespace Repository.DAO
                 connection.CommitTransaction();
                 return ARESULT.S_OK;
             }
-            catch (Exception ex) {
+            catch (Exception e) {
                 connection.RollbackTransaction();
-                Tracker.LogE(ex);
+                Tracker.LogE(e);
                 return ARESULT.E_FAIL;
             }
             finally {
@@ -472,8 +472,8 @@ namespace Repository.DAO
                 }
                 return recordList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -530,8 +530,8 @@ namespace Repository.DAO
 
                 return imageList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -583,8 +583,8 @@ namespace Repository.DAO
 
                 return imageList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
@@ -626,8 +626,8 @@ namespace Repository.DAO
 
                 return strList;
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
+            catch (Exception e) {
+                Tracker.LogE(e);
                 return null;
             }
             finally {
