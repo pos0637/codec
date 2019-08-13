@@ -421,7 +421,7 @@ namespace IRMonitor.Services.Cell
             // 未开启告警录像，录像起始Id为 -1
             long recordId = -1;
             if (alarmInfo.mIsRecord) {
-                mRecordingWorker.Discard();
+                mRecordingWorker.Stop();
                 recordId = mCurrentRecordId;
                 alarmInfo.mIsRecord = false;
             }
@@ -1351,15 +1351,16 @@ namespace IRMonitor.Services.Cell
         /// <returns></returns>
         public ARESULT StartManualRecord(ref long recordId)
         {
-            mRecordingWorker.Discard();
+            mRecordingWorker.Start();
 
             long id = -1;
             if (ARESULT.AFAILED(AddManualRecord(ref id))) {
-                mRecordingWorker.Discard();
+                mRecordingWorker.Stop();
                 return ARESULT.E_FAIL;
             }
 
             recordId = id;
+
             return ARESULT.S_OK;
         }
 
@@ -1369,10 +1370,11 @@ namespace IRMonitor.Services.Cell
         /// <returns></returns>
         public ARESULT StopManualRecord(long recordId)
         {
-            mRecordingWorker.Discard();
+            mRecordingWorker.Stop();
 
-            if (ARESULT.AFAILED(UpdateManualRecord(recordId)))
+            if (ARESULT.AFAILED(UpdateManualRecord(recordId))) {
                 return ARESULT.E_FAIL;
+            }
 
             return ARESULT.S_OK;
         }

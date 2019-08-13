@@ -92,7 +92,7 @@ namespace IRMonitor.Services.Cell.Worker
             this.cell = cell;
             cell.OnImageCallback += OnImageCallback;
             cell.OnTempertureCallback += OnTemperatureCallback;
-            refbase = new RefBase(() => base.Discard());
+            refbase = new RefBase(() => { base.Discard(); base.Join(); });
 
             CreateImageBuffer(cell.mCell.mIRCameraWidth * cell.mCell.mIRCameraHeight);
             encoder.Initialize(cell.mCell.mIRCameraWidth, cell.mCell.mIRCameraHeight, cell.mCell.mIRCameraVideoFrameRate);
@@ -116,7 +116,7 @@ namespace IRMonitor.Services.Cell.Worker
         /// <summary>
         /// 停止录像
         /// </summary>
-        public override void Discard()
+        public void Stop()
         {
             refbase.Release();
         }
