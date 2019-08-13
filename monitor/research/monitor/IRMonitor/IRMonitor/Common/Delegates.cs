@@ -65,11 +65,10 @@ namespace IRMonitor
         public delegate void DgOnIrDisconnected();
 
         /// <summary>
-        /// 添加录像信息
+        /// 添加录像文件回调
         /// </summary>
-        public delegate ARESULT DgOnAddRecordInfo(
-            string videoFileName,
-            string selectionFileName);
+        /// <param name="filename">文件名</param>
+        public delegate void DgOnAddRecordInfo(string filename);
 
         /// <summary>
         /// 接收到短信

@@ -84,6 +84,7 @@ namespace IRMonitor.Services.Recording
 
             if (cell != null) {
                 cell.OnImageCallback -= OnImageCallback;
+                cell.OnTempertureCallback -= OnTemperatureCallback;
             }
 
             if (imageGCHandle.IsAllocated) {

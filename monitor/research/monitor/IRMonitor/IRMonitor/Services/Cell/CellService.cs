@@ -129,7 +129,6 @@ namespace IRMonitor.Services.Cell
 
             // 录像
             mRecordingWorker.OnAddRecord += new Delegates.DgOnAddRecordInfo(AddRecord);
-            OnImageCallback += new Delegates.DgOnImageCallback(mRecordingWorker.ReceiveImageData);
 
             // 温度处理
             mProcessingWorker.SetSelctionSampleRate(mTempCurveSample.mSelectionSample);
@@ -187,7 +186,7 @@ namespace IRMonitor.Services.Cell
             mGetIrDataWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraIp, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, device);
 
             // 录像线程初始化
-            mRecordingWorker.Init(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mCell.mIRCameraVideoFrameRate, mCell.mIRCameraTemperatureFrameRate, mCell.mIRCameraVideoFolder, mCell.mIRCameraVideoDuration, mSelectionList);
+            mRecordingWorker.Initialize(this);
 
             // 温度处理线程初始化
             mProcessingWorker.Initialize(mCell.mIRCameraWidth, mCell.mIRCameraHeight, mSelectionList, mSelectionGroupList);
@@ -295,7 +294,7 @@ namespace IRMonitor.Services.Cell
                 info.mIsRecord = false;
                 if (((alarmMode == (int)AlarmMode.Selection) && mAlarmNoticeConfig.mIsSelectionRecord)
                     || ((alarmMode == (int)AlarmMode.GroupSelection) && mAlarmNoticeConfig.mIsGroupSelectionRecord)) {
-                    mRecordingWorker.StartRecord();
+                    mRecordingWorker.Start();
                     recordId = mCurrentRecordId;
                     info.mIsRecord = true;
                 }
@@ -422,7 +421,7 @@ namespace IRMonitor.Services.Cell
             // 未开启告警录像，录像起始Id为 -1
             long recordId = -1;
             if (alarmInfo.mIsRecord) {
-                mRecordingWorker.StopRecord();
+                mRecordingWorker.Discard();
                 recordId = mCurrentRecordId;
                 alarmInfo.mIsRecord = false;
             }
@@ -1352,11 +1351,11 @@ namespace IRMonitor.Services.Cell
         /// <returns></returns>
         public ARESULT StartManualRecord(ref long recordId)
         {
-            mRecordingWorker.StartRecord();
+            mRecordingWorker.Discard();
 
             long id = -1;
             if (ARESULT.AFAILED(AddManualRecord(ref id))) {
-                mRecordingWorker.StopRecord();
+                mRecordingWorker.Discard();
                 return ARESULT.E_FAIL;
             }
 
@@ -1370,7 +1369,7 @@ namespace IRMonitor.Services.Cell
         /// <returns></returns>
         public ARESULT StopManualRecord(long recordId)
         {
-            mRecordingWorker.StopRecord();
+            mRecordingWorker.Discard();
 
             if (ARESULT.AFAILED(UpdateManualRecord(recordId)))
                 return ARESULT.E_FAIL;
@@ -1381,26 +1380,13 @@ namespace IRMonitor.Services.Cell
         /// <summary>
         /// 添加告警录像
         /// </summary>
-        /// <param name="date"></param>
-        /// <param name="videoFileName"></param>
-        /// <param name="irFileName"></param>
-        /// <param name="tableFileName"></param>
+        /// <param name="filename">文件名</param>
         /// <returns></returns>
-        public ARESULT AddRecord(
-            string videoFileName,
-            string selectionFileName)
+        public void AddRecord(string filename)
         {
             long id = -1;
-
-            if (ARESULT.AFAILED(RecordDAO.AddRecord(
-                mCell.mCellId,
-                videoFileName,
-                selectionFileName,
-                ref id)))
-                return ARESULT.E_FAIL;
-            else {
+            if (!ARESULT.AFAILED(RecordDAO.AddRecord(mCell.mCellId, filename, null, ref id))) {
                 mCurrentRecordId = id;
-                return ARESULT.S_OK;
             }
         }
 

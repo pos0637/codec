@@ -103,7 +103,10 @@ namespace Common
         public virtual ARESULT Start()
         {
             lock (mLock) {
-                if (mStatus != WorkerStatus.Idle) {
+                if (mStatus == WorkerStatus.Running) {
+                    return ARESULT.E_ALREADY_EXISTS;
+                }
+                else if (mStatus != WorkerStatus.Idle) {
                     return ARESULT.E_FAIL;
                 }
 

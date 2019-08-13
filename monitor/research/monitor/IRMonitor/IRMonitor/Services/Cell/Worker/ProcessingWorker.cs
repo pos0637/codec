@@ -515,8 +515,8 @@ namespace IRMonitor.Services.Cell.Worker
         {
             AlarmConfigData alarmSet;
             AlarmInfo info;
+            float temperature;
 
-            var temperature;
             switch (alarmType) {
                 case SelectionAlarmType.MaxTemp:
                     alarmSet = select.mAlarmConfig.mMaxTempConfig;

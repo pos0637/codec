@@ -1,396 +1,219 @@
 ﻿using Common;
 using IRMonitor.Common;
+using IRMonitor.Miscs;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
 namespace IRMonitor.Services.Cell.Worker
 {
-    /// <summary>
-    /// 帧类型
-    /// </summary>
-    public enum H264NALTYPE
-    {
-        H264NT_NAL = 0,
-        H264NT_SLICE,
-        H264NT_SLICE_DPA,
-        H264NT_SLICE_DPB,
-        H264NT_SLICE_DPC,
-        H264NT_SLICE_IDR,
-        H264NT_SEI,
-        H264NT_SPS,
-        H264NT_PPS,
-    };
-
-    /// <summary>
-    /// 录像线程
-    /// </summary>
     public class RecordingWorker : BaseWorker
     {
-        public event Delegates.DgOnAddRecordInfo OnAddRecord; // 添加录像文件记录
+        /// <summary>
+        /// 用户数据
+        /// </summary>
+        private struct UserData
+        {
+            /// <summary>
+            /// 温度数据
+            /// </summary>
+            public string temperature;
 
-        private FixedLenQueue<Byte[]> mVideoQueue = new FixedLenQueue<Byte[]>(1); // 图像队列
-        private Thread mVideoThread; // 图像录制线程
-        private Int32 mUserCount; // 计数
-        private Int32 mSpace = 2 * 1024 * 1024; // 单文件空间
-        private Int32 mWidth; // 宽度
-        private Int32 mHeight; // 高度
-        private Int32 mFrameNum; // 帧数
-        private Int32 mImageFrameRate; // 图像帧率
-        private Int32 mTempFramRate; // 温度帧率
-        private Int32 mRateScale; // 帧率比值
-        private String mRecordFolder; // 导出文件夹
-        private List<Selection> mSelectionList; // 选区链表
-        private Object mSyncEvent = new Object(); // 同步事件
-        private const Int32 mThumbnailWidth = 90; // 缩略图宽度
-        private const Int32 mThumbnailHeight = 60; // 缩略图高度
+            /// <summary>
+            /// 选区
+            /// </summary>
+            public string selections;
 
-        // H264缓冲区，size为灰度图的1.5倍
-        private Byte[] mImageBuf, mEncodeBuf;
-        private GCHandle mImageBufHandle, mEncodeBufHandle;
-        private IntPtr mImageBufAddr, mEncodeBufAddr;
-
-        private BinaryWriter mVideoBw;
-        private BinaryWriter mInfoBw;
-        private IFrameInfo mFrameInfo;
+            /// <summary>
+            /// 组选区
+            /// </summary>
+            public string groupSelections;
+        }
 
         /// <summary>
-        /// 是否有上一个I帧的数据
+        /// 添加录像文件记录事件
         /// </summary>
-        private Boolean mHasLastIFrame;
+        public event Delegates.DgOnAddRecordInfo OnAddRecord;
 
         /// <summary>
-        /// 上一个I帧的数据长度
+        /// 设备单元服务
         /// </summary>
-        public Int32 mLastIFrameLen = 0; // 最近一个I帧的长度
+        private CellService cell;
+
+        /// <summary>
+        /// 视频数据
+        /// </summary>
+        private byte[] image;
+
+        /// <summary>
+        /// 视频数据大小
+        /// </summary>
+        private int imageSize;
+
+        /// <summary>
+        /// GCHandle
+        /// </summary>
+        private GCHandle imageGCHandle;
+
+        /// <summary>
+        /// 温度数据
+        /// </summary>
+        private byte[] temperature;
+
+        /// <summary>
+        /// 编码器
+        /// </summary>
+        private Codec.Encoder encoder = new Codec.Encoder();
+
+        /// <summary>
+        /// 引用计数
+        /// </summary>
+        private RefBase refbase;
 
         ~RecordingWorker()
         {
-            if (mImageBufAddr != IntPtr.Zero)
-                mImageBufHandle.Free();
-
-            if (mEncodeBufAddr != IntPtr.Zero)
-                mEncodeBufHandle.Free();
-        }
-
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public ARESULT Init(
-            Int32 width,
-            Int32 height,
-            Int32 imageFrameRate,
-            Int32 tempFrameRate,
-            String floder,
-            Int32 space,
-            List<Selection> selectionList)
-        {
-            Int32 len = width * height;
-            mSpace = space;
-            mRecordFolder = floder;
-            mWidth = width;
-            mHeight = height;
-            mImageFrameRate = imageFrameRate;
-            mTempFramRate = tempFrameRate;
-            mRateScale = imageFrameRate / tempFrameRate;
-            mImageBuf = Enumerable.Repeat((Byte)0x80, (Int32)(len * 1.5)).ToArray();
-            mImageBufHandle = GCHandle.Alloc(mImageBuf, GCHandleType.Pinned);
-            mImageBufAddr = mImageBufHandle.AddrOfPinnedObject();
-            mEncodeBuf = new Byte[(Int32)(len * 1.5)];
-            mEncodeBufHandle = GCHandle.Alloc(mEncodeBuf, GCHandleType.Pinned);
-            mEncodeBufAddr = mEncodeBufHandle.AddrOfPinnedObject();
-            mSelectionList = selectionList;
-            return ARESULT.S_OK;
-        }
-
-        /// <summary>
-        /// 接收图像数据
-        /// </summary>
-        public void ReceiveImageData(Byte[] buf)
-        {
-            mVideoQueue.Enqueue(buf);
-        }
-
-        /// <summary>
-        /// 开始录像
-        /// </summary>
-        public void StartRecord()
-        {
-            Boolean first = false;
-            lock (mLock) {
-                if (mUserCount == 0) {
-                    Start();
-                    first = true;
-                }
-                mUserCount++;
+            if (cell != null) {
+                cell.OnImageCallback -= OnImageCallback;
+                cell.OnTempertureCallback -= OnTemperatureCallback;
             }
 
-            // 同步
-            if (first) {
-                lock (mSyncEvent) {
-                    Monitor.Wait(mSyncEvent);
-                }
+            if (imageGCHandle.IsAllocated) {
+                imageGCHandle.Free();
             }
         }
 
-        /// <summary>
-        /// 结束录像
-        /// </summary>
-        public void StopRecord()
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void Initialize(CellService cell)
         {
-            lock (mLock) {
-                mUserCount--;
-                if (mUserCount <= 0) {
-                    mUserCount = 0;
-                    NotifyToStop(ARESULT.S_OK);
-                }
+            this.cell = cell;
+            cell.OnImageCallback += OnImageCallback;
+            cell.OnTempertureCallback += OnTemperatureCallback;
+            refbase = new RefBase(() => base.Discard());
+
+            CreateImageBuffer(cell.mCell.mIRCameraWidth * cell.mCell.mIRCameraHeight);
+            encoder.Initialize(cell.mCell.mIRCameraWidth, cell.mCell.mIRCameraHeight, cell.mCell.mIRCameraVideoFrameRate);
+        }
+
+        /// <summary>
+        /// 启动录像
+        /// </summary>
+        /// <returns>启动结果</returns>
+        public override ARESULT Start()
+        {
+            var result = base.Start();
+            if ((result == ARESULT.S_OK) || (result == ARESULT.E_ALREADY_EXISTS)) {
+                refbase.AddRef();
+                return ARESULT.S_OK;
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 停止录像
+        /// </summary>
+        public override void Discard()
+        {
+            refbase.Release();
         }
 
         protected override void Run()
         {
             try {
-                while (!IsTerminated()) {
-                    DateTime time = DateTime.Now;
-                    String floderPath = String.Format("{0}/{1}-{2}-{3}", mRecordFolder, time.Year.ToString(),
-                        time.Month.ToString(), time.Day.ToString());
-
-                    // 跨越零点,重置
-                    DirectoryInfo folder = new DirectoryInfo(floderPath);
-                    if (!folder.Exists)
-                        folder.Create();
-
-                    String videoFileName = String.Format("{0}/{1}.H264", floderPath, time.ToString("yyyyMMddHHmmss"));
-                    FileStream vfs = new FileStream(videoFileName, FileMode.OpenOrCreate);
-                    mVideoBw = new BinaryWriter(vfs);
-
-                    String infoFileName = String.Format("{0}/{1}.Info", floderPath, time.ToString("yyyyMMddHHmmss"));
-                    FileStream ifs = new FileStream(infoFileName, FileMode.OpenOrCreate);
-                    mInfoBw = new BinaryWriter(ifs);
-
-                    OnAddRecord?.Invoke(videoFileName, infoFileName);
-                    lock (mSyncEvent) {
-                        Monitor.PulseAll(mSyncEvent);
-                    }
-
-                    // 头部，16个字节
-                    mFrameNum = 0;
-                    mInfoBw.Write(BitConverter.GetBytes(mWidth));
-                    mInfoBw.Write(BitConverter.GetBytes(mHeight));
-                    mInfoBw.Write(BitConverter.GetBytes(mFrameNum));
-                    mInfoBw.Write(BitConverter.GetBytes(mImageFrameRate));
-
-                    // 无数据时,阻塞
-                    if (mVideoQueue.Count <= 0)
-                        mVideoQueue.Wait();
-
-                    if (IsTerminated()) {
-                        mInfoBw.BaseStream.Seek(8, SeekOrigin.Begin);
-                        mInfoBw.Write(BitConverter.GetBytes(mFrameNum)); // 写入帧数
-                        mInfoBw.Close();
-                        return;
-                    }
-
-                    // 缩略图
-                    Byte[] buf = mVideoQueue.Dequeue();
-                    if (buf == null)
-                        break;
-                    /*
-                    using (Image img = ImageGenerater.CreateBitmap(buf, mWidth, mHeight)) {
-                        Image img2 = img.GetThumbnailImage(mThumbnailWidth, mThumbnailHeight, null, IntPtr.Zero);
-                        Byte[] bytes = Utils.GetBytesByImage(img2);
-                        img2.Dispose();
-
-                        mInfoBw.Write(bytes.Length);
-                        mInfoBw.Write(bytes);
-                    }
-                    */
-
-                    // 只存带后缀的文件名
-                    mFrameInfo.mVideoFileName = Path.GetFileName(videoFileName);
-
-                    // 开启线程录制
-                    mVideoThread = new Thread(RecordVideoThread);
-                    mVideoThread.Start();
-                    mVideoThread.Join();
-
-                    mVideoBw.Close();
-                    vfs.Close();
-
-                    mInfoBw.BaseStream.Seek(8, SeekOrigin.Begin);
-                    mInfoBw.Write(BitConverter.GetBytes(mFrameNum)); // 写入帧数
-                    mInfoBw.Close();
-                    ifs.Close();
+                // 创建目录
+                var now = DateTime.Now;
+                var folder = $"{Global.gRecordingsFolder}/{now.Year}-{now.Month}-{now.Day}";
+                var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}.h264";
+                if (!Directory.Exists(folder)) {
+                    Directory.CreateDirectory(folder);
                 }
+
+                encoder.Stop();
+                encoder.Start(filename);
+                OnAddRecord?.Invoke(filename);
             }
-            catch (Exception ex) {
-                Tracker.LogE(ex);
-            }
-
-            lock (mSyncEvent) {
-                Monitor.PulseAll(mSyncEvent);
-            }
-        }
-
-        public override void Discard()
-        {
-            lock (mSyncEvent) {
-                Monitor.PulseAll(mSyncEvent);
-            }
-            OnAddRecord = null;
-            base.Discard();
-            mVideoQueue.Notify();
-        }
-
-        /// <summary>
-        /// 获取H264的帧类别
-        /// </summary>
-        /// <param name="buf">缓存</param>
-        /// <param name="len">缓存长度</param>
-        /// <returns></returns>
-        private H264NALTYPE H264GetNALType(Byte[] buf, Int32 len)
-        {
-            // 不完整的NAL单元
-            if (len < 5)
-                return H264NALTYPE.H264NT_NAL;
-
-            // NAL类型在固定的位置上 
-            Int32 nType = buf[4] & 0x1F;
-            if (nType <= (Int32)H264NALTYPE.H264NT_PPS)
-                return (H264NALTYPE)nType;
-
-            return H264NALTYPE.H264NT_NAL;
-        }
-
-        /// <summary>
-        /// 图像录制线程
-        /// </summary>
-        /// <param name="vbw">二进制写入器</param>
-        private void RecordVideoThread()
-        {
-            Int32 len = 0;
-            H264NALTYPE type = H264NALTYPE.H264NT_NAL;
-            Int32 count = 0;
-
-            // 文件头添加I帧
-            if (mHasLastIFrame) {
-                mVideoBw.Write(mEncodeBuf, 0, mLastIFrameLen);
-                mFrameInfo.mIsIFrame = true;
-                mFrameInfo.mSelectionDatalength = 0;
-                mFrameInfo.mVideoPosition = len;
-                mFrameInfo.mVideoLength = mLastIFrameLen;
-
-                Byte[] infoData = Utils.StructureToByte(mFrameInfo);
-                mInfoBw.Write(infoData.Length);
-                mInfoBw.Write(infoData, 0, infoData.Length);
-                mFrameNum += 1;
-                len += mLastIFrameLen;
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return;
             }
 
-            // 添加mHasLastIFrame 和 hasLength 两个状态，保证每个头文件都是以I帧开头
-            Boolean hasLength = false;
-            while (((len < mSpace) || hasLength) && !IsTerminated()) {
-                // 无数据时,阻塞
-                if (mVideoQueue.Count <= 0)
-                    mVideoQueue.Wait();
-
-                if (IsTerminated())
+            while (!IsTerminated()) {
+                try {
+                    IntPtr addr = imageGCHandle.AddrOfPinnedObject();
+                    encoder.Encode(addr, addr + imageSize, addr + imageSize + imageSize / 4);
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                    encoder.Stop();
                     return;
-
-                mFrameInfo.mIsIFrame = false;
-                mFrameInfo.mSelectionDatalength = 0;
-
-                // 取数据编码
-                Byte[] buf = mVideoQueue.Dequeue();
-                if (buf == null)
-                    break;
-
-                buf.CopyTo(mImageBuf, 0);
-                Int32 encoderLen = 0;
-                if (encoderLen <= 0)
-                    continue;
-
-                // 判断是否I帧
-                type = H264GetNALType(mEncodeBuf, encoderLen);
-                if (type == H264NALTYPE.H264NT_SPS) {
-                    mFrameInfo.mIsIFrame = true;
-                    mLastIFrameLen = encoderLen;
-                    if (hasLength) {
-                        mHasLastIFrame = true;
-                        break;
-                    }
                 }
 
-                // 写入图像数据
-                mVideoBw.Write(mEncodeBuf, 0, encoderLen);
-                mVideoBw.Flush();
+                Thread.Sleep(1000 / cell.mCell.mIRCameraVideoFrameRate);
+            }
 
-                mFrameInfo.mVideoPosition = len;
-                mFrameInfo.mVideoLength = encoderLen;
-                len += encoderLen;
-                count++;
-
-                if (count >= mRateScale) {
-                    if (mSelectionList.Count > 0) {
-                        String str = GetSelectionData();
-                        Byte[] selectionData = Encoding.UTF8.GetBytes(str);
-                        mFrameInfo.mSelectionDatalength = selectionData.Length;
-                        Byte[] infoData = Utils.StructureToByte(mFrameInfo);
-                        mInfoBw.Write(infoData.Length);
-                        mInfoBw.Write(infoData, 0, infoData.Length);
-                        mInfoBw.Write(selectionData, 0, selectionData.Length); // 写入选区数据
-                        mFrameNum += 1;
-                    }
-                    else {
-                        mFrameInfo.mSelectionDatalength = 0;
-                        Byte[] infoData = Utils.StructureToByte(mFrameInfo);
-                        mInfoBw.Write(infoData.Length);
-                        mInfoBw.Write(infoData, 0, infoData.Length);
-                        mFrameNum += 1;
-                    }
-
-                    count = 0;
-                }
-                else {
-                    Byte[] infoData = Utils.StructureToByte(mFrameInfo);
-                    mInfoBw.Write(infoData.Length);
-                    mInfoBw.Write(infoData, 0, infoData.Length);
-                    mFrameNum += 1;
-                }
-
-                if (len >= mSpace)
-                    hasLength = true;
+            try {
+                encoder.Encode(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                encoder.Stop();
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
             }
         }
 
-        /// <summary>
-        /// 序列化选区数据
-        /// </summary>
-        private String GetSelectionData()
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void OnImageCallback(byte[] data)
         {
-            // 按帧率记录选区数据
-            String str = "";
-            Single maxTemp = 0.0f;
-            Single minTemp = 0.0f;
-            lock (mSelectionList) {
-                foreach (Selection item in mSelectionList) {
-                    if (item.mIsGlobalSelection) {
-                        maxTemp = item.mTemperatureData.mMaxTemperature;
-                        minTemp = item.mTemperatureData.mMinTemperature;
-                    }
-                    String var = item.Serialize();
-                    if (var != null)
-                        str += var + ",";
-                }
+            if ((image == null) || (image.Length != data.Length * 3 / 2)) {
+                CreateImageBuffer(data.Length);
             }
 
-            str = "[" + str.Remove(str.Length - 1, 1) + "]";
-            str = String.Format("{0},{1},{2}", maxTemp, minTemp, str);
-            return str;
+            data.CopyTo(image, 0);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void OnTemperatureCallback(float[] data)
+        {
+            if ((temperature == null) || (temperature.Length != data.Length)) {
+                temperature = new byte[data.Length * 4];
+            }
+
+            Buffer.BlockCopy(data, 0, temperature, 0, temperature.Length);
+
+            var userData = new UserData() {
+                temperature = Convert.ToBase64String(temperature),
+                selections = cell.GetAllSelectionInfo(),
+                groupSelections = cell.GetAllGroupSelectionInfo()
+            };
+            var content = CompressUtils.Compress(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userData)));
+            var header = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
+            var length = BitConverter.GetBytes(content.Length);
+
+            var sei = new byte[header.Length + length.Length + content.Length];
+            Buffer.BlockCopy(header, 0, sei, 0, header.Length);
+            Buffer.BlockCopy(length, 0, sei, header.Length, length.Length);
+            Buffer.BlockCopy(content, 0, sei, header.Length + length.Length, content.Length);
+            encoder.EncodeSEI(sei);
+        }
+
+        /// <summary>
+        /// 创建视频数据
+        /// </summary>
+        /// <param name="size">原始数据大小</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void CreateImageBuffer(int size)
+        {
+            if (imageGCHandle.IsAllocated) {
+                imageGCHandle.Free();
+            }
+
+            // 分配YUV视频数据空间
+            imageSize = size;
+            image = new byte[imageSize * 3 / 2];
+            imageGCHandle = GCHandle.Alloc(image, GCHandleType.Pinned);
         }
     }
 }

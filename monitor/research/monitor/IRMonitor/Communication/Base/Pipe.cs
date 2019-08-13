@@ -1,5 +1,5 @@
-﻿using Common;
-using IRMonitor.Miscs;
+﻿using IRMonitor.Miscs;
+using Miscs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
