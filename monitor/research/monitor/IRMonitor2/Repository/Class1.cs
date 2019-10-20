@@ -28,7 +28,7 @@ namespace Repository
                     new SqliteParameter("Content", "123456")
                 };
 
-                Database.ExecuteSqlCommand("update t_test_post set Title=@Title Content=@Content where Id>0", parameters);
+                Database.ExecuteSqlCommand("UPDATE t_test_post SET Title=@Title, Content=@Content WHERE PostId>0", parameters);
             }
         }
 
