@@ -47,7 +47,7 @@ namespace Communication
         /// <param name="offset">偏移</param>
         /// <param name="length">长度</param>
         /// <returns>协议数据</returns>
-        public static byte[] Build(SessionPipe pipe, byte[] buffer, int offset, int length)
+        public static byte[] Build(Pipe pipe, byte[] buffer, int offset, int length)
         {
             var headerLength = CLIENT_ID_LENGTH + CLIENT_ID_LENGTH + SESSION_ID_LENGTH;
             var data = new byte[headerLength + length];

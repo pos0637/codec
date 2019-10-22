@@ -29,7 +29,7 @@ namespace Communication
         /// <summary>
         /// 会话列表
         /// </summary>
-        protected List<SessionPipe> sessionList = new List<SessionPipe>();
+        protected List<Pipe> sessionList = new List<Pipe>();
 
         /// <summary>
         /// 会话计数器
@@ -41,7 +41,7 @@ namespace Communication
         /// </summary>
         /// <param name="sessionId">会话索引</param>
         /// <param name="pipe">会话</param>
-        public virtual void AddSession(string sessionId, SessionPipe pipe)
+        public virtual void AddSession(string sessionId, Pipe pipe)
         {
             // 添加并同步SessionId
             sessions.Add(sessionId, pipe);
@@ -54,9 +54,9 @@ namespace Communication
         /// </summary>
         /// <param name="sessionId">会话索引</param>
         /// <returns>会话通讯管道</returns>
-        public SessionPipe GetSession(string sessionId)
+        public Pipe GetSession(string sessionId)
         {
-            return sessions[sessionId] as SessionPipe;
+            return sessions[sessionId] as Pipe;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Communication
         /// <param name="dstId">目标客户端索引</param>
         /// <param name="sessionId">会话索引</param>
         /// <returns>会话</returns>
-        protected abstract SessionPipe OnNewSession(string srcId, string dstId, string sessionId);
+        protected abstract Pipe OnNewSession(string srcId, string dstId, string sessionId);
 
         /// <summary>
         /// 接收数据
@@ -112,7 +112,7 @@ namespace Communication
                 while (runningFlag) {
                     DateTime now = DateTime.Now;
                     lock (this) {
-                        var list = new List<SessionPipe>();
+                        var list = new List<Pipe>();
                         sessionList.ForEach(pipe => {
                             if ((now - pipe.GetLastActiveTime()).Milliseconds > MAX_KEEP_ALIVE_DURATION) {
                                 list.Add(pipe);

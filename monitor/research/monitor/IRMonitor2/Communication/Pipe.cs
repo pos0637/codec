@@ -5,7 +5,7 @@ namespace Communication
     /// <summary>
     /// 通讯管道
     /// </summary>
-    public abstract class SessionPipe : IDisposable
+    public abstract class Pipe : IDisposable
     {
         /// <summary>
         /// 源客户端索引
@@ -33,7 +33,7 @@ namespace Communication
         /// <param name="srcId">源客户端索引</param>
         /// <param name="dstId">目标客户端索引</param>
         /// <param name="sessionId">会话索引</param>
-        public SessionPipe(string srcId, string dstId, string sessionId)
+        public Pipe(string srcId, string dstId, string sessionId)
         {
             this.srcId = srcId;
             this.dstId = dstId;
