@@ -16,8 +16,13 @@ namespace Miscs
         /// <returns>子数组</returns>
         public static T[] SubArray<T>(this T[] data, int index)
         {
+            if (index == 0) {
+                return data;
+            }
+
             T[] result = new T[data.Length - index];
             Array.Copy(data, index, result, 0, data.Length - index);
+
             return result;
         }
 
@@ -31,8 +36,13 @@ namespace Miscs
         /// <returns>子数组</returns>
         public static T[] SubArray<T>(this T[] data, int index, int length)
         {
+            if ((index == 0) && ((length < 0) || (length == data.Length))) {
+                return data;
+            }
+
             T[] result = new T[length];
             Array.Copy(data, index, result, 0, length);
+
             return result;
         }
     }

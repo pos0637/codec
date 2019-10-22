@@ -1,5 +1,10 @@
-﻿using System;
+﻿using Common;
+using Communication;
+using IRMonitor2.Common;
+using System;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using static Repository.Class1;
 
 namespace IRMonitor2
@@ -8,6 +13,9 @@ namespace IRMonitor2
     {
         static void Main(string[] args)
         {
+            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, "1234");
+
+            /*
             using (var db = new BloggingContext()) {
                 db.Database.EnsureCreated();
                 db.Query();
@@ -37,6 +45,17 @@ namespace IRMonitor2
                 Console.WriteLine("Delete the blog");
                 db.Remove(blog);
                 db.SaveChanges();
+            }
+            */
+
+            while (true) {
+                Thread.Sleep(3000);
+                try {
+                    manager.Get().Send("9999", Encoding.UTF8.GetBytes("Hello"), 0, -1);
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                }
             }
         }
     }
