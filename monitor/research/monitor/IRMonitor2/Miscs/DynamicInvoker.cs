@@ -10,7 +10,7 @@ namespace Miscs
     /// <summary>
     /// 动态调用器
     /// </summary>
-    public class DynamicInvoker
+    public static class DynamicInvoker
     {
         /// <summary>
         /// 调用类静态方法
@@ -22,8 +22,11 @@ namespace Miscs
         public static dynamic JsonRpcInvoke(Type clazz, Dictionary<string, object> arguments, byte[] data)
         {
             try {
-                var rpc = JsonConvert.DeserializeObject<JsonRpcRequest>(Encoding.UTF8.GetString(data));
-                var method = clazz.GetMethod(rpc.method);
+                var requestJson = Encoding.UTF8.GetString(data);
+                Tracker.LogD($"JsonRpcInvoke request: {requestJson}");
+
+                var request = JsonConvert.DeserializeObject<JsonRpcRequest>(requestJson);
+                var method = clazz.GetMethod(request.method);
                 if (method == null) {
                     throw new ArgumentException();
                 }
@@ -35,19 +38,19 @@ namespace Miscs
                     var name = parameters[i].Name;
 
                     try {
-                        if ((arguments != null) && (arguments.ContainsKey(name))) {
+                        if ((arguments != null) && arguments.ContainsKey(name)) {
                             args.Add(arguments[name]);
                             continue;
                         }
 
                         // 简单类型转换
-                        var obj = Convert.ChangeType(rpc.parameters[name], type);
+                        var obj = Convert.ChangeType(request.parameters[name], type);
                         args.Add(obj);
                     }
                     catch {
                         try {
                             // 复杂类型转换
-                            var json = JsonConvert.SerializeObject(rpc.parameters[name]);
+                            var json = JsonConvert.SerializeObject(request.parameters[name]);
                             var obj = Activator.CreateInstance(type);
                             obj = JsonConvert.DeserializeAnonymousType(json, obj);
                             args.Add(obj);
@@ -58,7 +61,42 @@ namespace Miscs
                     }
                 }
 
-                return method.Invoke(null, args.ToArray());
+                try {
+                    dynamic result = method.Invoke(null, args.ToArray());
+                    if (result == null) {
+                        Tracker.LogD("JsonRpcInvoke response: null");
+                        return null;
+                    }
+
+                    if (Type.GetType(result) != typeof(Dictionary<string, object>)) {
+                        result = new Dictionary<string, object>() { { "data", result } };
+                    }
+
+                    var JsonRpcResult = new JsonRpcResult() {
+                        version = request.version,
+                        result = result,
+                        id = request.id
+                    };
+
+                    var response = JsonConvert.SerializeObject(JsonRpcResult);
+                    Tracker.LogD($"JsonRpcInvoke response: {response}");
+                    return Encoding.UTF8.GetBytes(response);
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                    var JsonRpcError = new JsonRpcError() {
+                        version = request.version,
+                        error = new Error() {
+                            code = -32000,
+                            message = e.Message
+                        },
+                        id = request.id
+                    };
+
+                    var response = JsonConvert.SerializeObject(JsonRpcError);
+                    Tracker.LogD($"JsonRpcInvoke response: {response}");
+                    return Encoding.UTF8.GetBytes(response);
+                }
             }
             catch (Exception e) {
                 Tracker.LogE(e);

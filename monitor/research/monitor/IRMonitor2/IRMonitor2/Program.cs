@@ -3,8 +3,6 @@ using Communication;
 using IRMonitor2.Common;
 using Miscs;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace IRMonitor2
@@ -13,7 +11,7 @@ namespace IRMonitor2
     {
         static void Main(string[] args)
         {
-            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, "1234");
+            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, Global.gClientId);
 
             /*
             using (var db = new BloggingContext()) {
@@ -48,18 +46,22 @@ namespace IRMonitor2
             }
             */
 
+            Tls.Register("Session");
             manager.OnReceiveEvent += (session, data) => {
-                DynamicInvoker.JsonRpcInvoke(typeof(Controller), new Dictionary<string, object>() { { "session", session } }, data);
-            };
-
-            while (true) {
-                Thread.Sleep(3000);
+                Tls.Set("Session", session);
                 try {
-                    manager.Get().Send("9999", Encoding.UTF8.GetBytes("Hello"), 0, -1);
+                    var result = DynamicInvoker.JsonRpcInvoke(typeof(Controller), null, data);
+                    if (result != null) {
+                        session.Send(result, 0, -1);
+                    }
                 }
                 catch (Exception e) {
                     Tracker.LogE(e);
                 }
+            };
+
+            while (true) {
+                Thread.Sleep(3000);
             }
         }
     }

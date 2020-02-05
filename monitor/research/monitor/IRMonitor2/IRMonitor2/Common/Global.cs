@@ -8,6 +8,11 @@ namespace IRMonitor2.Common
     public static class Global
     {
         /// <summary>
+        /// 客户端索引
+        /// </summary>
+        public static string gClientId = ConfigurationManager.AppSettings["ClientId"];
+
+        /// <summary>
         /// 云端IP
         /// </summary>
         public static string gCloudIP = ConfigurationManager.AppSettings["CloudIP"];

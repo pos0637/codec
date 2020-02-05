@@ -4,18 +4,13 @@ namespace IRMonitor2
 {
     public class Controller
     {
-        public class Test
-        {
-            public string a;
-            public int b;
-        }
-
-        public static void foo(string a, int b)
+        public static string login(string username, string password)
         {
             Tracker.LogI("foo");
+            return "success";
         }
 
-        public static void bar(string a, Test b)
+        public static void logout()
         {
             Tracker.LogI("bar");
         }

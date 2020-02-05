@@ -113,11 +113,13 @@ namespace Communication
         /// <returns>会话索引</returns>
         private string GenerateSessionId()
         {
-            for (int i = 0; i < MAX_SESSIONS; ++i) {
-                sessionCounter = (++sessionCounter) % 9999;
-                var sessionId = $"{sessionCounter:D4}";
-                if (GetNamedSession(sessionId) == null) {
-                    return sessionId;
+            lock (sessionsLock) {
+                for (int i = 0; i < MAX_SESSIONS; ++i) {
+                    sessionCounter = (++sessionCounter) % 9999;
+                    var sessionId = $"{sessionCounter:D4}";
+                    if (GetNamedSession(sessionId) == null) {
+                        return sessionId;
+                    }
                 }
             }
 
@@ -176,8 +178,12 @@ namespace Communication
 
             var session = Get(sessionId);
             if (session != null) {
-                session.dstId = protocol.DstId;
+                session.dstId = protocol.SrcId;
                 session.LastActiveTime = DateTime.Now;
+            }
+
+            if ((protocol.Data == null) || (protocol.Data.Length == 0)) {
+                return;
             }
 
             OnReceiveEvent.Invoke(session, protocol.Data);

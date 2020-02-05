@@ -56,6 +56,17 @@ namespace Communication
         /// <summary>
         /// 发送数据
         /// </summary>
+        /// <param name="data">数据</param>
+        /// <param name="offset">偏移</param>
+        /// <param name="length">长度</param>
+        public virtual void Send(byte[] data, int offset, int length)
+        {
+            Send(this.dstId, data, offset, length);
+        }
+
+        /// <summary>
+        /// 发送数据
+        /// </summary>
         /// <param name="dstId">目标客户端索引</param>
         /// <param name="data">数据</param>
         /// <param name="offset">偏移</param>
