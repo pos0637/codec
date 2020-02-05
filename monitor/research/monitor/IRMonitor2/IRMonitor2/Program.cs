@@ -1,11 +1,11 @@
 ﻿using Common;
 using Communication;
 using IRMonitor2.Common;
+using Miscs;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using static Repository.Class1;
 
 namespace IRMonitor2
 {
@@ -47,6 +47,10 @@ namespace IRMonitor2
                 db.SaveChanges();
             }
             */
+
+            manager.OnReceiveEvent += (session, data) => {
+                DynamicInvoker.JsonRpcInvoke(typeof(Controller), new Dictionary<string, object>() { { "session", session } }, data);
+            };
 
             while (true) {
                 Thread.Sleep(3000);
