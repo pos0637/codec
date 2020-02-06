@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{adfe4f40-0e96-4619-851b-530fefccb29b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{45dbfd9b-4dd7-4564-8812-56d699f25990}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceDiscovery.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenICam.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GigEVision.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Gvcp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Gvsp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mutex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Thread.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UdpSocket.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EbusDevice.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Tracker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\DeviceDiscovery.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenICam.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GigEVision.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gvcp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gvsp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UdpSocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EbusDevice.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tracker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
