@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace Common
@@ -16,22 +15,22 @@ namespace Common
         /// <param name="oldPriority">原有消息的优先级</param>
         /// <param name="newPriority">新消息的优先级</param>
         /// <returns>比较结果</returns>
-        public delegate Int32 PriorityCompareHandler(T oldPriority, T newPriority);
+        public delegate int PriorityCompareHandler(T oldPriority, T newPriority);
 
         /// <summary>
         /// 事件
         /// </summary>
-        private Object mEvent = new Object();
+        private readonly object mEvent = new object();
 
         /// <summary>
         /// 存储泛型链表
         /// </summary>
-        private List<T> mPriorityList = new List<T>();
+        private readonly List<T> mPriorityList = new List<T>();
 
         /// <summary>
         /// 消息优先级比较器
         /// </summary>
-        private PriorityCompareHandler mCompare;
+        private readonly PriorityCompareHandler mCompare;
 
         /// <summary>
         /// 构造函数
@@ -52,9 +51,9 @@ namespace Common
         /// <param name="item">消息对象</param>
         public void Enqueue(T item)
         {
-            Boolean hasFind = false;
+            var hasFind = false;
             lock (mPriorityList) {
-                for (Int32 i = mPriorityList.Count - 1; i >= 0; i--) {
+                for (var i = mPriorityList.Count - 1; i >= 0; i--) {
                     if (mCompare(mPriorityList[i], item) <= 0) {
                         mPriorityList.Insert(i + 1, item);
                         hasFind = true;
@@ -85,14 +84,14 @@ namespace Common
                 }
             }
 
-            return default(T);
+            return default;
         }
 
         /// <summary>
         /// 获取链表元素个数
         /// </summary>
         /// <returns>链表元素个数</returns>
-        public Int32 Size()
+        public int Size()
         {
             return mPriorityList.Count;
         }
@@ -101,7 +100,7 @@ namespace Common
         /// 等待事件锁重新获取
         /// </summary>
         /// <returns></returns>
-        public Boolean Wait()
+        public bool Wait()
         {
             lock (mEvent) {
                 return Monitor.Wait(mEvent);

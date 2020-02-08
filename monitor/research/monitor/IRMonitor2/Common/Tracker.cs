@@ -9,7 +9,7 @@ namespace Common
     /// <summary>
     /// 日志类型
     /// </summary>
-    public class Tracker
+    public static class Tracker
     {
         static Tracker()
         {

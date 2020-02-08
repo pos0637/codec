@@ -1,0 +1,32 @@
+﻿information:
+  province: 
+  city: 
+  company: 
+  manager: 
+  tester: 
+  substation: 
+  location: 
+  saveVideoPath: 
+  saveImagePath: 
+cells:
+- name: cell0
+  devices:
+  - category: IrCamera
+    model: HIKVision
+    version: 1.0
+    serialNumber: 
+    irCameraDeviceParameters:
+      ip: 
+      width: 160
+      stride: 160
+      height: 120
+      bpp: 4
+      videoFrameRate: 30
+      temperatureFrameRate: 1
+      emissivity: 
+      reflectedTemperature: 
+      transmission: 
+      atmosphericTemperature: 
+      relativeHumidity: 
+      distance: 
+    cameraDeviceParameters: 

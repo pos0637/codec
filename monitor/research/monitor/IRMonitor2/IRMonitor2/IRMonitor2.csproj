@@ -6,12 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\Cell\Worker\GetIrDataWorker.cs" />
+    <Compile Remove="Services\Cell\Worker\ProcessingWorker.cs" />
+    <Compile Remove="Services\Cell\Worker\RealtimeNoticeWorker.cs" />
+    <Compile Remove="Services\Cell\Worker\RecordingWorker.cs" />
+    <Compile Remove="Services\Cell\Worker\SmsServiceWorker.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Communication\Communication.csproj" />
+    <ProjectReference Include="..\Devices\Devices.csproj" />
     <ProjectReference Include="..\Miscs\Miscs.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
     <ProjectReference Include="..\Resources\Resources.csproj" />
@@ -24,8 +33,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Selection\" />
-    <Folder Include="Services\Cell\" />
+    <None Include="Services\Cell\Worker\GetIrDataWorker.cs" />
+    <None Include="Services\Cell\Worker\ProcessingWorker.cs" />
+    <None Include="Services\Cell\Worker\RealtimeNoticeWorker.cs" />
+    <None Include="Services\Cell\Worker\RecordingWorker.cs" />
+    <None Include="Services\Cell\Worker\SmsServiceWorker.cs" />
   </ItemGroup>
 
 </Project>

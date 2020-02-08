@@ -11,8 +11,6 @@ namespace IRMonitor2
     {
         static void Main(string[] args)
         {
-            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, Global.gClientId);
-
             /*
             using (var db = new BloggingContext()) {
                 db.Database.EnsureCreated();
@@ -46,9 +44,33 @@ namespace IRMonitor2
             }
             */
 
+            var configuration = Repository.Repository.LoadConfiguation();
+
+            // 初始化通讯会话管理器
+            InitializeSessionManager();
+
+            while (true) {
+                Thread.Sleep(3000);
+            }
+        }
+
+        /// <summary>
+        /// 初始化通讯会话管理器
+        /// </summary>
+        private static void InitializeSessionManager()
+        {
+            // 创建通讯会话管理器
+            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, Global.gClientId);
+
+            // 注册会话
             Tls.Register("Session");
+
+            // 注册收到数据事件回调函数
             manager.OnReceiveEvent += (session, data) => {
+                // 设置会话
                 Tls.Set("Session", session);
+
+                // 调用方法
                 try {
                     var result = DynamicInvoker.JsonRpcInvoke(typeof(Controller), null, data);
                     if (result != null) {
@@ -59,10 +81,6 @@ namespace IRMonitor2
                     Tracker.LogE(e);
                 }
             };
-
-            while (true) {
-                Thread.Sleep(3000);
-            }
         }
     }
 }

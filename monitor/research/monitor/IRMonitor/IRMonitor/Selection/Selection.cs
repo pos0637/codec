@@ -269,7 +269,7 @@ namespace IRMonitor
     [DataContract]
     public class RectangleSelection : Selection
     {
-        [DataMember(Name = "Rectangle")]
+        [DataMember]
         public Rectangle mRectangle;
 
         public RectangleSelection()
