@@ -38,10 +38,7 @@ namespace IRMonitor2.Services.Cell
                 service.Initialize(new Dictionary<string, object>() { ["cell"] = cell });
 
                 // 开启设备单元服务
-                if (ARESULT.AFAILED(service.Start())) {
-                    Tracker.LogI($"CellService: {cell.name} Start FAIL");
-                    return ARESULT.E_FAIL;
-                }
+                service.Start();
 
                 AddService(cell.name, service);
                 Tracker.LogI($"CellService: {cell.name} Start SUCCEED");

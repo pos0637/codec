@@ -37,7 +37,7 @@ namespace Repository
                     new SqliteParameter("Content", "123456")
                 };
 
-                Database.ExecuteSqlCommand("UPDATE t_test_post SET Title=@Title, Content=@Content WHERE PostId>0", parameters);
+                Database.ExecuteSqlRaw("UPDATE t_test_post SET Title=@Title, Content=@Content WHERE PostId>0", parameters);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Repository
         public static Selections LoadSelections()
         {
             try {
-                using var sr = new StreamReader(SelectionsConfigurationPath, Encoding.UTF8);                
+                using var sr = new StreamReader(SelectionsConfigurationPath, Encoding.UTF8);
                 return JsonUtils.ObjectFromJson<Selections>(sr.ReadToEnd());
             }
             catch (Exception e) {

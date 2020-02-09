@@ -1,6 +1,7 @@
 ﻿using Common;
 using Communication;
 using IRMonitor2.Common;
+using IRMonitor2.Services.Cell;
 using Miscs;
 using System;
 using System.Threading;
@@ -44,10 +45,11 @@ namespace IRMonitor2
             }
             */
 
-            var configuration = Repository.Repository.LoadConfiguation();
-
             // 初始化通讯会话管理器
             InitializeSessionManager();
+
+            // 初始化设备单元服务管理器
+            CellServiceManager.Instance.Initialize();
 
             while (true) {
                 Thread.Sleep(3000);

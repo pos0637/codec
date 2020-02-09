@@ -14,12 +14,12 @@ namespace Devices
         /// <summary>
         /// 动态链接库路径
         /// </summary>
-        private readonly string mDevicePath = Directory.GetCurrentDirectory();
+        private readonly string driverPath = Directory.GetCurrentDirectory();
 
         /// <summary>
         /// 设备类型哈希表
         /// </summary>
-        private Hashtable mDeviceTypeList = Hashtable.Synchronized(new Hashtable());
+        private readonly Hashtable deviceTypeList = Hashtable.Synchronized(new Hashtable());
 
         /// <summary>
         /// 构造函数 
@@ -39,11 +39,12 @@ namespace Devices
         public IDevice GetDevice(long id, string typeName, string name)
         {
             Type deviceType;
-            lock (mDeviceTypeList) {
-                if (!mDeviceTypeList.Contains(typeName))
+            lock (deviceTypeList) {
+                if (!deviceTypeList.Contains(typeName)) {
                     return null;
+                }
 
-                deviceType = mDeviceTypeList[typeName] as Type;
+                deviceType = deviceTypeList[typeName] as Type;
             }
 
             try {
@@ -69,22 +70,24 @@ namespace Devices
         /// </summary>
         public void GetAssemblyDeviceType()
         {
-            lock (mDeviceTypeList) {
-                if (mDeviceTypeList.Count > 0)
+            lock (deviceTypeList) {
+                if (deviceTypeList.Count > 0) {
                     return;
+                }
 
-                Tracker.LogI(string.Format("Get All DeviceType From Path:({0})", mDevicePath));
+                Tracker.LogI($"Get all driver from path: {driverPath}");
 
-                DirectoryInfo folder = new DirectoryInfo(mDevicePath);
-                if (!folder.Exists)
+                DirectoryInfo folder = new DirectoryInfo(driverPath);
+                if (!folder.Exists) {
                     return;
+                }
 
                 foreach (FileInfo file in folder.GetFiles("*Device.dll")) {
                     try {
                         Assembly asm = Assembly.LoadFile(file.FullName);
                         foreach (Type type in asm.GetTypes()) {
                             if (type.IsSubclassOf(typeof(IDevice))) {
-                                mDeviceTypeList.Add(type.Name, type);
+                                deviceTypeList.Add(type.Name, type);
                                 continue;
                             }
                         }

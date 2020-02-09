@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using AspectInjector.Broker;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,6 +106,36 @@ namespace IRMonitor.Miscs
             {
                 if (isLocked) {
                     Monitor.Enter(locker);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 同步器
+        /// </summary>
+        [Aspect(Scope.PerInstance)]
+        [Injection(typeof(Synchronized))]
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+        public sealed class Synchronized : Attribute
+        {
+            private readonly string lockerName;
+
+            public Synchronized(string lockerName)
+            {
+                this.lockerName = lockerName;
+            }
+
+            public Synchronized() { }
+
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object HandleMethod(
+                [Argument(Source.Instance)] object instance,
+                [Argument(Source.Arguments)] object[] arguments,
+                [Argument(Source.Target)] Func<object[], object> method)
+            {
+                var locker = instance.GetType().GetProperty(lockerName).GetValue(instance, null);
+                lock (locker) {
+                    return method(arguments);
                 }
             }
         }

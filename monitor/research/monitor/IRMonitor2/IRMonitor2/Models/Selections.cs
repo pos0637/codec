@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Runtime.Serialization;
 
-namespace IRMonitor2.Selection
+namespace IRMonitor2.Models
 {
     /// <summary>
     /// 选区
@@ -52,6 +52,11 @@ namespace IRMonitor2.Selection
             public int pixels;
 
             /// <summary>
+            /// 选区配置
+            /// </summary>
+            public abstract Repository.Entities.Selections.Selection Entity { get; }
+
+            /// <summary>
             /// 初始化
             /// </summary>
             public abstract void Initialize();
@@ -79,6 +84,8 @@ namespace IRMonitor2.Selection
             [DataMember]
             public Repository.Entities.Selections.PointSelection entity;
 
+            public override Repository.Entities.Selections.Selection Entity { get { return entity; } }
+
             public override void Initialize()
             {
                 pixels = 1;
@@ -104,6 +111,8 @@ namespace IRMonitor2.Selection
             /// </summary>
             [DataMember]
             public Repository.Entities.Selections.LineSelection entity;
+
+            public override Repository.Entities.Selections.Selection Entity { get { return entity; } }
 
             public override void Initialize()
             {
@@ -182,6 +191,8 @@ namespace IRMonitor2.Selection
             [DataMember]
             public Repository.Entities.Selections.RectangleSelection entity;
 
+            public override Repository.Entities.Selections.Selection Entity { get { return entity; } }
+
             public override void Initialize()
             {
                 var rectangle = entity.rectangle;
@@ -235,7 +246,7 @@ namespace IRMonitor2.Selection
             /// <summary>
             /// 线段的结构体
             /// </summary>
-            public struct Segment
+            protected struct Segment
             {
                 public int start;
                 public int end;
@@ -247,6 +258,8 @@ namespace IRMonitor2.Selection
             /// </summary>
             [DataMember]
             public Repository.Entities.Selections.EllipseSelection entity;
+
+            public override Repository.Entities.Selections.Selection Entity { get { return entity; } }
 
             /// <summary>
             /// X轴

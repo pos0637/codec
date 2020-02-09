@@ -49,10 +49,12 @@ namespace IRMonitor2.Services
         /// 初始化
         /// </summary>
         /// <param name="arguments">参数列表</param>
+        /// <returns>是否成功</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public virtual void Initialize(Dictionary<string, object> arguments)
+        public virtual bool Initialize(Dictionary<string, object> arguments)
         {
             status = Status.Initialized;
+            return true;
         }
 
         /// <summary>
