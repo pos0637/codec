@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace IRMonitor.Miscs
@@ -114,30 +115,38 @@ namespace IRMonitor.Miscs
         /// 同步器
         /// </summary>
         [Aspect(Scope.PerInstance)]
-        [Injection(typeof(Synchronized))]
-        [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-        public sealed class Synchronized : Attribute
+        public sealed class SynchronizedAspect
         {
-            private readonly string lockerName;
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object HandleMethod(
+                [Argument(Source.Triggers)] Attribute[] triggers,
+                [Argument(Source.Instance)] object instance,
+                [Argument(Source.Arguments)] object[] arguments,
+                [Argument(Source.Target)] Func<object[], object> method)
+            {
+                var synchronized = triggers[0] as Synchronized;
+                var locker = instance.GetType().GetRuntimeField(synchronized.lockerName).GetValue(instance);
+                lock (locker) {
+                    return method(arguments);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 同步器
+        /// </summary>
+        [Injection(typeof(SynchronizedAspect))]
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+        public class Synchronized : Attribute
+        {
+            public string lockerName { get; }
 
             public Synchronized(string lockerName)
             {
                 this.lockerName = lockerName;
             }
 
-            public Synchronized() { }
-
-            [Advice(Kind.Around, Targets = Target.Method)]
-            public object HandleMethod(
-                [Argument(Source.Instance)] object instance,
-                [Argument(Source.Arguments)] object[] arguments,
-                [Argument(Source.Target)] Func<object[], object> method)
-            {
-                var locker = instance.GetType().GetProperty(lockerName).GetValue(instance, null);
-                lock (locker) {
-                    return method(arguments);
-                }
-            }
+            private Synchronized() { }
         }
     }
 }

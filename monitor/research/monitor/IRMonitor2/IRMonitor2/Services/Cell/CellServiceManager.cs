@@ -14,28 +14,32 @@ namespace IRMonitor2.Services.Cell
         /// <summary>
         /// 初始化
         /// </summary>
-        public ARESULT Initialize()
+        /// <returns>是否成功</returns>
+        public bool Initialize()
         {
             // 读取所有设备单元信息
             Configuration configuration = Repository.Repository.LoadConfiguation();
             if (configuration == null) {
                 Tracker.LogI("LoadConfiguration FAIL");
-                return ARESULT.E_FAIL;
+                return false;
             }
 
-            if (ARESULT.AFAILED(CheckConfiguration(configuration))) {
+            if (!CheckConfiguration(configuration)) {
                 Tracker.LogI("CheckConfiguration FAIL");
-                return ARESULT.E_FAIL;
+                return false;
             }
 
-            Tracker.LogI($"LoadConfiguration SUCCEED, Cell Count: {configuration.cells.Length}");
+            Tracker.LogI($"LoadConfiguration SUCCEED, Cell count: {configuration.cells.Length}");
 
             // 创建服务
             foreach (var cell in configuration.cells) {
                 var service = new CellService();
 
                 // 初始化设备单元服务
-                service.Initialize(new Dictionary<string, object>() { ["cell"] = cell });
+                if (!service.Initialize(new Dictionary<string, object>() { ["cell"] = cell })) {
+                    Tracker.LogE($"CellService: {cell.name} Initialize FAIL");
+                    return false;
+                }
 
                 // 开启设备单元服务
                 service.Start();
@@ -44,7 +48,7 @@ namespace IRMonitor2.Services.Cell
                 Tracker.LogI($"CellService: {cell.name} Start SUCCEED");
             }
 
-            return ARESULT.S_OK;
+            return true;
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace IRMonitor2.Services.Cell
         /// </summary>
         /// <param name="configuration">配置</param>
         /// <returns>是否成功</returns>
-        private ARESULT CheckConfiguration(Configuration configuration)
+        private bool CheckConfiguration(Configuration configuration)
         {
             try {
                 if (!Directory.Exists(configuration.information.saveVideoPath)) {
@@ -65,10 +69,10 @@ namespace IRMonitor2.Services.Cell
             }
             catch (Exception e) {
                 Tracker.LogE(e);
-                return ARESULT.E_FAIL;
+                return false;
             }
 
-            return ARESULT.S_OK;
+            return true;
         }
     }
 

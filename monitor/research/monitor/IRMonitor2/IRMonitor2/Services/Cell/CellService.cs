@@ -17,22 +17,22 @@ namespace IRMonitor2.Services.Cell
         /// <summary>
         /// 设备单元配置
         /// </summary>
-        private Configuration.Cell cell;
+        public Configuration.Cell cell;
 
         /// <summary>
         /// 选区列表
         /// </summary>
-        private readonly List<Models.Selections.Selection> selections = new List<Models.Selections.Selection>();
+        public readonly List<Models.Selections.Selection> selections = new List<Models.Selections.Selection>();
 
         /// <summary>
         /// 设备列表
         /// </summary>
-        private readonly List<IDevice> devices = new List<IDevice>();
+        public readonly List<IDevice> devices = new List<IDevice>();
 
         /// <summary>
         /// 工作线程列表
         /// </summary>
-        private readonly List<BaseWorker> workers = new List<BaseWorker>();
+        public readonly List<BaseWorker> workers = new List<BaseWorker>();
 
         #endregion
 

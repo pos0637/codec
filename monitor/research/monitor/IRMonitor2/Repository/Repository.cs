@@ -120,6 +120,7 @@ namespace Repository
                 var data = JsonUtils.ObjectToJson(selections);
                 sw.Write(data);
                 sw.Flush();
+                sw.Close();
             }
             catch (Exception e) {
                 Tracker.LogE(e);

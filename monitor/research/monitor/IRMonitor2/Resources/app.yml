@@ -6,13 +6,13 @@
   tester: 
   substation: 
   location: 
-  saveVideoPath: 
-  saveImagePath: 
+  saveVideoPath: ./video
+  saveImagePath: ./image
 cells:
 - name: cell0
   devices:
   - category: IrCamera
-    model: HIKVision
+    model: VirtualIrDevice
     version: 1.0
     serialNumber: 
     irCameraDeviceParameters:
