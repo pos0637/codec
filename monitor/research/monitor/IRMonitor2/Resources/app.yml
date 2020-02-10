@@ -15,8 +15,8 @@ cells:
     model: VirtualIrDevice
     version: 1.0
     serialNumber: 
-    irCameraDeviceParameters:
-      ip: 
+    irCameraParameters:
+      uri: 
       width: 160
       stride: 160
       height: 120
@@ -29,4 +29,4 @@ cells:
       atmosphericTemperature: 
       relativeHumidity: 
       distance: 
-    cameraDeviceParameters: 
+    cameraParameters: 

@@ -98,25 +98,25 @@
             public string serialNumber;
 
             /// <summary>
-            /// 红外摄像机设备参数
+            /// 红外摄像机参数
             /// </summary>
-            public IrCameraDeviceParameters irCameraDeviceParameters;
+            public IrCameraParameters irCameraParameters;
 
             /// <summary>
-            /// 可见光摄像机设备参数
+            /// 可见光摄像机参数
             /// </summary>
-            public CameraDeviceParameters cameraDeviceParameters;
+            public CameraParameters cameraParameters;
         }
 
         /// <summary>
-        /// 红外摄像机设备参数
+        /// 红外摄像机参数
         /// </summary>
-        public class IrCameraDeviceParameters
+        public class IrCameraParameters
         {
             /// <summary>
-            /// IP地址
+            /// 资源地址
             /// </summary>
-            public string ip;
+            public string uri;
 
             /// <summary>
             /// 图像宽度
@@ -154,7 +154,7 @@
             public float? emissivity;
 
             /// <summary>
-            /// 翻转表象温度
+            /// 翻转表面温度
             /// </summary>
             public float? reflectedTemperature;
 
@@ -180,14 +180,14 @@
         }
 
         /// <summary>
-        /// 可见光摄像机设备参数
+        /// 可见光摄像机参数
         /// </summary>
-        public class CameraDeviceParameters
+        public class CameraParameters
         {
             /// <summary>
-            /// IP地址
+            /// 资源地址
             /// </summary>
-            public string ip;
+            public string uri;
 
             /// <summary>
             /// 图像宽度

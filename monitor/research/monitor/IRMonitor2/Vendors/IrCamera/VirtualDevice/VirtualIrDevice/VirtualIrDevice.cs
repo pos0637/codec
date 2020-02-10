@@ -43,12 +43,10 @@ namespace VirtualIrDevice
             return false;
         }
 
-        public override bool Read(ReadMode mode, object data, out int used)
+        public override bool Read(ReadMode mode, in object inData, out object outData, out int used)
         {
             used = 0;
-            if (data == null) {
-                return false;
-            }
+            outData = null;
 
             switch (mode) {
                 case ReadMode.ObjectDistance:
@@ -56,13 +54,12 @@ namespace VirtualIrDevice
                 case ReadMode.AtmosphericTemperature:
                 case ReadMode.RelativeHumidity:
                 case ReadMode.Transmission:
-                    data = 0.0F;
+                    outData = 0.0F;
                     break;
 
                 case ReadMode.TemperatureArray: {
-                    float[] dst = (float[])data;
+                    var dst = (float[])inData;
                     for (int y = 0, i = 0; y < mHeight; ++y) {
-                        int startOffset = (mHeight - y - 1) * mWidth;
                         for (int x = 0; x < mWidth; ++x) {
                             dst[i++] = 0.0F;
                         }
@@ -72,9 +69,8 @@ namespace VirtualIrDevice
                 }
 
                 case ReadMode.ImageArray: {
-                    byte[] dst = (byte[])data;
+                    var dst = (byte[])inData;
                     for (int y = 0, i = 0; y < mHeight; ++y) {
-                        int startOffset = (mHeight - y - 1) * mWidth;
                         for (int x = 0; x < mWidth; ++x) {
                             dst[i++] = 0;
                         }

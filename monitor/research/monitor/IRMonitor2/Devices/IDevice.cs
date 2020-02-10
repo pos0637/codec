@@ -59,10 +59,11 @@ namespace Devices
         /// 从设备中读取数据
         /// </summary>
         /// <param name="mode">读取方式</param>
-        /// <param name="data">数据缓存</param>
-        /// <param name="used">使用的长度</param>
+        /// <param name="inData">输入数据</param>
+        /// <param name="outData">输出数据</param>
+        /// <param name="used">数据长度</param>
         /// <returns>是否成功</returns>        
-        public abstract bool Read(ReadMode mode, object data, out int used);
+        public abstract bool Read(ReadMode mode, in object inData, out object outData, out int used);
 
         /// <summary>
         /// 将数据写入设备

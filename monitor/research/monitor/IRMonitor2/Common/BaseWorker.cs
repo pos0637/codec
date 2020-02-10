@@ -1,11 +1,13 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Common
 {
     /// <summary>
     /// 工作线程
     /// </summary>
-    public class BaseWorker
+    public class BaseWorker : IDisposable
     {
         /// <summary>
         /// 执行函数接口
@@ -49,7 +51,7 @@ namespace Common
         private ARESULT mUserData = ARESULT.S_OK;
 
         // 执行函数接口
-        private IExecutor mExecutor;
+        private readonly IExecutor mExecutor;
 
         // 工作线程锁
         public object mLock = new object();
@@ -97,9 +99,28 @@ namespace Common
         }
 
         /// <summary>
+        /// 释放资源
+        /// </summary>
+        public virtual void Dispose()
+        {
+            Discard();
+            Join();
+        }
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="arguments">参数列表</param>
+        /// <returns>是否成功</returns>
+        public virtual ARESULT Initialize(Dictionary<string, object> arguments)
+        {
+            return ARESULT.S_OK;
+        }
+
+        /// <summary>
         /// 启动工作线程
         /// </summary>
-        /// <returns>启动结果</returns>
+        /// <returns>是否成功</returns>
         public virtual ARESULT Start()
         {
             lock (mLock) {

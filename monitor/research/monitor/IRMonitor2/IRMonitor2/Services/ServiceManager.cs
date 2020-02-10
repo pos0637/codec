@@ -38,7 +38,7 @@ namespace IRMonitor2.Services
         /// <summary>
         /// 释放资源
         /// </summary>
-        public virtual void Dispose()
+        public override void Dispose()
         {
             Discard();
             Join();

@@ -22,18 +22,18 @@ namespace IRMonitor2.Services.Cell
             foreach (var device in cell.devices) {
                 var instance = DeviceFactory.Instance.GetDevice(UUID.GenerateUUID(), device.model, device.serialNumber);
                 if (instance == null) {
-                    Tracker.LogE($"Load {device.model} Device FAIL");
+                    Tracker.LogE($"Load device fail: {device.model}");
                     return false;
                 }
 
-                Tracker.LogI($"Load {device.model} Device SUCCEED");
+                Tracker.LogI($"Load device succeed: {device.model}");
 
                 if (!InitializeDevice(instance, device)) {
-                    Tracker.LogE($"Initialize {device.model} Device FAIL");
+                    Tracker.LogE($"Initialize device fail: {device.model}");
                     return false;
                 }
 
-                Tracker.LogI($"Initialize {device.model} Device SUCCEED");
+                Tracker.LogI($"Initialize device succeed: {device.model}");
 
                 devices.Add(instance);
             }
@@ -57,6 +57,10 @@ namespace IRMonitor2.Services.Cell
                         break;
                     case DeviceType.IrCamera:
                         // TODO: 启动服务线程并设置参数
+                        if (!instance.Write(WriteMode.IrCameraParameters, device.irCameraParameters)) {
+                            Tracker.LogE($"Write parameters fail: {device.model}");
+                            return false;
+                        }
                         break;
                     default:
                         return false;
@@ -65,7 +69,7 @@ namespace IRMonitor2.Services.Cell
                 return true;
             }
             catch (Exception e) {
-                Tracker.LogE($"Initialize Device: {device.model} FAIL", e);
+                Tracker.LogE($"Initialize device fail: {device.model}", e);
                 return false;
             }
         }
@@ -74,8 +78,7 @@ namespace IRMonitor2.Services.Cell
         private void CloseDevices()
         {
             foreach (var worker in workers) {
-                worker.Discard();
-                worker.Join();
+                worker.Dispose();
             }
 
             foreach (var device in devices) {

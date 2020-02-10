@@ -8,7 +8,7 @@ namespace Devices
     {
         AutoFocus, // 红外热像仪专用
         FocusFar, // 调远焦
-        FocusNear, // 调近焦
+        FocusNear // 调近焦
     };
 
     /// <summary>
@@ -16,15 +16,16 @@ namespace Devices
     /// </summary>
     public enum WriteMode
     {
-        ConnectionString = 0,
-        FrameRate, // 设置帧率
-        AtmosphericTemperature, // 红外热像仪专用 设置大气温度
-        RelativeHumidity, // 红外热像仪专用 设置相对湿度
-        ReflectedTemperature, // 红外热像仪专用 设置相对温度
-        ObjectDistance, // 红外热像仪专用 设置距离
-        Emissivity, // 红外热像仪专用 设置辐射率
-        Transmission, // 红外热像仪专用 设置透过率
-        SetIrCameraParametersToDevice
+        URI = 0, // 资源地址
+        FrameRate, // 帧率
+        AtmosphericTemperature, // 大气温度
+        RelativeHumidity, // 相对湿度
+        ReflectedTemperature, // 相对温度
+        ObjectDistance, // 距离
+        Emissivity, // 辐射率
+        Transmission, // 透过率
+        IrCameraParameters, // 红外摄像机参数
+        CameraParameters // 可见光摄像机参数
     };
 
     /// <summary>
@@ -34,13 +35,14 @@ namespace Devices
     {
         TemperatureArray = 0, // 温度矩阵
         ImageArray, // 图像矩阵
-        FrameRate,
-        AtmosphericTemperature, // 读取大气温度
-        RelativeHumidity, // 读取相对湿度
-        ReflectedTemperature, // 读取翻转表面温度
-        ObjectDistance, // 读取距离
-        Emissivity, // 读取辐射率
-        Transmission, // 读取透过率
-        Parameters // 读取参数
+        FrameRate, // 帧率
+        AtmosphericTemperature, // 大气温度
+        RelativeHumidity, // 相对湿度
+        ReflectedTemperature, // 翻转表面温度
+        ObjectDistance, // 距离
+        Emissivity, // 辐射率
+        Transmission, // 透过率
+        IrCameraParameters, // 红外摄像机参数
+        CameraParameters // 可见光摄像机参数
     };
 }

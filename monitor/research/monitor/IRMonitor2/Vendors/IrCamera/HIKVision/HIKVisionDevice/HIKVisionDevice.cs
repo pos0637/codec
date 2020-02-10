@@ -213,29 +213,24 @@ namespace HIKVisionDevice
             return false;
         }
 
-        public override bool Read(ReadMode mode, object data, out int used)
+        public override bool Read(ReadMode mode, in object inData, out object outData, out int used)
         {
             used = 0;
-            if (data == null) {
-                return false;
-            }
+            outData = null;
 
             switch (mode) {
                 case ReadMode.ObjectDistance: {
-                    float? result = data as float?;
-                    result = mDistance;
+                    outData = mDistance;
                     break;
                 }
 
                 case ReadMode.Emissivity: {
-                    float? result = data as float?;
-                    result = mEmissivity;
+                    outData = mEmissivity;
                     break;
                 }
 
                 case ReadMode.ReflectedTemperature: {
-                    float? result = data as float?;
-                    result = mReflectedTemperature;
+                    outData = mReflectedTemperature;
                     break;
                 }
 
@@ -246,9 +241,9 @@ namespace HIKVisionDevice
                         }
                     }
 
-                    float[] dst = (float[])data;
-                    float scale = BitConverter.ToInt32(mFrameBuffer, 4);
-                    for (int i = 0; i < mTemperatureBuffer.Length; ++i) {
+                    var dst = (float[])inData;
+                    var scale = BitConverter.ToInt32(mFrameBuffer, 4);
+                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
                         dst[i] = mTemperatureBuffer[i];
                     }
 
@@ -262,21 +257,22 @@ namespace HIKVisionDevice
                         }
                     }
 
-                    float min = float.MaxValue, max = 0;
-                    for (int i = 0; i < mTemperatureBuffer.Length; ++i) {
+                    var min = float.MaxValue;
+                    var max = 0.0F;
+                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
                         min = Math.Min(mTemperatureBuffer[i], min);
                         max = Math.Max(mTemperatureBuffer[i], max);
                     }
 
-                    byte[] dst = (byte[])data;
+                    var dst = (byte[])inData;
                     float span = max - min;
-                    if (span <= 1e-5) {
+                    if (span <= float.Epsilon) {
                         Array.Clear(dst, 0, dst.Length);
                         return true;
                     }
 
-                    for (int i = 0; i < mTemperatureBuffer.Length; ++i) {
-                        dst[i] = (byte)((mTemperatureBuffer[i] - min) * 255 / span);
+                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
+                        dst[i] = (byte)((mTemperatureBuffer[i] - min) * 255.0F / span);
                     }
 
                     return true;
