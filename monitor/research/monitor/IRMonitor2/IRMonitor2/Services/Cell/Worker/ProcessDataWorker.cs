@@ -3,6 +3,7 @@ using Devices;
 using IRMonitor2.Common;
 using Miscs;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace IRMonitor2.Services.Cell.Worker
 {
@@ -45,6 +46,11 @@ namespace IRMonitor2.Services.Cell.Worker
         /// </summary>
         private EventEmitter.EventHandler onReceiveImage;
 
+        /// <summary>
+        /// 红外图像读取间隔
+        /// </summary>
+        private int tempertureDuration;
+
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
             service = arguments["service"] as CellService;
@@ -56,6 +62,7 @@ namespace IRMonitor2.Services.Cell.Worker
             }
 
             irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+            tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
 
             // 声明事件处理函数
             onReceiveTemperature = (arguments) => {
@@ -98,6 +105,8 @@ namespace IRMonitor2.Services.Cell.Worker
 
                 // 计算选取温度
                 CalculateTemperature(selections, temperature);
+
+                Thread.Sleep(tempertureDuration);
             }
         }
 

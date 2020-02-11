@@ -46,6 +46,24 @@ namespace IRMonitor2.Models
             public float avgTemperature;
 
             /// <summary>
+            /// 高温警告
+            /// </summary>
+            [DataMember]
+            public Alarm maxTemperatureAlarm;
+
+            /// <summary>
+            /// 低温警告
+            /// </summary>
+            [DataMember]
+            public Alarm minTemperatureAlarm;
+
+            /// <summary>
+            /// 平均温警告
+            /// </summary>
+            [DataMember]
+            public Alarm averageTemperatureAlarm;
+
+            /// <summary>
             /// 区域内像素点的数量
             /// </summary>
             [NonSerialized]

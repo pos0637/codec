@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace Common
@@ -7,40 +6,41 @@ namespace Common
     /// <summary>
     /// 固定长度的队列
     /// </summary>
-    public class FixedLenQueue<T>
+    public class FixedLengthQueue<T>
     {
         /// <summary>
         /// 事件
         /// </summary>
-        private Object mEvent = new Object();
+        private readonly object mEvent = new object();
 
         /// <summary>
         /// 存储泛型链表
         /// </summary>
-        private List<T> mList = new List<T>();
+        private readonly List<T> mList = new List<T>();
 
         /// <summary>
         /// 队列最大长度
         /// </summary>
-        private Int32 mLen;
+        private readonly int mLength;
 
-        public Int32 Count
+        public int Count
         {
             get { return mList.Count; }
         }
 
-        public FixedLenQueue(Int32 len)
+        public FixedLengthQueue(int length)
         {
-            mLen = len;
+            mLength = length;
         }
 
         public T Dequeue()
         {
-            T temp = default(T);
+            T temp = default;
 
             lock (mList) {
-                if (mList.Count <= 0)
+                if (mList.Count <= 0) {
                     return temp;
+                }
                 else {
                     temp = mList[0];
                     mList.RemoveAt(0);
@@ -52,7 +52,7 @@ namespace Common
         public void Enqueue(T item)
         {
             lock (mList) {
-                if (mList.Count >= mLen)
+                if (mList.Count >= mLength)
                     mList.RemoveAt(0);
 
                 mList.Add(item);
@@ -63,17 +63,17 @@ namespace Common
             }
         }
 
-        public Boolean Wait()
+        public bool Wait()
         {
             lock (mEvent) {
                 return Monitor.Wait(mEvent);
             }
         }
 
-        public Boolean Wait(Int32 millisecondsTimeout)
+        public bool Wait(int timeout)
         {
             lock (mEvent) {
-                return Monitor.Wait(mEvent, millisecondsTimeout);
+                return Monitor.Wait(mEvent, timeout);
             }
         }
 
