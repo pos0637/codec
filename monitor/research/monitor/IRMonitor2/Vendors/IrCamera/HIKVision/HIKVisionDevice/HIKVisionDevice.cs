@@ -288,7 +288,7 @@ namespace HIKVisionDevice
         public override bool Write(WriteMode mode, object data)
         {
             switch (mode) {
-                case WriteMode.ConnectionString:
+                case WriteMode.URI:
                     mIp = data as string;
                     break;
 

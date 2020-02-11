@@ -2,6 +2,7 @@
 using Devices;
 using IRMonitor2.Common;
 using Miscs;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -120,6 +121,14 @@ namespace IRMonitor2.Services.Cell.Worker
             foreach (var selection in selections) {
                 selection.Calculate(temperature, irCameraParameters.width, irCameraParameters.stride, irCameraParameters.height);
             }
+        }
+
+        /// <summary>
+        /// 检查选区告警
+        /// </summary>
+        /// <param name="selection"></param>
+        private void CheckSelectionAlarm(Models.Selections.Selection selection)
+        {
         }
     }
 }

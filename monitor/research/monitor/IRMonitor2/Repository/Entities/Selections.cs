@@ -23,28 +23,6 @@ namespace Repository.Entities
         }
 
         /// <summary>
-        /// 告警配置
-        /// </summary>
-        [DataContract]
-        public class AlarmConfiguration
-        {
-            /// <summary>
-            /// 一般阀值
-            /// </summary>
-            public float generalThreshold;
-
-            /// <summary>
-            /// 严重阀值
-            /// </summary>
-            public float seriousThreshold;
-
-            /// <summary>
-            /// 危急阀值
-            /// </summary>
-            public float criticalThreshold;
-        }
-
-        /// <summary>
         /// 选区
         /// </summary>
         [DataContract]
@@ -72,19 +50,19 @@ namespace Repository.Entities
             /// 高温警告配置
             /// </summary>
             [DataMember]
-            public AlarmConfiguration maxTemperatureAlarmConfiguration;
+            public Alarm.AlarmConfiguration maxTemperatureAlarmConfiguration;
 
             /// <summary>
             /// 低温警告配置
             /// </summary>
             [DataMember]
-            public AlarmConfiguration minTemperatureAlarmConfiguration;
+            public Alarm.AlarmConfiguration minTemperatureAlarmConfiguration;
 
             /// <summary>
             /// 平均温警告配置
             /// </summary>
             [DataMember]
-            public AlarmConfiguration averageTemperatureAlarmConfiguration;
+            public Alarm.AlarmConfiguration averageTemperatureAlarmConfiguration;
 
             /// <summary>
             /// 构造函数

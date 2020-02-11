@@ -1,5 +1,6 @@
 ﻿using Common;
 using System;
+using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace IRMonitor2.Models
@@ -52,6 +53,18 @@ namespace IRMonitor2.Models
         /// </summary>
         [DataMember]
         public DateTime startTime;
+
+        /// <summary>
+        /// 告警区域
+        /// </summary>
+        [DataMember]
+        public Rectangle area;
+
+        /// <summary>
+        /// 告警点
+        /// </summary>
+        [DataMember]
+        public Point point;
 
         /// <summary>
         /// 历史温度队列
