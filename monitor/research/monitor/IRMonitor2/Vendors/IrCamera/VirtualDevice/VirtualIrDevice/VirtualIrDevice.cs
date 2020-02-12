@@ -11,14 +11,14 @@ namespace VirtualIrDevice
         private DeviceStatus status;
 
         /// <summary>
-        /// 宽度
+        /// 红外摄像机参数
         /// </summary>
-        private const int mWidth = 384;
+        private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;
 
         /// <summary>
-        /// 高度
+        /// 可见光摄像机参数
         /// </summary>
-        private const int mHeight = 288;
+        public Repository.Entities.Configuration.CameraParameters cameraParameters;
 
         public override bool Initialize()
         {
@@ -59,8 +59,8 @@ namespace VirtualIrDevice
 
                 case ReadMode.TemperatureArray: {
                     var dst = (float[])inData;
-                    for (int y = 0, i = 0; y < mHeight; ++y) {
-                        for (int x = 0; x < mWidth; ++x) {
+                    for (int y = 0, i = 0; y < irCameraParameters.height; ++y) {
+                        for (int x = 0; x < irCameraParameters.width; ++x) {
                             dst[i++] = 0.0F;
                         }
                     }
@@ -70,12 +70,22 @@ namespace VirtualIrDevice
 
                 case ReadMode.ImageArray: {
                     var dst = (byte[])inData;
-                    for (int y = 0, i = 0; y < mHeight; ++y) {
-                        for (int x = 0; x < mWidth; ++x) {
+                    for (int y = 0, i = 0; y < cameraParameters.height; ++y) {
+                        for (int x = 0; x < cameraParameters.width; ++x) {
                             dst[i++] = 0;
                         }
                     }
 
+                    return true;
+                }
+
+                case ReadMode.IrCameraParameters: {
+                    outData = irCameraParameters;
+                    return true;
+                }
+
+                case ReadMode.CameraParameters: {
+                    outData = cameraParameters;
                     return true;
                 }
 
@@ -88,6 +98,21 @@ namespace VirtualIrDevice
 
         public override bool Write(WriteMode mode, object data)
         {
+            switch (mode) {
+                case WriteMode.IrCameraParameters: {
+                    irCameraParameters = data as Repository.Entities.Configuration.IrCameraParameters;
+                    return true;
+                }
+
+                case WriteMode.CameraParameters: {
+                    cameraParameters = data as Repository.Entities.Configuration.CameraParameters;
+                    return true;
+                }
+
+                default:
+                    break;
+            }
+
             return true;
         }
 

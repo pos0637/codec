@@ -1,5 +1,6 @@
 ﻿using Common;
 using Devices;
+using Miscs;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -30,27 +31,37 @@ namespace HIKVisionDevice
         /// <summary>
         /// 端口
         /// </summary>
-        private const short mPort = 8000;
+        private short mPort;
 
         /// <summary>
         /// 用户名
         /// </summary>
-        private const string mUserName = "admin";
+        private string mUserName;
 
         /// <summary>
         /// 密码
         /// </summary>
-        private const string mPassword = "abcd1234";
+        private string mPassword;
 
         /// <summary>
-        /// 宽度
+        /// 红外摄像机参数
         /// </summary>
-        private const int mWidth = 384;
+        private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;
 
         /// <summary>
-        /// 高度
+        /// 可见光摄像机参数
         /// </summary>
-        private const int mHeight = 288;
+        private Repository.Entities.Configuration.CameraParameters cameraParameters;
+
+        /// <summary>
+        /// 红外摄像机通道
+        /// </summary>
+        private int irCameraChannel;
+
+        /// <summary>
+        /// 可见光摄像机通道
+        /// </summary>
+        private int cameraChannel;
 
         /// <summary>
         /// 距离
@@ -130,10 +141,10 @@ namespace HIKVisionDevice
 
         public override bool Open()
         {
-            mBufferLength = 4 + mWidth * mHeight * sizeof(float);
+            mBufferLength = 4 + irCameraParameters.width * irCameraParameters.height * sizeof(float);
             mTempBuffer = new byte[mBufferLength];
             mFrameBuffer = new byte[mBufferLength];
-            mTemperatureBuffer = new float[mWidth * mHeight];
+            mTemperatureBuffer = new float[irCameraParameters.width * irCameraParameters.height];
             mBufferUsed = 0;
             mHasHeader = false;
 
@@ -142,7 +153,7 @@ namespace HIKVisionDevice
             if (!Login(mIp, mPort, mUserName, mPassword))
                 return false;
 
-            if (!Config(mDistance, mEmissivity, mReflectedTemperature)) {
+            if (!Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature)) {
                 Logout();
                 return false;
             }
@@ -175,21 +186,21 @@ namespace HIKVisionDevice
         {
             switch (mode) {
                 case ControlMode.AutoFocus:
-                    return CHCNetSDK.NET_DVR_FocusOnePush(mUserId, 1);
+                    return CHCNetSDK.NET_DVR_FocusOnePush(mUserId, irCameraChannel);
 
                 case ControlMode.FocusFar:
-                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, 1, CHCNetSDK.FOCUS_FAR, 0))
+                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
-                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, 1, CHCNetSDK.FOCUS_FAR, 1);
+                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 1);
 
                 case ControlMode.FocusNear:
-                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, 1, CHCNetSDK.FOCUS_NEAR, 0))
+                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
-                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, 1, CHCNetSDK.FOCUS_NEAR, 1);
+                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 1);
 
                 default:
                     return false;
@@ -278,6 +289,16 @@ namespace HIKVisionDevice
                     return true;
                 }
 
+                case ReadMode.IrCameraParameters: {
+                    outData = irCameraParameters;
+                    return true;
+                }
+
+                case ReadMode.CameraParameters: {
+                    outData = cameraParameters;
+                    return true;
+                }
+
                 default:
                     break;
             }
@@ -288,30 +309,50 @@ namespace HIKVisionDevice
         public override bool Write(WriteMode mode, object data)
         {
             switch (mode) {
-                case WriteMode.URI:
-                    mIp = data as string;
+                case WriteMode.URI: {
+                    var dict = (data as string).ParseQueryString();
+                    mIp = dict["ip"];
+                    mPort = short.Parse(dict["port"]);
+                    mUserName = dict["username"];
+                    mPassword = dict["password"];
                     break;
+                }
 
-                case WriteMode.ObjectDistance:
+                case WriteMode.ObjectDistance: {
                     mDistance = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
                     }
                     break;
+                }
 
-                case WriteMode.Emissivity:
+                case WriteMode.Emissivity: {
                     mEmissivity = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
                     }
                     break;
+                }
 
-                case WriteMode.ReflectedTemperature:
+                case WriteMode.ReflectedTemperature: {
                     mReflectedTemperature = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
                     }
                     break;
+                }
+
+                case WriteMode.IrCameraParameters: {
+                    irCameraParameters = data as Repository.Entities.Configuration.IrCameraParameters;
+                    irCameraChannel = int.Parse(irCameraParameters.uri.ParseQueryString()["channel"]);
+                    return true;
+                }
+
+                case WriteMode.CameraParameters: {
+                    cameraParameters = data as Repository.Entities.Configuration.CameraParameters;
+                    cameraChannel = int.Parse(cameraParameters.uri.ParseQueryString()["channel"]);
+                    return true;
+                }
 
                 default:
                     break;
@@ -357,11 +398,12 @@ namespace HIKVisionDevice
         /// <summary>
         /// 设置参数
         /// </summary>
+        /// <param name="channel">通道</param>
         /// <param name="distance">距离</param>
         /// <param name="emissivity">发射率</param>
         /// <param name="reflectedTemperature">反射温度</param>
         /// <returns></returns>
-        private bool Config(float distance, float emissivity, float reflectedTemperature)
+        private bool Config(int channel, float distance, float emissivity, float reflectedTemperature)
         {
             int channelId = 1;
             IntPtr lpOutputXml = Marshal.AllocHGlobal(1024 * 1024);
@@ -388,7 +430,7 @@ namespace HIKVisionDevice
             struOuput.lpOutBuffer = lpOutputXml;
             struOuput.dwOutBufferSize = 1024 * 1024;
 
-            string szUrl = "GET /ISAPI/Thermal/channels/1/streamParam/capabilities";
+            string szUrl = $"GET /ISAPI/Thermal/channels/{channel}/streamParam/capabilities";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             struInput.lpInBuffer = null;
@@ -399,7 +441,7 @@ namespace HIKVisionDevice
                 return false;
             }
 
-            szUrl = "GET /ISAPI/Thermal/channels/1/streamParam";
+            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/streamParam";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             struInput.lpInBuffer = null;
@@ -410,7 +452,7 @@ namespace HIKVisionDevice
                 return false;
             }
 
-            szUrl = "PUT /ISAPI/Thermal/channels/1/streamParam";
+            szUrl = $"PUT /ISAPI/Thermal/channels/{channel}/streamParam";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             string szThermalStreamParam =
@@ -423,7 +465,7 @@ namespace HIKVisionDevice
                 return false;
             }
 
-            szUrl = "GET /ISAPI/Thermal/channels/1/thermometry/pixelToPixelParam/capabilities";
+            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam/capabilities";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             struInput.lpInBuffer = null;
@@ -434,7 +476,7 @@ namespace HIKVisionDevice
                 return false;
             }
 
-            szUrl = "GET /ISAPI/Thermal/channels/1/thermometry/pixelToPixelParam";
+            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             struInput.lpInBuffer = null;
@@ -445,7 +487,7 @@ namespace HIKVisionDevice
                 return false;
             }
 
-            szUrl = "GET /ISAPI/Thermal/channels/1/thermometry/pixelToPixelParam";
+            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam";
             struInput.lpRequestUrl = szUrl;
             struInput.dwRequestUrlLen = (uint)szUrl.Length;
             string szPixelToPixelParamFormat =
@@ -477,14 +519,14 @@ namespace HIKVisionDevice
             int outSize = Marshal.SizeOf(cfg);
             IntPtr outBuffer = Marshal.AllocHGlobal(outSize);
             Marshal.StructureToPtr(cfg, outBuffer, false);
-            if (!CHCNetSDK.NET_DVR_GetDVRConfig(mUserId, CHCNetSDK.NET_DVR_GET_FOCUSMODECFG, 1, outBuffer, (uint)outSize, ref returnBytes)) {
+            if (!CHCNetSDK.NET_DVR_GetDVRConfig(mUserId, CHCNetSDK.NET_DVR_GET_FOCUSMODECFG, channel, outBuffer, (uint)outSize, ref returnBytes)) {
                 Marshal.FreeHGlobal(outBuffer);
                 outBuffer = IntPtr.Zero;
                 return false;
             }
 
             cfg.byFocusMode = 2;
-            bool ret = CHCNetSDK.NET_DVR_SetDVRConfig(mUserId, CHCNetSDK.NET_DVR_SET_FOCUSMODECFG, 1, outBuffer, (uint)outSize);
+            bool ret = CHCNetSDK.NET_DVR_SetDVRConfig(mUserId, CHCNetSDK.NET_DVR_SET_FOCUSMODECFG, channel, outBuffer, (uint)outSize);
             Marshal.FreeHGlobal(outBuffer);
             outBuffer = IntPtr.Zero;
 
@@ -535,7 +577,7 @@ namespace HIKVisionDevice
 
             CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
             lpPreviewInfo.hPlayWnd = IntPtr.Zero; // 预览窗口
-            lpPreviewInfo.lChannel = 1; // 预览的设备通道
+            lpPreviewInfo.lChannel = irCameraChannel; // 预览的设备通道
             lpPreviewInfo.dwStreamType = 0; // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
             lpPreviewInfo.dwLinkMode = 0; // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
             lpPreviewInfo.bBlocked = true; // 0- 非阻塞取流，1- 阻塞取流

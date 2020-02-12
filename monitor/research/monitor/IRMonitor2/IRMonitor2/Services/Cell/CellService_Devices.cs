@@ -1,8 +1,10 @@
 ﻿using Common;
 using Devices;
+using IRMonitor2.Services.Cell.Worker;
 using Miscs;
 using Repository.Entities;
 using System;
+using System.Collections.Generic;
 using static IRMonitor.Miscs.MethodUtils;
 
 namespace IRMonitor2.Services.Cell
@@ -54,13 +56,41 @@ namespace IRMonitor2.Services.Cell
                 switch (category) {
                     case DeviceType.Camera:
                         // TODO: 启动服务线程并设置参数
+                        if (!instance.Write(WriteMode.URI, device.uri)) {
+                            Tracker.LogE($"Write parameters fail: {device.model}");
+                            return false;
+                        }
+
+                        if (!instance.Write(WriteMode.CameraParameters, device.cameraParameters)) {
+                            Tracker.LogE($"Write parameters fail: {device.model}");
+                            return false;
+                        }
+
                         break;
                     case DeviceType.IrCamera:
                         // TODO: 启动服务线程并设置参数
+                        if (!instance.Write(WriteMode.URI, device.uri)) {
+                            Tracker.LogE($"Write parameters fail: {device.model}");
+                            return false;
+                        }
+
                         if (!instance.Write(WriteMode.IrCameraParameters, device.irCameraParameters)) {
                             Tracker.LogE($"Write parameters fail: {device.model}");
                             return false;
                         }
+
+                        if (!instance.Write(WriteMode.CameraParameters, device.cameraParameters)) {
+                            Tracker.LogE($"Write parameters fail: {device.model}");
+                            return false;
+                        }
+
+                        var worker = new CaptureVideoWorker();
+                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "device", instance } }))) {
+                            Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
+                        }
+
+                        worker.Start();
+
                         break;
                     default:
                         return false;

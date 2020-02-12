@@ -98,6 +98,11 @@
             public string serialNumber;
 
             /// <summary>
+            /// 资源地址
+            /// </summary>
+            public string uri;
+
+            /// <summary>
             /// 红外摄像机参数
             /// </summary>
             public IrCameraParameters irCameraParameters;
