@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.Serialization;
 
@@ -43,25 +44,13 @@ namespace IRMonitor2.Models
             /// 选区平均温度
             /// </summary>
             [DataMember]
-            public float avgTemperature;
+            public float averageTemperature;
 
             /// <summary>
-            /// 高温警告
+            /// 警告列表
             /// </summary>
             [DataMember]
-            public Alarm maxTemperatureAlarm;
-
-            /// <summary>
-            /// 低温警告
-            /// </summary>
-            [DataMember]
-            public Alarm minTemperatureAlarm;
-
-            /// <summary>
-            /// 平均温警告
-            /// </summary>
-            [DataMember]
-            public Alarm averageTemperatureAlarm;
+            public List<Alarm> alarms;
 
             /// <summary>
             /// 区域内像素点的数量
@@ -77,7 +66,16 @@ namespace IRMonitor2.Models
             /// <summary>
             /// 初始化
             /// </summary>
-            public abstract void Initialize();
+            public virtual void Initialize()
+            {
+                alarms = new List<Alarm>();
+                foreach (var configuration in Entity.alarmConfigurations) {
+                    alarms.Add(new Alarm() {
+                        type = configuration.type,
+                        temperatureType = configuration.temperatureType
+                    });
+                }
+            }
 
             /// <summary>
             /// 计算温度
@@ -106,6 +104,7 @@ namespace IRMonitor2.Models
 
             public override void Initialize()
             {
+                base.Initialize();
                 pixels = 1;
             }
 
@@ -113,7 +112,7 @@ namespace IRMonitor2.Models
             {
                 var point = entity.point;
                 var temp = data[stride * point.Y + point.X];
-                minTemperature = maxTemperature = avgTemperature = temp;
+                minTemperature = maxTemperature = averageTemperature = temp;
                 minPoint = maxPoint = point;
             }
         }
@@ -134,6 +133,8 @@ namespace IRMonitor2.Models
 
             public override void Initialize()
             {
+                base.Initialize();
+
                 var start = entity.start;
                 var end = entity.end;
                 var x = end.X - start.X;
@@ -191,7 +192,7 @@ namespace IRMonitor2.Models
 
                 minTemperature = min;
                 maxTemperature = max;
-                avgTemperature = total / pixels;
+                averageTemperature = total / pixels;
                 this.minPoint = minPoint;
                 this.maxPoint = maxPoint;
             }
@@ -213,6 +214,8 @@ namespace IRMonitor2.Models
 
             public override void Initialize()
             {
+                base.Initialize();
+
                 var rectangle = entity.rectangle;
                 pixels = rectangle.Width * rectangle.Height;
             }
@@ -249,7 +252,7 @@ namespace IRMonitor2.Models
 
                 minTemperature = min;
                 maxTemperature = max;
-                avgTemperature = total / pixels;
+                averageTemperature = total / pixels;
                 this.minPoint = minPoint;
                 this.maxPoint = maxPoint;
             }
@@ -305,6 +308,8 @@ namespace IRMonitor2.Models
 
             public override void Initialize()
             {
+                base.Initialize();
+
                 var rectangle = entity.rectangle;
                 xAxis = rectangle.Width;
                 yAxis = rectangle.Height;
@@ -367,7 +372,7 @@ namespace IRMonitor2.Models
 
                 minTemperature = min;
                 maxTemperature = max;
-                avgTemperature = total / pixels;
+                averageTemperature = total / pixels;
                 this.minPoint = minPoint;
                 this.maxPoint = maxPoint;
             }

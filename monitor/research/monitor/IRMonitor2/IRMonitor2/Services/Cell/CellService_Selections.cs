@@ -1,4 +1,5 @@
-﻿using Repository.Entities;
+﻿using Miscs;
+using Repository.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using static IRMonitor.Miscs.MethodUtils;
@@ -19,6 +20,16 @@ namespace IRMonitor2.Services.Cell
         private Models.Selections.Selection GetSelection(string name)
         {
             return selections.First(selection => selection.Entity.name.Equals(name));
+        }
+
+        /// <summary>
+        /// 获取选区列表
+        /// </summary>
+        /// <returns>选区列表</returns>
+        [Synchronized("selections")]
+        public List<Models.Selections.Selection> GetSelections()
+        {
+            return selections.Clone();
         }
 
         /// <summary>

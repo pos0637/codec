@@ -4,6 +4,7 @@ using IRMonitor2.Common;
 using Miscs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace IRMonitor2.Services.Cell.Worker
@@ -106,6 +107,8 @@ namespace IRMonitor2.Services.Cell.Worker
 
                 // 计算选取温度
                 CalculateTemperature(selections, temperature);
+                // 检查选区告警
+                CheckSelectionAlarm(selections);
 
                 Thread.Sleep(tempertureDuration);
             }
@@ -126,9 +129,108 @@ namespace IRMonitor2.Services.Cell.Worker
         /// <summary>
         /// 检查选区告警
         /// </summary>
-        /// <param name="selection"></param>
-        private void CheckSelectionAlarm(Models.Selections.Selection selection)
+        /// <param name="selections">选区列表</param>
+        private void CheckSelectionAlarm(List<Models.Selections.Selection> selections)
         {
+            foreach (var selection in selections) {
+                foreach (var configuation in selection.Entity.alarmConfigurations) {
+                    CheckSelectionAlarm(selection, configuation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 检查选区告警
+        /// </summary>
+        /// <param name="selection">选区</param>
+        /// <param name="configuration">告警配置</param>
+        private void CheckSelectionAlarm(Models.Selections.Selection selection, Repository.Entities.Alarm.AlarmConfiguration configuration)
+        {
+            float temperture;
+            if (configuration.temperatureType == Repository.Entities.Selections.TemperatureType.min) {
+                temperture = selection.minTemperature;
+            }
+            else if (configuration.temperatureType == Repository.Entities.Selections.TemperatureType.max) {
+                temperture = selection.minTemperature;
+            }
+            else if (configuration.temperatureType == Repository.Entities.Selections.TemperatureType.average) {
+                temperture = selection.averageTemperature;
+            }
+            else {
+                return;
+            }
+
+            var alarm = selection.alarms.First(alarm => alarm.temperatureType == configuration.temperatureType);
+            if (alarm == null) {
+                return;
+            }
+
+            var level = alarm.level;
+            alarm.temperatures.Enqueue(temperture);
+            // TODO: 通过算法计算温度
+
+            if (configuration.type == Repository.Entities.Alarm.Type.High) {
+                if (temperture >= configuration.criticalThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.Critical;
+                }
+                else if (temperture >= configuration.seriousThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.Serious;
+                }
+                else if (temperture >= configuration.generalThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.General;
+                }
+                else {
+                    alarm.level = Repository.Entities.Alarm.Level.None;
+                }
+            }
+            else if (configuration.type == Repository.Entities.Alarm.Type.Low) {
+                if (temperture <= configuration.criticalThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.Critical;
+                }
+                else if (temperture <= configuration.seriousThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.Serious;
+                }
+                else if (temperture <= configuration.generalThreshold) {
+                    alarm.level = Repository.Entities.Alarm.Level.General;
+                }
+                else {
+                    alarm.level = Repository.Entities.Alarm.Level.None;
+                }
+            }
+
+            if (level != alarm.level) {
+                if (level == Repository.Entities.Alarm.Level.None) {
+                    // TODO: 停止告警自动录像
+                }
+
+                // 添加选区告警
+                AddAlarm(selection, alarm);
+            }
+        }
+
+        /// <summary>
+        /// 添加选区告警
+        /// </summary>
+        /// <param name="selection">选区</param>
+        /// <param name="alarm">告警</param>
+        private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
+        {
+            var data = new Repository.Entities.Alarm() {
+                cellName = service.cell.name,
+                selectionName = selection.Entity.name,
+                startTime = DateTime.Now,
+                alarmType = alarm.type,
+                temperatureType = alarm.temperatureType,
+                level = alarm.level,
+                detail = "",
+                imageUrl = "",
+                temperatureUrl = "",
+                videoUrl = "",
+                irCameraParameters = irCameraParameters
+            };
+
+            using var db = new Repository.Repository.RepositoyContext();
+            db.AddAlarm(data);
         }
     }
 }

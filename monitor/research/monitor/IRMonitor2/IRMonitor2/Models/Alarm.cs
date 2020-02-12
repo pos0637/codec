@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Runtime.Serialization;
+using static Repository.Entities.Alarm;
 
 namespace IRMonitor2.Models
 {
@@ -17,30 +18,16 @@ namespace IRMonitor2.Models
         private const int queueLength = 3;
 
         /// <summary>
-        /// 告警等级
+        /// 告警类型
         /// </summary>
-        public enum Level
-        {
-            /// <summary>
-            /// 无告警
-            /// </summary>
-            None = 0,
+        [DataMember]
+        public Repository.Entities.Alarm.Type type;
 
-            /// <summary>
-            /// 一般告警
-            /// </summary>
-            General,
-
-            /// <summary>
-            /// 严重告警
-            /// </summary>
-            Serious,
-
-            /// <summary>
-            /// 危急告警
-            /// </summary>
-            Critical
-        }
+        /// <summary>
+        /// 温度类型
+        /// </summary>
+        [DataMember]
+        public Repository.Entities.Selections.TemperatureType temperatureType;
 
         /// <summary>
         /// 告警等级

@@ -15,11 +15,51 @@ namespace Repository.Entities
         /// </summary>
         public enum SelectionType
         {
+            /// <summary>
+            /// 未知
+            /// </summary>
             Unknown = 0,
+
+            /// <summary>
+            /// 点选区
+            /// </summary>
             Point,
+
+            /// <summary>
+            /// 线选区
+            /// </summary>
+            Line,
+
+            /// <summary>
+            /// 矩形选区
+            /// </summary>
             Rectangle,
-            Ellipse,
-            Line
+
+            /// <summary>
+            /// 椭圆选区
+            /// </summary>
+            Ellipse
+        }
+
+        /// <summary>
+        /// 温度类型
+        /// </summary>
+        public enum TemperatureType
+        {
+            /// <summary>
+            /// 最低温度
+            /// </summary>
+            min,
+
+            /// <summary>
+            /// 最高温度
+            /// </summary>
+            max,
+
+            /// <summary>
+            /// 平均温度
+            /// </summary>
+            average
         }
 
         /// <summary>
@@ -50,19 +90,7 @@ namespace Repository.Entities
             /// 高温警告配置
             /// </summary>
             [DataMember]
-            public Alarm.AlarmConfiguration maxTemperatureAlarmConfiguration;
-
-            /// <summary>
-            /// 低温警告配置
-            /// </summary>
-            [DataMember]
-            public Alarm.AlarmConfiguration minTemperatureAlarmConfiguration;
-
-            /// <summary>
-            /// 平均温警告配置
-            /// </summary>
-            [DataMember]
-            public Alarm.AlarmConfiguration averageTemperatureAlarmConfiguration;
+            public List<Alarm.AlarmConfiguration> alarmConfigurations;
 
             /// <summary>
             /// 构造函数

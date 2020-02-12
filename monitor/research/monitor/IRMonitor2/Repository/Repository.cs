@@ -10,10 +10,38 @@ using YamlDotNet.Serialization;
 
 namespace Repository
 {
+    /// <summary>
+    /// 数据仓库
+    /// </summary>
     public static class Repository
     {
         private static readonly string AppConfigurationPath = AppDomain.CurrentDomain.BaseDirectory + @"\app.yml";
         private static readonly string SelectionsConfigurationPath = AppDomain.CurrentDomain.BaseDirectory + @"\selections.json";
+
+        /// <summary>
+        /// 数据仓库
+        /// </summary>
+        public class RepositoyContext : DbContext
+        {
+            protected override void OnConfiguring(DbContextOptionsBuilder options)
+                => options.UseSqlite("Data Source=ir.db");
+
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                base.OnModelCreating(modelBuilder);
+                modelBuilder.Entity<Alarm>().ToTable("t_alarm");
+            }
+
+            /// <summary>
+            /// 添加告警
+            /// </summary>
+            /// <param name="alarm">告警</param>
+            public void AddAlarm(Alarm alarm)
+            {
+                Add(alarm);
+                SaveChanges();
+            }
+        }
 
         public class BloggingContext : DbContext
         {
