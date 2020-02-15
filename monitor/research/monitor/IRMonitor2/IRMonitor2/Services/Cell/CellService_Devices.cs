@@ -84,12 +84,19 @@ namespace IRMonitor2.Services.Cell
                             return false;
                         }
 
+                        // 启动获取数据工作线程
                         var worker = new CaptureVideoWorker();
                         if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
+                            return false;
                         }
 
-                        worker.Start();
+                        if (ARESULT.AFAILED(worker.Start())) {
+                            Tracker.LogE($"CaptureVideoWorker start fail: {device.model}");
+                            return false;
+                        }
+
+                        workers.Add(worker);
 
                         break;
                     default:

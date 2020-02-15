@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Compile Remove="Services\Cell\Worker\GetIrDataWorker.cs" />
+    <Compile Remove="Services\Cell\Worker\LiveStreamingWorker.cs" />
     <Compile Remove="Services\Cell\Worker\ProcessingWorker.cs" />
     <Compile Remove="Services\Cell\Worker\RealtimeNoticeWorker.cs" />
     <Compile Remove="Services\Cell\Worker\RecordingWorker.cs" />
@@ -37,6 +38,7 @@
 
   <ItemGroup>
     <None Include="Services\Cell\Worker\GetIrDataWorker.cs" />
+    <None Include="Services\Cell\Worker\LiveStreamingWorker.cs" />
     <None Include="Services\Cell\Worker\ProcessingWorker.cs" />
     <None Include="Services\Cell\Worker\RealtimeNoticeWorker.cs" />
     <None Include="Services\Cell\Worker\RecordingWorker.cs" />

@@ -11,8 +11,8 @@ namespace HIKVisionDevice
     {
         #region 常量
 
-        // 温度偏置
-        private const int FSMT_TEMP_OFFSET = 200;
+        // 解码器帧缓冲数量
+        private const int FRAME_BUFFER_COUNT = 15;
 
         #endregion
 
@@ -81,27 +81,37 @@ namespace HIKVisionDevice
         /// <summary>
         /// 用户索引
         /// </summary>
-        private int mUserId;
+        private int userId;
 
         /// <summary>
-        /// 串口句柄
+        /// 红外摄像机实时播放句柄
         /// </summary>
-        private int mRealPlayHandle;
+        private int irCameraRealPlayHandle;
 
         /// <summary>
-        /// 帧缓冲
+        /// 可见光摄像机实时播放句柄
         /// </summary>
-        private byte[] mFrameBuffer;
+        private int cameraRealPlayHandle;
+
+        /// <summary>
+        /// 可见光摄像机实时播放端口
+        /// </summary>
+        private int cameraRealPlayPort = -1;
+
+        /// <summary>
+        /// 临时温度帧缓冲
+        /// </summary>
+        private byte[] mTempTemperatureBuffer;
+
+        /// <summary>
+        /// 温度帧缓冲
+        /// </summary>
+        private byte[] mTemperatureFrameBuffer;
 
         /// <summary>
         /// 温度缓冲区
         /// </summary>
         private float[] mTemperatureBuffer;
-
-        /// <summary>
-        /// 临时帧缓冲
-        /// </summary>
-        private byte[] mTempBuffer;
 
         /// <summary>
         /// 缓冲区已使用长度
@@ -114,10 +124,8 @@ namespace HIKVisionDevice
         private int mBufferLength;
 
         /// <summary>
-        /// 接收数据回调函数
+        /// 是否解析到头部
         /// </summary>
-        private CHCNetSDK.REALDATACALLBACK mOnReceived;
-
         private bool mHasHeader = false;
 
         #endregion
@@ -142,8 +150,8 @@ namespace HIKVisionDevice
         public override bool Open()
         {
             mBufferLength = 4 + irCameraParameters.width * irCameraParameters.height * sizeof(float);
-            mTempBuffer = new byte[mBufferLength];
-            mFrameBuffer = new byte[mBufferLength];
+            mTempTemperatureBuffer = new byte[mBufferLength];
+            mTemperatureFrameBuffer = new byte[mBufferLength];
             mTemperatureBuffer = new float[irCameraParameters.width * irCameraParameters.height];
             mBufferUsed = 0;
             mHasHeader = false;
@@ -186,21 +194,21 @@ namespace HIKVisionDevice
         {
             switch (mode) {
                 case ControlMode.AutoFocus:
-                    return CHCNetSDK.NET_DVR_FocusOnePush(mUserId, irCameraChannel);
+                    return CHCNetSDK.NET_DVR_FocusOnePush(userId, irCameraChannel);
 
                 case ControlMode.FocusFar:
-                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 0))
+                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
-                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 1);
+                    return CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 1);
 
                 case ControlMode.FocusNear:
-                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 0))
+                    if (!CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
-                    return CHCNetSDK.NET_DVR_PTZControl_Other(mUserId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 1);
+                    return CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 1);
 
                 default:
                     return false;
@@ -246,14 +254,14 @@ namespace HIKVisionDevice
                 }
 
                 case ReadMode.TemperatureArray: {
-                    lock (mFrameBuffer) {
+                    lock (mTemperatureFrameBuffer) {
                         for (int i = 0, j = 4; i < mTemperatureBuffer.Length; ++i, j += 4) {
-                            mTemperatureBuffer[i] = BitConverter.ToSingle(mFrameBuffer, j);
+                            mTemperatureBuffer[i] = BitConverter.ToSingle(mTemperatureFrameBuffer, j);
                         }
                     }
 
                     var dst = (float[])inData;
-                    var scale = BitConverter.ToInt32(mFrameBuffer, 4);
+                    var scale = BitConverter.ToInt32(mTemperatureFrameBuffer, 4);
                     for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
                         dst[i] = mTemperatureBuffer[i];
                     }
@@ -262,9 +270,9 @@ namespace HIKVisionDevice
                 }
 
                 case ReadMode.ImageArray: {
-                    lock (mFrameBuffer) {
+                    lock (mTemperatureFrameBuffer) {
                         for (int i = 0, j = 4; i < mTemperatureBuffer.Length; ++i, j += 4) {
-                            mTemperatureBuffer[i] = BitConverter.ToSingle(mFrameBuffer, j);
+                            mTemperatureBuffer[i] = BitConverter.ToSingle(mTemperatureFrameBuffer, j);
                         }
                     }
 
@@ -377,8 +385,8 @@ namespace HIKVisionDevice
         {
             CHCNetSDK.NET_DVR_DEVICEINFO_V30 deviceInfo = new CHCNetSDK.NET_DVR_DEVICEINFO_V30();
 
-            mUserId = CHCNetSDK.NET_DVR_Login_V30(ip, port, userName, password, ref deviceInfo);
-            if (mUserId < 0) {
+            userId = CHCNetSDK.NET_DVR_Login_V30(ip, port, userName, password, ref deviceInfo);
+            if (userId < 0) {
                 Tracker.LogE("NET_DVR_Login_V30 failed, error code= " + CHCNetSDK.NET_DVR_GetLastError());
                 return false;
             }
@@ -392,7 +400,7 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool Logout()
         {
-            return CHCNetSDK.NET_DVR_Logout(mUserId);
+            return CHCNetSDK.NET_DVR_Logout(userId);
         }
 
         /// <summary>
@@ -405,11 +413,10 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool Config(int channel, float distance, float emissivity, float reflectedTemperature)
         {
-            int channelId = 1;
             IntPtr lpOutputXml = Marshal.AllocHGlobal(1024 * 1024);
 
             CHCNetSDK.NET_DVR_STD_ABILITY struSTDAbility = new CHCNetSDK.NET_DVR_STD_ABILITY();
-            struSTDAbility.lpCondBuffer = new IntPtr(channelId);
+            struSTDAbility.lpCondBuffer = new IntPtr(channel);
             struSTDAbility.dwCondSize = sizeof(int);
 
             struSTDAbility.lpOutBuffer = lpOutputXml;
@@ -417,79 +424,27 @@ namespace HIKVisionDevice
             struSTDAbility.lpStatusBuffer = lpOutputXml;
             struSTDAbility.dwStatusSize = 1024 * 1024;
 
-            if (!CHCNetSDK.NET_DVR_GetSTDAbility(mUserId, CHCNetSDK.NET_DVR_GET_THERMAL_CAPABILITIES, ref struSTDAbility)) {
+            if (!CHCNetSDK.NET_DVR_GetSTDAbility(userId, CHCNetSDK.NET_DVR_GET_THERMAL_CAPABILITIES, ref struSTDAbility)) {
                 Marshal.FreeHGlobal(lpOutputXml);
                 lpOutputXml = IntPtr.Zero;
                 return false;
             }
 
-            CHCNetSDK.NET_DVR_XML_CONFIG_INPUT struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
-            CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT struOuput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
-            struInput.dwSize = (uint)Marshal.SizeOf(struInput);
-            struOuput.dwSize = (uint)Marshal.SizeOf(struOuput);
-            struOuput.lpOutBuffer = lpOutputXml;
-            struOuput.dwOutBufferSize = 1024 * 1024;
+            var configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam/capabilities");
+            Tracker.LogD($"get streamParam capabilities: {configuration}");
 
-            string szUrl = $"GET /ISAPI/Thermal/channels/{channel}/streamParam/capabilities";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
-            struInput.lpInBuffer = null;
-            struInput.dwInBufferSize = 0;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
+            configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam");
+            Tracker.LogD($"get streamParam: {configuration}");
 
-            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/streamParam";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
-            struInput.lpInBuffer = null;
-            struInput.dwInBufferSize = 0;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
+            configuration = SetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam", "<ThermalStreamParam version=\"2.0\" xmlns=\"http://www.isapi.org/ver20/XMLSchema\"><videoCodingType>pixel-to-pixel_thermometry_data</videoCodingType></ThermalStreamParam>");
+            Tracker.LogD($"set streamParam: {configuration}");
 
-            szUrl = $"PUT /ISAPI/Thermal/channels/{channel}/streamParam";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
-            string szThermalStreamParam =
-                "<ThermalStreamParam version=\"2.0\" xmlns=\"http://www.isapi.org/ver20/XMLSchema\"><videoCodingType>pixel-to-pixel_thermometry_data</videoCodingType></ThermalStreamParam>";
-            struInput.lpInBuffer = szThermalStreamParam;
-            struInput.dwInBufferSize = (uint)szThermalStreamParam.Length;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
+            configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam/capabilities");
+            Tracker.LogD($"get pixelToPixelParam capabilities: {configuration}");
 
-            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam/capabilities";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
-            struInput.lpInBuffer = null;
-            struInput.dwInBufferSize = 0;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
+            configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam");
+            Tracker.LogD($"get pixelToPixelParam: {configuration}");
 
-            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
-            struInput.lpInBuffer = null;
-            struInput.dwInBufferSize = 0;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
-
-            szUrl = $"GET /ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam";
-            struInput.lpRequestUrl = szUrl;
-            struInput.dwRequestUrlLen = (uint)szUrl.Length;
             string szPixelToPixelParamFormat =
                 "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>" +
                 "<PixelToPixelParam version = \"2.0\" xmlns = \"http://www.hikvision.com/ver20/XMLSchema\">" +
@@ -501,32 +456,23 @@ namespace HIKVisionDevice
                 "<distance>{2:D}</distance>" +
                 "<refreshInterval>0</refreshInterval>" +
                 "</PixelToPixelParam>";
-
             string szPixelToPixelParam = string.Format(szPixelToPixelParamFormat, reflectedTemperature, emissivity, (int)distance);
-            struInput.lpInBuffer = szPixelToPixelParam;
-            struInput.dwInBufferSize = (uint)szPixelToPixelParam.Length;
-            if (!CHCNetSDK.NET_DVR_STDXMLConfig(mUserId, ref struInput, ref struOuput)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
-
-            Marshal.FreeHGlobal(lpOutputXml);
-            lpOutputXml = IntPtr.Zero;
+            configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam", szPixelToPixelParam);
+            Tracker.LogD($"get pixelToPixelParam: {configuration}");
 
             CHCNetSDK.NET_DVR_FOCUSMODE_CFG cfg = new CHCNetSDK.NET_DVR_FOCUSMODE_CFG();
             uint returnBytes = 0;
             int outSize = Marshal.SizeOf(cfg);
             IntPtr outBuffer = Marshal.AllocHGlobal(outSize);
             Marshal.StructureToPtr(cfg, outBuffer, false);
-            if (!CHCNetSDK.NET_DVR_GetDVRConfig(mUserId, CHCNetSDK.NET_DVR_GET_FOCUSMODECFG, channel, outBuffer, (uint)outSize, ref returnBytes)) {
+            if (!CHCNetSDK.NET_DVR_GetDVRConfig(userId, CHCNetSDK.NET_DVR_GET_FOCUSMODECFG, channel, outBuffer, (uint)outSize, ref returnBytes)) {
                 Marshal.FreeHGlobal(outBuffer);
                 outBuffer = IntPtr.Zero;
                 return false;
             }
 
             cfg.byFocusMode = 2;
-            bool ret = CHCNetSDK.NET_DVR_SetDVRConfig(mUserId, CHCNetSDK.NET_DVR_SET_FOCUSMODECFG, channel, outBuffer, (uint)outSize);
+            bool ret = CHCNetSDK.NET_DVR_SetDVRConfig(userId, CHCNetSDK.NET_DVR_SET_FOCUSMODECFG, channel, outBuffer, (uint)outSize);
             Marshal.FreeHGlobal(outBuffer);
             outBuffer = IntPtr.Zero;
 
@@ -539,7 +485,9 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool StartRealPlay()
         {
-            mOnReceived = (int lRealHandle, UInt32 dwDataType, IntPtr pBuffer, UInt32 dwBufSize, IntPtr pUser) => {
+            // 接收红外摄像机数据回调函数
+            void onIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+            {
                 if ((dwDataType == CHCNetSDK.NET_DVR_STREAMDATA) && (dwBufSize > 0)) {
                     CHCNetSDK.STREAM_FRAME_INFO_S st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
 
@@ -550,7 +498,7 @@ namespace HIKVisionDevice
                         hasHeader = true;
                     }
 
-                    lock (mTempBuffer) {
+                    lock (mTempTemperatureBuffer) {
                         int length = (int)dwBufSize - iIndex;
                         if (((!mHasHeader) && (!hasHeader)) || ((mBufferUsed + length) > mBufferLength)) {
                             mBufferUsed = 0;
@@ -561,31 +509,133 @@ namespace HIKVisionDevice
                         if (hasHeader)
                             mHasHeader = true;
 
-                        Marshal.Copy(pBuffer + iIndex, mTempBuffer, mBufferUsed, length);
+                        Marshal.Copy(pBuffer + iIndex, mTempTemperatureBuffer, mBufferUsed, length);
                         mBufferUsed += length;
 
                         if (mBufferUsed == mBufferLength) {
-                            lock (mFrameBuffer) {
-                                Array.Copy(mTempBuffer, mFrameBuffer, mBufferLength);
+                            lock (mTemperatureFrameBuffer) {
+                                Array.Copy(mTempTemperatureBuffer, mTemperatureFrameBuffer, mBufferLength);
                             }
                             mBufferUsed = 0;
                             mHasHeader = false;
                         }
                     }
                 }
+            }
+
+            // 接收可见光摄像机数据回调函数
+            void onCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+            {
+                switch (dwDataType) {
+                    case CHCNetSDK.NET_DVR_SYSHEAD: {
+                        if (dwBufSize <= 0) {
+                            break;
+                        }
+
+                        // 同一路码流不需要多次调用开流接口
+                        if (cameraRealPlayPort >= 0) {
+                            break;
+                        }
+
+                        // 获取播放句柄
+                        if (!PlayCtrl.PlayM4_GetPort(ref cameraRealPlayPort)) {
+                            Tracker.LogE($"PlayM4_GetPort fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 设置流播放模式
+                        if (!PlayCtrl.PlayM4_SetStreamOpenMode(cameraRealPlayPort, PlayCtrl.STREAME_REALTIME)) {
+                            Tracker.LogE($"Set STREAME_REALTIME mode fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 打开码流,送入头数据
+                        if (!PlayCtrl.PlayM4_OpenStream(cameraRealPlayPort, pBuffer, dwBufSize, 2 * 1024 * 1024)) {
+                            Tracker.LogE($"PlayM4_OpenStream fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 设置显示缓冲区个数
+                        if (!PlayCtrl.PlayM4_SetDisplayBuf(cameraRealPlayPort, FRAME_BUFFER_COUNT)) {
+                            Tracker.LogE($"PlayM4_SetDisplayBuf fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 设置显示模式
+                        if (!PlayCtrl.PlayM4_SetOverlayMode(cameraRealPlayPort, 0, 0)) {
+                            Tracker.LogE($"PlayM4_SetOverlayMode fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 设置解码回调函数
+                        if (!PlayCtrl.PlayM4_SetDecCallBackEx(cameraRealPlayPort, new PlayCtrl.DECCBFUN(DecoderCallback), IntPtr.Zero, 0)) {
+                            Tracker.LogE($"PlayM4_SetDecCallBackEx fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        // 开始解码
+                        if (!PlayCtrl.PlayM4_Play(cameraRealPlayPort, IntPtr.Zero)) {
+                            Tracker.LogE($"PlayM4_Play fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+                            break;
+                        }
+
+                        break;
+                    }
+
+                    case CHCNetSDK.NET_DVR_STREAMDATA: {
+                        if (dwBufSize <= 0) {
+                            break;
+                        }
+
+                        if (cameraRealPlayPort < 0) {
+                            break;
+                        }
+
+                        // 送入其他数据
+                        for (var i = 0; i < 999; i++) {
+                            if (!PlayCtrl.PlayM4_InputData(cameraRealPlayPort, pBuffer, dwBufSize)) {
+                                Thread.Sleep(2);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+
+            var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                hPlayWnd = IntPtr.Zero, // 预览窗口
+                lChannel = irCameraChannel, // 预览的设备通道
+                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                byVideoCodingType = 1
             };
 
-            CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
-            lpPreviewInfo.hPlayWnd = IntPtr.Zero; // 预览窗口
-            lpPreviewInfo.lChannel = irCameraChannel; // 预览的设备通道
-            lpPreviewInfo.dwStreamType = 0; // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
-            lpPreviewInfo.dwLinkMode = 0; // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
-            lpPreviewInfo.bBlocked = true; // 0- 非阻塞取流，1- 阻塞取流
-            lpPreviewInfo.byVideoCodingType = 1;
+            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, onIrCameraReceived, IntPtr.Zero);
+            if (irCameraRealPlayHandle < 0) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+                return false;
+            }
 
-            mRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(mUserId, ref lpPreviewInfo, mOnReceived, IntPtr.Zero);
-            if (mRealPlayHandle < 0) {
-                Tracker.LogE("NET_DVR_RealPlay_V40 failed, error code= " + CHCNetSDK.NET_DVR_GetLastError());
+            lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                hPlayWnd = IntPtr.Zero, // 预览窗口
+                lChannel = cameraChannel, // 预览的设备通道
+                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
+            };
+
+            cameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, onCameraReceived, IntPtr.Zero);
+            if (cameraRealPlayHandle < 0) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={cameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
                 return false;
             }
 
@@ -598,7 +648,108 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool StopRealPlay()
         {
-            return CHCNetSDK.NET_DVR_SerialStop(mRealPlayHandle);
+            return CHCNetSDK.NET_DVR_SerialStop(irCameraRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(cameraChannel);
+        }
+
+        /// <summary>
+        /// 获取人脸测温配置
+        /// </summary>
+        /// <param name="channel">通道</param>
+        /// <returns>人脸测温配置</returns>
+        private bool GetFaceThermometry(int channel)
+        {
+            var faceThermometry = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/faceThermometry");
+            Tracker.LogI(faceThermometry);
+
+            return true;
+        }
+
+        /// <summary>
+        /// 读取配置
+        /// </summary>
+        /// <param name="url">请求信令</param>
+        /// <param name="configuration">配置</param>
+        /// <param name="outputBufferSize">输出缓冲区大小</param>
+        /// <returns>配置</returns>
+        private string GetConfiguration(string url, string configuration = null, int outputBufferSize = 1024 * 1024)
+        {
+            IntPtr lpOutputXml = IntPtr.Zero;
+            url = $"GET {url}";
+
+            try {
+                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
+                var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
+
+                struInput.dwSize = (uint)Marshal.SizeOf(struInput);
+                struInput.lpRequestUrl = url;
+                struInput.dwRequestUrlLen = (uint)url.Length;
+                struInput.lpInBuffer = configuration;
+                struInput.dwInBufferSize = (uint)(configuration?.Length ?? 0);
+
+                struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
+                struOutput.lpOutBuffer = lpOutputXml;
+                struOutput.dwOutBufferSize = (uint)outputBufferSize;
+
+                if (!CHCNetSDK.NET_DVR_STDXMLConfig(userId, ref struInput, ref struOutput)) {
+                    Tracker.LogE($"GetConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
+                    return null;
+                }
+
+                return Marshal.PtrToStringAnsi(struOutput.lpOutBuffer);
+            }
+            finally {
+                if (lpOutputXml != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpOutputXml);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置配置
+        /// </summary>
+        /// <param name="url">请求信令</param>
+        /// <param name="configuration">配置</param>
+        /// <param name="outputBufferSize">输出缓冲区大小</param>
+        /// <returns>配置</returns>
+        private string SetConfiguration(string url, string configuration, int outputBufferSize = 1024 * 1024)
+        {
+            IntPtr lpOutputXml = IntPtr.Zero;
+            url = $"PUT {url}";
+
+            try {
+                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
+                var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
+
+                struInput.dwSize = (uint)Marshal.SizeOf(struInput);
+                struInput.lpRequestUrl = url;
+                struInput.dwRequestUrlLen = (uint)url.Length;
+                struInput.lpInBuffer = configuration;
+                struInput.dwInBufferSize = (uint)configuration.Length;
+
+                struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
+                struOutput.lpOutBuffer = lpOutputXml;
+                struOutput.dwOutBufferSize = (uint)outputBufferSize;
+
+                if (!CHCNetSDK.NET_DVR_STDXMLConfig(userId, ref struInput, ref struOutput)) {
+                    Tracker.LogE($"SetConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
+                    return null;
+                }
+
+                return Marshal.PtrToStringAnsi(struOutput.lpOutBuffer);
+            }
+            finally {
+                if (lpOutputXml != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpOutputXml);
+                }
+            }
+        }
+
+        private void DecoderCallback(int nPort, IntPtr pBuf, int nSize, ref PlayCtrl.FRAME_INFO pFrameInfo, int nReserved1, int nReserved2)
+        {
+            Tracker.LogI($"DecoderCallback: {pFrameInfo.nType}");
+            // ImageUtils.ShowImage("image", pFrameInfo.nWidth, pFrameInfo.nHeight, pBuf);
         }
 
         #endregion
