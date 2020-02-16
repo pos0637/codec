@@ -46,6 +46,31 @@
             public string location;
 
             /// <summary>
+            /// 客户端索引
+            /// </summary>
+            public string clientId;
+
+            /// <summary>
+            /// MQTT服务器地址
+            /// </summary>
+            public string mqttServerIp;
+
+            /// <summary>
+            /// MQTT服务器端口
+            /// </summary>
+            public int mqttServerPort;
+
+            /// <summary>
+            /// RTMP服务器地址
+            /// </summary>
+            public string rtmpServerIp;
+
+            /// <summary>
+            /// RTMP服务器端口
+            /// </summary>
+            public int rtmpServerPort;
+
+            /// <summary>
             /// 视频保存路径
             /// </summary>
             public string saveVideoPath;

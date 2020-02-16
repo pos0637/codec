@@ -59,9 +59,20 @@ namespace VirtualIrDevice
 
                 case ReadMode.TemperatureArray: {
                     var dst = (float[])inData;
+                    for (int y = 0, i = 0; y < irCameraParameters.temperatureHeight; ++y) {
+                        for (int x = 0; x < irCameraParameters.temperatureWidth; ++x) {
+                            dst[i++] = 0.0F;
+                        }
+                    }
+
+                    return true;
+                }
+
+                case ReadMode.IrImage: {
+                    var dst = (byte[])inData;
                     for (int y = 0, i = 0; y < irCameraParameters.height; ++y) {
                         for (int x = 0; x < irCameraParameters.width; ++x) {
-                            dst[i++] = 0.0F;
+                            dst[i++] = 0;
                         }
                     }
 

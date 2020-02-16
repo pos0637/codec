@@ -1,6 +1,5 @@
 ﻿using Common;
 using Communication;
-using IRMonitor2.Common;
 using IRMonitor2.Services.Cell;
 using Miscs;
 using System;
@@ -62,7 +61,8 @@ namespace IRMonitor2
         private static void InitializeSessionManager()
         {
             // 创建通讯会话管理器
-            var manager = new MQTTSessionManager(Global.gCloudIP, Global.gCloudPort, Global.gClientId);
+            var configuration = Repository.Repository.LoadConfiguation().information;
+            var manager = new MQTTSessionManager(configuration.mqttServerIp, configuration.mqttServerPort, configuration.clientId);
 
             // 注册会话
             Tls.Register("Session");

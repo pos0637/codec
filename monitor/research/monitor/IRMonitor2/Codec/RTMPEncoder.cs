@@ -81,6 +81,9 @@ namespace Codec
             }
         }
 
+        /// <summary>
+        /// 重置
+        /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Reset()
         {
@@ -102,8 +105,12 @@ namespace Codec
             ffmpeg.avformat_network_deinit();
         }
 
+        /// <summary>
+        /// 开始推流
+        /// </summary>
+        /// <param name="uri">服务器资源地址</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Start(string server)
+        public void Start(string uri)
         {
             frame = ffmpeg.av_frame_alloc();
             if (frame == null) {
@@ -132,12 +139,15 @@ namespace Codec
                 stream->codec->flags |= ffmpeg.AV_CODEC_FLAG_GLOBAL_HEADER;
             }
 
-            ffmpeg.avio_open2(&formatContext->pb, server, ffmpeg.AVIO_FLAG_READ_WRITE, null, null).ThrowExceptionIfError();
+            ffmpeg.avio_open2(&formatContext->pb, uri, ffmpeg.AVIO_FLAG_READ_WRITE, null, null).ThrowExceptionIfError();
             ffmpeg.avformat_write_header(formatContext, null).ThrowExceptionIfError();
             ioOpened = true;
             pts = 0;
         }
 
+        /// <summary>
+        /// 停止推流
+        /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Stop()
         {
@@ -162,6 +172,12 @@ namespace Codec
             }
         }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="data1">Y通道数据</param>
+        /// <param name="data2">U通道数据</param>
+        /// <param name="data3">V通道数据</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Encode(IntPtr data1, IntPtr data2, IntPtr data3)
         {

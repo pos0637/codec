@@ -30,10 +30,11 @@ namespace IRMonitor2.Services.Cell.Worker
         private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;
 
         /// <summary>
-        /// 红外图像
+        /// 温度矩阵
         /// </summary>
         private float[] temperature;
 
+        /// <summary>
         /// 可见光图像
         /// </summary>
         private byte[] image;

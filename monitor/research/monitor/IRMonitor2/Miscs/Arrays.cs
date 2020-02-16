@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 
 namespace Miscs
@@ -63,6 +64,27 @@ namespace Miscs
 
             lock (result) {
                 Buffer.BlockCopy(from, 0, result, 0, from.Length);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 克隆数组
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="from">原数组</param>
+        /// <param name="to">目标数组</param>
+        /// <returns>数组</returns>
+        public static PinnedBuffer<T> Clone<T>(T[] from, PinnedBuffer<T> to)
+        {
+            var result = to;
+            if ((to == null) || (to.Length != from.Length)) {
+                result = PinnedBuffer<T>.Alloc(from.Length);
+            }
+
+            lock (result) {
+                Buffer.BlockCopy(from, 0, result.buffer, 0, from.Length);
             }
 
             return result;

@@ -6,6 +6,11 @@
   tester: 
   substation: 
   location: 
+  clientId: 0001
+  mqttServerIp: 112.51.3.158
+  mqttServerPort: 1883
+  rtmpServerIp: 127.0.0.1
+  rtmpServerPort: 1935
   saveVideoPath: ./video
   saveImagePath: ./image
 cells:

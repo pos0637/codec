@@ -45,6 +45,9 @@ namespace Common
             return buffer;
         }
 
+        /// <summary>
+        /// 释放资源
+        /// </summary>
         public void Dispose()
         {
             if (ptr != IntPtr.Zero) {

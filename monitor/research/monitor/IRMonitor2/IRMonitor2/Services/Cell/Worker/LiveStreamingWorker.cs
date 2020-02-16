@@ -1,10 +1,9 @@
-﻿using Common;
+﻿using Codec;
+using Common;
 using Devices;
-using IRMonitor2.Common;
 using Miscs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace IRMonitor2.Services.Cell.Worker
@@ -15,82 +14,64 @@ namespace IRMonitor2.Services.Cell.Worker
     public class LiveStreamingWorker : BaseWorker
     {
         /// <summary>
-        /// 设备单元服务
-        /// </summary>
-        private CellService service;
-
-        /// <summary>
         /// 设备
         /// </summary>
         private IDevice device;
 
         /// <summary>
-        /// 红外摄像机参数
+        /// 服务器资源地址
         /// </summary>
-        private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;
+        private string uri;
 
         /// <summary>
-        /// 可见光摄像机参数
+        /// 宽度
         /// </summary>
-        private Repository.Entities.Configuration.CameraParameters cameraParameters;
+        private int width;
 
         /// <summary>
-        /// 红外图像
+        /// 高度
         /// </summary>
-        private PinnedBuffer<float> temperature;
+        private int height;
 
         /// <summary>
-        /// 可见光图像
+        /// 帧率
+        /// </summary>
+        private int frameRate;
+
+        /// <summary>
+        /// 事件名称
+        /// </summary>
+        private string eventName;
+
+        /// <summary>
+        /// 图像缓存
         /// </summary>
         private PinnedBuffer<byte> image;
 
         /// <summary>
-        /// 红外图像读取间隔
+        /// 推送间隔
         /// </summary>
-        private int tempertureDuration;
+        private int duration;
 
         /// <summary>
-        /// 可见光读取间隔
-        /// </summary>
-        private int videoDuration;
-
-        /// <summary>
-        /// 接收温度事件处理函数
-        /// </summary>
-        private EventEmitter.EventHandler onReceiveTemperature;
-
-        /// <summary>
-        /// 接收可见光图像事件处理函数
+        /// 接收图像事件处理函数
         /// </summary>
         private EventEmitter.EventHandler onReceiveImage;
 
+        /// <summary>
+        /// 编码器
+        /// </summary>
+        private RTMPEncoder encoder;
+
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
-            service = arguments["service"] as CellService;
             device = arguments["device"] as IDevice;
-
-            // 读取配置信息
-            if (!device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
-                return ARESULT.E_INVALIDARG;
-            }
-
-            irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-            tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
-
-            // 读取配置信息
-            if (!device.Read(ReadMode.CameraParameters, null, out outData, out _)) {
-                return ARESULT.E_INVALIDARG;
-            }
-
-            cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
-            videoDuration = 1000 / cameraParameters.videoFrameRate;
-
-            // 声明事件处理函数
-            onReceiveTemperature = (arguments) => {
-                if (arguments[0] == device) {
-                    temperature = Arrays.Clone(arguments[1] as float[], temperature);
-                }
-            };
+            uri = arguments["uri"] as string;
+            width = (int)arguments["width"];
+            height = (int)arguments["height"];
+            frameRate = (int)arguments["frameRate"];
+            eventName = arguments["eventName"] as string;
+            duration = 1000 / frameRate;
 
             onReceiveImage = (arguments) => {
                 if (arguments[0] == device) {
@@ -103,50 +84,49 @@ namespace IRMonitor2.Services.Cell.Worker
 
         public override ARESULT Start()
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            try {
+                encoder = new RTMPEncoder();
+                encoder.Initialize(width, height, frameRate);
+                encoder.Start(uri);
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return ARESULT.E_FAIL;
+            }
+
+            EventEmitter.Instance.Subscribe(eventName, onReceiveImage);
             return base.Start();
         }
 
         public override void Discard()
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            encoder.Stop();
+            encoder.Dispose();
+            encoder = null;
+
+            EventEmitter.Instance.Unsubscribe(eventName, onReceiveImage);
             base.Discard();
         }
 
         protected override void Run()
         {
-            float[] temperature = null;
+            PinnedBuffer<byte> image = null;
+            int size = width * height;
 
             while (!IsTerminated()) {
                 // 克隆数据
-                var selections = service.selections.Clone();
-                temperature = Arrays.Clone(this.temperature, temperature);
+                image = Arrays.Clone(this.image.buffer, image);
 
-                // 计算选取温度
-                CalculateTemperature(selections, temperature);
-                // 检查选区告警
-                CheckSelectionAlarm(selections);
+                try {
+                    // 编码
+                    encoder.Encode(image.ptr, image.ptr + size, image.ptr + size + size / 4);
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                }
 
-                Thread.Sleep(tempertureDuration);
+                Thread.Sleep(duration);
             }
-        }
-
-        /// <summary>
-        /// 创建视频数据
-        /// </summary>
-        /// <param name="size">原始数据大小</param>
-        private void CreateImageBuffer(int size)
-        {
-            if (imageGCHandle.IsAllocated) {
-                imageGCHandle.Free();
-            }
-
-            // 分配YUV视频数据空间
-            imageSize = size;
-            image = new byte[imageSize * 3 / 2];
-            imageGCHandle = GCHandle.Alloc(image, GCHandleType.Pinned);
         }
     }
 }

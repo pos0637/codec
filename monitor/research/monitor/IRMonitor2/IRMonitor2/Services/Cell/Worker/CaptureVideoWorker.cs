@@ -94,32 +94,28 @@ namespace IRMonitor2.Services.Cell.Worker
                     continue;
                 }
 
-                // 读取红外图像
+                // 读取温度
                 if (duration1 > tempertureDuration) {
+                    if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
+                        device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
+                    }                    
+
+                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, device, temperature.buffer);
+                    
+                    duration1 = 0;
+                }
+
+                // 读取可见光与红外图像
+                if (duration2 > videoDuration) {
                     if (!device.Read(ReadMode.IrImage, irImage.ptr, irImage.Length * sizeof(float))) {
                         device.Read(ReadMode.IrImage, irImage.buffer, out _, out _);
                     }
 
-                    ImageUtils.ShowYV12Image("irimage", 1280, 720, irImage.ptr);
-
-                    if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
-                        device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
-                    }
-
-                    // ImageUtils.ShowIrImage("temperature", 160, 120, temperature.buffer);
-
-                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, device, temperature.buffer);
-                    duration1 = 0;
-                }
-
-                // 读取可见光图像
-                if (duration2 > videoDuration) {
                     if (!device.Read(ReadMode.Image, image.ptr, image.Length * sizeof(byte))) {
                         device.Read(ReadMode.Image, image.buffer, out _, out _);
                     }
 
-                    // ImageUtils.ShowYV12Image("image", 2688, 1520, image.ptr);
-
+                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IRIMAGE, device, irImage.buffer);
                     EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, device, image.buffer);
                     duration2 = 0;
                 }
