@@ -2,7 +2,6 @@
 using Devices;
 using Miscs;
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -85,6 +84,11 @@ namespace HIKVisionDevice
         private int userId;
 
         /// <summary>
+        /// 红外摄像机温度实时播放句柄
+        /// </summary>
+        private int temperatureRealPlayHandle;
+
+        /// <summary>
         /// 红外摄像机实时播放句柄
         /// </summary>
         private int irCameraRealPlayHandle;
@@ -150,9 +154,9 @@ namespace HIKVisionDevice
 
         public override bool Open()
         {
-            temperatureArray = new float[irCameraParameters.width * irCameraParameters.height];
-            temperatureBuffer = new TripleByteBuffer(4 + irCameraParameters.width * irCameraParameters.height * sizeof(float));
-            irImageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
+            temperatureArray = new float[irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight];
+            temperatureBuffer = new TripleByteBuffer(4 + irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight * sizeof(float));
+            irImageBuffer = new TripleByteBuffer(irCameraParameters.width * irCameraParameters.height * 3 / 2);
             imageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
             mHasHeader = false;
 
@@ -255,8 +259,11 @@ namespace HIKVisionDevice
 
                 case ReadMode.TemperatureArray: {
                     var dst = (float[])inData;
-                    var length = irCameraParameters.width * irCameraParameters.height;
-                    Debug.Assert(dst.Length == length);
+                    var length = irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight;
+                    if (dst.Length != length) {
+                        Tracker.LogE("invalid irCameraParameters");
+                        return false;
+                    }
 
                     var buffer = temperatureBuffer.SwapReadableBuffer().ToArray();
                     var scale = BitConverter.ToInt32(buffer, 4);
@@ -269,8 +276,11 @@ namespace HIKVisionDevice
 
                 case ReadMode.IrImage: {
                     var dst = (byte[])inData;
-                    var length = cameraParameters.width * cameraParameters.height * 3 / 2;
-                    Debug.Assert(dst.Length == length);
+                    var length = irCameraParameters.width * irCameraParameters.height * 3 / 2;
+                    if (dst.Length != length) {
+                        Tracker.LogE("invalid irCameraParameters");
+                        return false;
+                    }
 
                     var buffer = irImageBuffer.SwapReadableBuffer().ToArray();
                     Buffer.BlockCopy(buffer, 0, dst, 0, length);
@@ -281,7 +291,10 @@ namespace HIKVisionDevice
                 case ReadMode.Image: {
                     var dst = (byte[])inData;
                     var length = cameraParameters.width * cameraParameters.height * 3 / 2;
-                    Debug.Assert(dst.Length == length);
+                    if (dst.Length != length) {
+                        Tracker.LogE("invalid cameraParameters");
+                        return false;
+                    }
 
                     var buffer = imageBuffer.SwapReadableBuffer().ToArray();
                     Buffer.BlockCopy(buffer, 0, dst, 0, length);
@@ -483,8 +496,22 @@ namespace HIKVisionDevice
                 dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
                 dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
                 bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
-                dwDisplayBufNum = FRAME_BUFFER_COUNT, // 播放库显示缓冲区最大帧数
                 byVideoCodingType = 1
+            };
+
+            temperatureRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, OnTemperatureReceived, IntPtr.Zero);
+            if (temperatureRealPlayHandle < 0) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+                return false;
+            }
+
+            lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                hPlayWnd = IntPtr.Zero, // 预览窗口
+                lChannel = irCameraChannel, // 预览的设备通道
+                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
             };
 
             irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, OnIrCameraReceived, IntPtr.Zero);
@@ -517,7 +544,7 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool StopRealPlay()
         {
-            return CHCNetSDK.NET_DVR_SerialStop(irCameraRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(cameraChannel);
+            return CHCNetSDK.NET_DVR_SerialStop(temperatureRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(irCameraRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(cameraChannel);
         }
 
         /// <summary>
@@ -616,17 +643,15 @@ namespace HIKVisionDevice
         }
 
         /// <summary>
-        /// 接收红外摄像机数据回调函数
+        /// 接收红外摄像机温度数据回调函数
         /// </summary>
         /// <param name="lRealHandle">句柄</param>
         /// <param name="dwDataType">数据类型</param>
         /// <param name="pBuffer">数据</param>
         /// <param name="dwBufSize">大小</param>
         /// <param name="pUser">用户数据</param>
-        void OnIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+        void OnTemperatureReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
         {
-            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref irCameraRealPlayPort);
-
             if ((dwDataType != CHCNetSDK.NET_DVR_STREAMDATA) || (dwBufSize <= 0)) {
                 return;
             }
@@ -636,7 +661,7 @@ namespace HIKVisionDevice
             var st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
             if (st_frame_info.u32MagicNo == 0x70827773) {
                 // 检查红外摄像机参数是否一致
-                if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.width) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.height)) {
+                if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.temperatureWidth) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.temperatureHeight)) {
                     Tracker.LogE("invalid irCameraParameters");
                     return;
                 }
@@ -657,6 +682,19 @@ namespace HIKVisionDevice
                 temperatureBuffer.SwapWritableBuffer();
                 mHasHeader = false;
             }
+        }
+
+        /// <summary>
+        /// 接收红外摄像机数据回调函数
+        /// </summary>
+        /// <param name="lRealHandle">句柄</param>
+        /// <param name="dwDataType">数据类型</param>
+        /// <param name="pBuffer">数据</param>
+        /// <param name="dwBufSize">大小</param>
+        /// <param name="pUser">用户数据</param>
+        void OnIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+        {
+            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref irCameraRealPlayPort);
         }
 
         /// <summary>
@@ -769,14 +807,22 @@ namespace HIKVisionDevice
         private void DecoderCallback(int nPort, IntPtr pBuf, int nSize, ref PlayCtrl.FRAME_INFO pFrameInfo, int nReserved1, int nReserved2)
         {
             if (nPort == irCameraRealPlayPort) {
-                var length = cameraParameters.width * cameraParameters.height * 3 / 2;
-                Debug.Assert(nSize == length);
+                var length = irCameraParameters.width * irCameraParameters.height * 3 / 2;
+                if (nSize != length) {
+                    Tracker.LogE("invalid irCameraParameters");
+                    return;
+                }
+
                 irImageBuffer.GetWritableBuffer().Push(pBuf, length);
                 irImageBuffer.SwapWritableBuffer();
             }
             else if (nPort == cameraRealPlayPort) {
                 var length = cameraParameters.width * cameraParameters.height * 3 / 2;
-                Debug.Assert(nSize == length);
+                if (nSize != length) {
+                    Tracker.LogE("invalid cameraParameters");
+                    return;
+                }
+
                 imageBuffer.GetWritableBuffer().Push(pBuf, length);
                 imageBuffer.SwapWritableBuffer();
             }

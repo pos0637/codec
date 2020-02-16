@@ -18,11 +18,14 @@ cells:
     uri: 'ip=192.168.0.64&port=8000&username=admin&password=abcd1234'
     irCameraParameters:
       uri: 'channel=2'
-      width: 160
-      stride: 160
-      height: 120
+      width: 1280
+      stride: 1280
+      height: 720
       bpp: 4
       videoFrameRate: 15
+      temperatureWidth: 160
+      temperatureStride: 160
+      temperatureHeight: 120
       temperatureFrameRate: 15
       emissivity: 
       reflectedTemperature: 

@@ -61,7 +61,8 @@ namespace IRMonitor2.Services.Cell.Worker
 
             // 创建资源
             Repository.Entities.Configuration.IrCameraParameters irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-            temperature = PinnedBuffer<float>.Alloc(irCameraParameters.width * irCameraParameters.height);
+            temperature = PinnedBuffer<float>.Alloc(irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight);
+            irImage = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height * 3 / 2);
             tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
 
             // 读取配置信息
@@ -71,7 +72,6 @@ namespace IRMonitor2.Services.Cell.Worker
 
             // 创建资源
             Repository.Entities.Configuration.CameraParameters cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
-            irImage = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2);
             image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2);
             videoDuration = 1000 / cameraParameters.videoFrameRate;
 
@@ -100,7 +100,7 @@ namespace IRMonitor2.Services.Cell.Worker
                         device.Read(ReadMode.IrImage, irImage.buffer, out _, out _);
                     }
 
-                    // ImageUtils.ShowYV12Image("irimage", 2688, 1520, irImage.ptr);
+                    ImageUtils.ShowYV12Image("irimage", 1280, 720, irImage.ptr);
 
                     if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
                         device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
@@ -118,7 +118,7 @@ namespace IRMonitor2.Services.Cell.Worker
                         device.Read(ReadMode.Image, image.buffer, out _, out _);
                     }
 
-                    ImageUtils.ShowYV12Image("image", 2688, 1520, image.ptr);
+                    // ImageUtils.ShowYV12Image("image", 2688, 1520, image.ptr);
 
                     EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, device, image.buffer);
                     duration2 = 0;

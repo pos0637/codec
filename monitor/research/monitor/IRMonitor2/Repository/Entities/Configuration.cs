@@ -149,6 +149,21 @@
             public int videoFrameRate;
 
             /// <summary>
+            /// 温度矩阵宽度
+            /// </summary>
+            public int temperatureWidth;
+
+            /// <summary>
+            /// 温度矩阵对齐宽度
+            /// </summary>
+            public int temperatureStride;
+
+            /// <summary>
+            /// 温度矩阵高度
+            /// </summary>
+            public int temperatureHeight;
+
+            /// <summary>
             /// 温度帧率
             /// </summary>
             public int temperatureFrameRate;
