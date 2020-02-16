@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace IRMonitor.Miscs
+namespace IRMonitor2.Miscs
 {
     /// <summary>
     /// 方法调用工具

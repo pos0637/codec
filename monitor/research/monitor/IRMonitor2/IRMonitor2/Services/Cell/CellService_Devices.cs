@@ -5,7 +5,7 @@ using Miscs;
 using Repository.Entities;
 using System;
 using System.Collections.Generic;
-using static IRMonitor.Miscs.MethodUtils;
+using static IRMonitor2.Miscs.MethodUtils;
 
 namespace IRMonitor2.Services.Cell
 {

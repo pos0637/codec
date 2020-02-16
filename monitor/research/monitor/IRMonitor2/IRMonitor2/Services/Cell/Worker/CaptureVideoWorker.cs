@@ -98,10 +98,10 @@ namespace IRMonitor2.Services.Cell.Worker
                 if (duration1 > tempertureDuration) {
                     if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
                         device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
-                    }                    
+                    }
 
                     EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, device, temperature.buffer);
-                    
+
                     duration1 = 0;
                 }
 

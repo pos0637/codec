@@ -2,7 +2,7 @@
 using Repository.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using static IRMonitor.Miscs.MethodUtils;
+using static IRMonitor2.Miscs.MethodUtils;
 
 namespace IRMonitor2.Services.Cell
 {

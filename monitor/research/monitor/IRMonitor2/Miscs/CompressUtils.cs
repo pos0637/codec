@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace IRMonitor.Miscs
+namespace IRMonitor2.Miscs
 {
     /// <summary>
     /// 压缩工具

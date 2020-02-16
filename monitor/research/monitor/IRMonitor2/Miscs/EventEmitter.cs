@@ -1,5 +1,4 @@
 ﻿using Common;
-using System;
 using System.Collections.Generic;
 
 namespace Miscs
@@ -81,7 +80,7 @@ namespace Miscs
         /// <param name="name">事件名称</param>
         /// <param name="handler">事件处理器</param>
         /// <returns>是否成功</returns>
-        public bool Unsubscribe(String name, EventHandler handler)
+        public bool Unsubscribe(string name, EventHandler handler)
         {
             if (string.IsNullOrEmpty(name)) {
                 return false;
@@ -128,7 +127,7 @@ namespace Miscs
         /// <param name="name">事件名称</param>
         /// <param name="arguments">参数</param>
         /// <returns>是否成功</returns>
-        public bool Publish(String name, params object[] arguments)
+        public bool Publish(string name, params object[] arguments)
         {
             if (string.IsNullOrEmpty(name)) {
                 return false;

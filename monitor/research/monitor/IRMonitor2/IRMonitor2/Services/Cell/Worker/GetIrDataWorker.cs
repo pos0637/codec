@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace IRMonitor.Services.Cell.Worker
+namespace IRMonitor2.Services.Cell.Worker
 {
     /// <summary>
     /// 获取红外数据线程

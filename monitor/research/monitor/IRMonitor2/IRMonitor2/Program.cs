@@ -7,9 +7,9 @@ using System.Threading;
 
 namespace IRMonitor2
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             /*
             using (var db = new BloggingContext()) {
@@ -49,10 +49,6 @@ namespace IRMonitor2
 
             // 初始化设备单元服务管理器
             CellServiceManager.Instance.Initialize();
-
-            while (true) {
-                Thread.Sleep(3000);
-            }
         }
 
         /// <summary>

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace IRMonitor.Services.Cell.Worker
+namespace IRMonitor2.Services.Cell.Worker
 {
     /// <summary>
     /// 通知设置

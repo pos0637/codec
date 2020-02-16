@@ -1,6 +1,6 @@
 ﻿using Common;
-using IRMonitor.Common;
-using IRMonitor.Miscs;
+using IRMonitor2.Common;
+using IRMonitor2.Miscs;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace IRMonitor.Services.Cell.Worker
+namespace IRMonitor2.Services.Cell.Worker
 {
     public class RecordingWorker : BaseWorker
     {
