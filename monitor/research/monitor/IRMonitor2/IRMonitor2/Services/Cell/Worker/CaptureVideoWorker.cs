@@ -18,9 +18,14 @@ namespace IRMonitor2.Services.Cell.Worker
         private IDevice device;
 
         /// <summary>
-        /// 红外图像
+        /// 温度矩阵
         /// </summary>
         private PinnedBuffer<float> temperature;
+
+        /// <summary>
+        /// 红外图像
+        /// </summary>
+        private PinnedBuffer<byte> irImage;
 
         /// <summary>
         /// 可见光图像
@@ -56,6 +61,7 @@ namespace IRMonitor2.Services.Cell.Worker
 
             // 创建资源
             Repository.Entities.Configuration.IrCameraParameters irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+            irImage = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height);
             temperature = PinnedBuffer<float>.Alloc(irCameraParameters.width * irCameraParameters.height);
             tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
 
@@ -66,7 +72,7 @@ namespace IRMonitor2.Services.Cell.Worker
 
             // 创建资源
             Repository.Entities.Configuration.CameraParameters cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
-            image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height);
+            image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2);
             videoDuration = 1000 / cameraParameters.videoFrameRate;
 
             return base.Initialize(arguments);
@@ -90,6 +96,10 @@ namespace IRMonitor2.Services.Cell.Worker
 
                 // 读取红外图像
                 if (duration1 > tempertureDuration) {
+                    if (!device.Read(ReadMode.IrImage, irImage.ptr, irImage.Length * sizeof(float))) {
+                        device.Read(ReadMode.IrImage, irImage.buffer, out _, out _);
+                    }                    
+
                     if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
                         device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
                     }
@@ -100,9 +110,11 @@ namespace IRMonitor2.Services.Cell.Worker
 
                 // 读取可见光图像
                 if (duration2 > videoDuration) {
-                    if (!device.Read(ReadMode.ImageArray, image.ptr, image.Length * sizeof(byte))) {
-                        device.Read(ReadMode.ImageArray, image.buffer, out _, out _);
+                    if (!device.Read(ReadMode.Image, image.ptr, image.Length * sizeof(byte))) {
+                        device.Read(ReadMode.Image, image.buffer, out _, out _);
                     }
+
+                    ImageUtils.ShowYV12Image("image", 2688, 1520, image.ptr);
 
                     EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, device, image.buffer);
                     duration2 = 0;

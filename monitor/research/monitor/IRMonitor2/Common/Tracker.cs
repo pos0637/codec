@@ -3,6 +3,7 @@ using log4net.Config;
 using log4net.Repository;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Common
 {
@@ -25,10 +26,10 @@ namespace Common
         }
 
         private static ILog sLog;
-        private static ILog sLogDA;
-        private static ILog sLogEX;
-        private static ILog sLogNW;
-        private static ILog sLogBU;
+        private static readonly ILog sLogDA;
+        private static readonly ILog sLogEX;
+        private static readonly ILog sLogNW;
+        private static readonly ILog sLogBU;
 
         /// <summary>
         /// 设置日志接口
@@ -43,36 +44,36 @@ namespace Common
         /// 输出信息日志
         /// </summary>
         /// <param name="message">信息日志</param>
-        public static void LogI(String message)
+        public static void LogI(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLog.Info(message + "\n");
+            sLog.Info($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
         /// 输出调试日志
         /// </summary>
         /// <param name="message">调试日志</param>
-        public static void LogD(String message)
+        public static void LogD(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLog.Debug(message + "\n");
+            sLog.Debug($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
         /// 输出错误日志
         /// </summary>
         /// <param name="message">错误日志</param>
-        public static void LogE(String message)
+        public static void LogE(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogEX.Error(message + "\n");
+            sLogEX.Error($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
         /// 输出错误日志
         /// </summary>
         /// <param name="e">异常</param>
-        public static void LogE(Exception e)
+        public static void LogE(Exception e, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogEX.Error(e.ToString() + "\n" + e.StackTrace.ToString() + "\n");
+            sLogEX.Error($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {e.ToString()}\n {e.StackTrace.ToString()}\n");
         }
 
         /// <summary>
@@ -80,27 +81,27 @@ namespace Common
         /// </summary>
         /// <param name="message">错误日志</param>
         /// <param name="e">异常</param>
-        public static void LogE(String message, Exception e)
+        public static void LogE(string message, Exception e, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogEX.Error(message + ":" + e.ToString() + "\n" + e.StackTrace.ToString() + "\n");
+            sLogEX.Error($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}: {e.ToString()}\n {e.StackTrace.ToString()}\n");
         }
 
         /// <summary>
         /// 输出数据库访问日志
         /// </summary>
         /// <param name="message">数据库访问日志</param>
-        public static void LogDA(String message)
+        public static void LogDA(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogDA.Info(message);
+            sLogDA.Info($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
         /// 输出网络日志
         /// </summary>
         /// <param name="message">网络日志</param>
-        public static void LogNW(String message)
+        public static void LogNW(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogNW.Info(message);
+            sLogNW.Info($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Common
         /// </summary>
         /// <param name="tag">标签</param>
         /// <param name="message">网络日志</param>
-        public static void LogNW(String tag, String message)
+        public static void LogNW(string tag, string message)
         {
             sLogNW.Info("[" + tag + "] " + message);
         }
@@ -117,9 +118,9 @@ namespace Common
         /// 输出业务日志
         /// </summary>
         /// <param name="message">业务日志</param>
-        public static void LogBU(String message)
+        public static void LogBU(string message, [CallerFilePath] string path = "", [CallerLineNumber]int lineNumber = 0, [CallerMemberName] string memberName = "")
         {
-            sLogBU.Info(message);
+            sLogBU.Info($"[{Path.GetFileNameWithoutExtension(path)}:{lineNumber} {memberName}] {message}\n");
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace Common
         /// </summary>
         /// <param name="tag">标签</param>
         /// <param name="message">业务日志</param>
-        public static void LogBU(String tag, String message)
+        public static void LogBU(string tag, string message)
         {
             sLogBU.Info("[" + tag + "] " + message);
         }

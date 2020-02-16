@@ -34,7 +34,8 @@ namespace Devices
     public enum ReadMode
     {
         TemperatureArray = 0, // 温度矩阵
-        ImageArray, // 图像矩阵
+        IrImage, // 红外图像
+        Image, // 可见光图像
         FrameRate, // 帧率
         AtmosphericTemperature, // 大气温度
         RelativeHumidity, // 相对湿度

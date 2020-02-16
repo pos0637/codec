@@ -68,7 +68,7 @@ namespace VirtualIrDevice
                     return true;
                 }
 
-                case ReadMode.ImageArray: {
+                case ReadMode.Image: {
                     var dst = (byte[])inData;
                     for (int y = 0, i = 0; y < cameraParameters.height; ++y) {
                         for (int x = 0; x < cameraParameters.width; ++x) {

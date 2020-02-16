@@ -2,6 +2,8 @@
 using Devices;
 using Miscs;
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -99,32 +101,22 @@ namespace HIKVisionDevice
         private int cameraRealPlayPort = -1;
 
         /// <summary>
-        /// 临时温度帧缓冲
+        /// 温度矩阵
         /// </summary>
-        private byte[] mTempTemperatureBuffer;
+        private float[] temperatureArray;
 
         /// <summary>
-        /// 温度帧缓冲
+        /// 温度帧缓存
         /// </summary>
-        private byte[] mTemperatureFrameBuffer;
+        private TripleByteBuffer temperatureBuffer;
 
         /// <summary>
-        /// 温度缓冲区
+        /// 图像帧缓存
         /// </summary>
-        private float[] mTemperatureBuffer;
+        private TripleByteBuffer imageBuffer;
 
         /// <summary>
-        /// 缓冲区已使用长度
-        /// </summary>
-        private int mBufferUsed;
-
-        /// <summary>
-        /// 缓冲区长度
-        /// </summary>
-        private int mBufferLength;
-
-        /// <summary>
-        /// 是否解析到头部
+        /// 是否解析到温度帧头部
         /// </summary>
         private bool mHasHeader = false;
 
@@ -149,11 +141,9 @@ namespace HIKVisionDevice
 
         public override bool Open()
         {
-            mBufferLength = 4 + irCameraParameters.width * irCameraParameters.height * sizeof(float);
-            mTempTemperatureBuffer = new byte[mBufferLength];
-            mTemperatureFrameBuffer = new byte[mBufferLength];
-            mTemperatureBuffer = new float[irCameraParameters.width * irCameraParameters.height];
-            mBufferUsed = 0;
+            temperatureArray = new float[irCameraParameters.width * irCameraParameters.height];
+            temperatureBuffer = new TripleByteBuffer(4 + irCameraParameters.width * irCameraParameters.height * sizeof(float));
+            imageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
             mHasHeader = false;
 
             CHCNetSDK.NET_DVR_Init();
@@ -254,45 +244,50 @@ namespace HIKVisionDevice
                 }
 
                 case ReadMode.TemperatureArray: {
-                    lock (mTemperatureFrameBuffer) {
-                        for (int i = 0, j = 4; i < mTemperatureBuffer.Length; ++i, j += 4) {
-                            mTemperatureBuffer[i] = BitConverter.ToSingle(mTemperatureFrameBuffer, j);
-                        }
-                    }
-
                     var dst = (float[])inData;
-                    var scale = BitConverter.ToInt32(mTemperatureFrameBuffer, 4);
-                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
-                        dst[i] = mTemperatureBuffer[i];
+                    var length = irCameraParameters.width * irCameraParameters.height;
+                    Debug.Assert(dst.Length == length);
+
+                    var buffer = temperatureBuffer.SwapReadableBuffer().ToArray();
+                    var scale = BitConverter.ToInt32(buffer, 4);
+                    for (int i = 0, j = 4; i < length; ++i, j += 4) {
+                        dst[i] = BitConverter.ToSingle(buffer, j) * scale;
                     }
 
                     return true;
                 }
 
-                case ReadMode.ImageArray: {
-                    lock (mTemperatureFrameBuffer) {
-                        for (int i = 0, j = 4; i < mTemperatureBuffer.Length; ++i, j += 4) {
-                            mTemperatureBuffer[i] = BitConverter.ToSingle(mTemperatureFrameBuffer, j);
-                        }
+                case ReadMode.IrImage: {
+                    var buffer = temperatureBuffer.SwapReadableBuffer().ToArray();
+                    var scale = BitConverter.ToInt32(buffer, 4);
+                    for (int i = 0, j = 4; i < temperatureArray.Length; ++i, j += 4) {
+                        temperatureArray[i] = BitConverter.ToSingle(buffer, j);
                     }
 
-                    var min = float.MaxValue;
-                    var max = 0.0F;
-                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
-                        min = Math.Min(mTemperatureBuffer[i], min);
-                        max = Math.Max(mTemperatureBuffer[i], max);
-                    }
+                    var min = temperatureArray.Min();
+                    var max = temperatureArray.Max();
+                    float span = max - min;
 
                     var dst = (byte[])inData;
-                    float span = max - min;
                     if (span <= float.Epsilon) {
                         Array.Clear(dst, 0, dst.Length);
                         return true;
                     }
 
-                    for (var i = 0; i < mTemperatureBuffer.Length; ++i) {
-                        dst[i] = (byte)((mTemperatureBuffer[i] - min) * 255.0F / span);
+                    for (var i = 0; i < temperatureArray.Length; ++i) {
+                        dst[i] = (byte)((temperatureArray[i] - min) * 255.0F / span);
                     }
+
+                    return true;
+                }
+
+                case ReadMode.Image: {
+                    var dst = (byte[])inData;
+                    var length = cameraParameters.width * cameraParameters.height * 3 / 2;
+                    Debug.Assert(dst.Length == length);
+
+                    var buffer = imageBuffer.SwapReadableBuffer().ToArray();
+                    Buffer.BlockCopy(buffer, 0, dst, 0, length);
 
                     return true;
                 }
@@ -446,8 +441,8 @@ namespace HIKVisionDevice
             Tracker.LogD($"get pixelToPixelParam: {configuration}");
 
             string szPixelToPixelParamFormat =
-                "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>" +
-                "<PixelToPixelParam version = \"2.0\" xmlns = \"http://www.hikvision.com/ver20/XMLSchema\">" +
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<PixelToPixelParam version=\"2.0\" xmlns=\"http://www.hikvision.com/ver20/XMLSchema\">" +
                 "<id>1</id>" +
                 "<maxFrameRate>0</maxFrameRate>" +
                 "<reflectiveEnable>false</reflectiveEnable>" +
@@ -488,38 +483,35 @@ namespace HIKVisionDevice
             // 接收红外摄像机数据回调函数
             void onIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
             {
-                if ((dwDataType == CHCNetSDK.NET_DVR_STREAMDATA) && (dwBufSize > 0)) {
-                    CHCNetSDK.STREAM_FRAME_INFO_S st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
+                if ((dwDataType != CHCNetSDK.NET_DVR_STREAMDATA) || (dwBufSize <= 0)) {
+                    return;
+                }
 
-                    bool hasHeader = false;
-                    int iIndex = 0;
-                    if (st_frame_info.u32MagicNo == 0x70827773) {
-                        iIndex = (int)st_frame_info.u32HeaderSize;
-                        hasHeader = true;
+                var hasHeader = false;
+                var headerSize = 0;
+                var st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
+                if (st_frame_info.u32MagicNo == 0x70827773) {
+                    // 检查红外摄像机参数是否一致
+                    if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.width) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.height)) {
+                        Tracker.LogE("invalid irCameraParameters");
+                        return;
                     }
+                    headerSize = (int)st_frame_info.u32HeaderSize;
+                    mHasHeader = hasHeader = true;
+                }
 
-                    lock (mTempTemperatureBuffer) {
-                        int length = (int)dwBufSize - iIndex;
-                        if (((!mHasHeader) && (!hasHeader)) || ((mBufferUsed + length) > mBufferLength)) {
-                            mBufferUsed = 0;
-                            mHasHeader = false;
-                            return;
-                        }
+                var buffer = temperatureBuffer.GetWritableBuffer();
+                var length = (int)dwBufSize - headerSize;
+                if (((!mHasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
+                    buffer.Reset();
+                    mHasHeader = false;
+                    return;
+                }
 
-                        if (hasHeader)
-                            mHasHeader = true;
-
-                        Marshal.Copy(pBuffer + iIndex, mTempTemperatureBuffer, mBufferUsed, length);
-                        mBufferUsed += length;
-
-                        if (mBufferUsed == mBufferLength) {
-                            lock (mTemperatureFrameBuffer) {
-                                Array.Copy(mTempTemperatureBuffer, mTemperatureFrameBuffer, mBufferLength);
-                            }
-                            mBufferUsed = 0;
-                            mHasHeader = false;
-                        }
-                    }
+                buffer.Push(pBuffer + headerSize, length);
+                if (buffer.IsFull()) {
+                    temperatureBuffer.SwapWritableBuffer();
+                    mHasHeader = false;
                 }
             }
 
@@ -748,8 +740,10 @@ namespace HIKVisionDevice
 
         private void DecoderCallback(int nPort, IntPtr pBuf, int nSize, ref PlayCtrl.FRAME_INFO pFrameInfo, int nReserved1, int nReserved2)
         {
-            Tracker.LogI($"DecoderCallback: {pFrameInfo.nType}");
-            // ImageUtils.ShowImage("image", pFrameInfo.nWidth, pFrameInfo.nHeight, pBuf);
+            var length = cameraParameters.width * cameraParameters.height * 3 / 2;
+            Debug.Assert(nSize == length);
+            imageBuffer.GetWritableBuffer().Push(pBuf, length);
+            imageBuffer.SwapWritableBuffer();
         }
 
         #endregion
