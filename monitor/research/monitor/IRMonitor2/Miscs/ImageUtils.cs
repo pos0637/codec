@@ -1,4 +1,5 @@
 ﻿using OpenCvSharp;
+using System.Linq;
 
 namespace Miscs
 {
@@ -7,6 +8,30 @@ namespace Miscs
     /// </summary>
     public static class ImageUtils
     {
+        /// <summary>
+        /// 显示红外图像
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="buffer">数据</param>
+        public static void ShowIrImage(string name, int width, int height, float[] buffer)
+        {
+            var min = buffer.Min();
+            var max = buffer.Max();
+            float span = max - min;
+            if (span <= float.Epsilon) {
+                return;
+            }
+
+            var image = new byte[buffer.Length];
+            for (var i = 0; i < buffer.Length; ++i) {
+                image[i] = (byte)((buffer[i] - min) * 255.0F / span);
+            }
+
+            ShowYImage(name, width, height, image);
+        }
+
         /// <summary>
         /// 显示图像
         /// </summary>

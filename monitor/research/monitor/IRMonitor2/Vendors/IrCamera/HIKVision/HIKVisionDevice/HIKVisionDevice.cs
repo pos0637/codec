@@ -3,7 +3,6 @@ using Devices;
 using Miscs;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -96,6 +95,11 @@ namespace HIKVisionDevice
         private int cameraRealPlayHandle;
 
         /// <summary>
+        /// 红外摄像机实时播放端口
+        /// </summary>
+        private int irCameraRealPlayPort = -1;
+
+        /// <summary>
         /// 可见光摄像机实时播放端口
         /// </summary>
         private int cameraRealPlayPort = -1;
@@ -109,6 +113,11 @@ namespace HIKVisionDevice
         /// 温度帧缓存
         /// </summary>
         private TripleByteBuffer temperatureBuffer;
+
+        /// <summary>
+        /// 红外图像帧缓存
+        /// </summary>
+        private TripleByteBuffer irImageBuffer;
 
         /// <summary>
         /// 图像帧缓存
@@ -143,6 +152,7 @@ namespace HIKVisionDevice
         {
             temperatureArray = new float[irCameraParameters.width * irCameraParameters.height];
             temperatureBuffer = new TripleByteBuffer(4 + irCameraParameters.width * irCameraParameters.height * sizeof(float));
+            irImageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
             imageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
             mHasHeader = false;
 
@@ -258,25 +268,12 @@ namespace HIKVisionDevice
                 }
 
                 case ReadMode.IrImage: {
-                    var buffer = temperatureBuffer.SwapReadableBuffer().ToArray();
-                    var scale = BitConverter.ToInt32(buffer, 4);
-                    for (int i = 0, j = 4; i < temperatureArray.Length; ++i, j += 4) {
-                        temperatureArray[i] = BitConverter.ToSingle(buffer, j);
-                    }
-
-                    var min = temperatureArray.Min();
-                    var max = temperatureArray.Max();
-                    float span = max - min;
-
                     var dst = (byte[])inData;
-                    if (span <= float.Epsilon) {
-                        Array.Clear(dst, 0, dst.Length);
-                        return true;
-                    }
+                    var length = cameraParameters.width * cameraParameters.height * 3 / 2;
+                    Debug.Assert(dst.Length == length);
 
-                    for (var i = 0; i < temperatureArray.Length; ++i) {
-                        dst[i] = (byte)((temperatureArray[i] - min) * 255.0F / span);
-                    }
+                    var buffer = irImageBuffer.SwapReadableBuffer().ToArray();
+                    Buffer.BlockCopy(buffer, 0, dst, 0, length);
 
                     return true;
                 }
@@ -480,137 +477,17 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool StartRealPlay()
         {
-            // 接收红外摄像机数据回调函数
-            void onIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
-            {
-                if ((dwDataType != CHCNetSDK.NET_DVR_STREAMDATA) || (dwBufSize <= 0)) {
-                    return;
-                }
-
-                var hasHeader = false;
-                var headerSize = 0;
-                var st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
-                if (st_frame_info.u32MagicNo == 0x70827773) {
-                    // 检查红外摄像机参数是否一致
-                    if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.width) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.height)) {
-                        Tracker.LogE("invalid irCameraParameters");
-                        return;
-                    }
-                    headerSize = (int)st_frame_info.u32HeaderSize;
-                    mHasHeader = hasHeader = true;
-                }
-
-                var buffer = temperatureBuffer.GetWritableBuffer();
-                var length = (int)dwBufSize - headerSize;
-                if (((!mHasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
-                    buffer.Reset();
-                    mHasHeader = false;
-                    return;
-                }
-
-                buffer.Push(pBuffer + headerSize, length);
-                if (buffer.IsFull()) {
-                    temperatureBuffer.SwapWritableBuffer();
-                    mHasHeader = false;
-                }
-            }
-
-            // 接收可见光摄像机数据回调函数
-            void onCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
-            {
-                switch (dwDataType) {
-                    case CHCNetSDK.NET_DVR_SYSHEAD: {
-                        if (dwBufSize <= 0) {
-                            break;
-                        }
-
-                        // 同一路码流不需要多次调用开流接口
-                        if (cameraRealPlayPort >= 0) {
-                            break;
-                        }
-
-                        // 获取播放句柄
-                        if (!PlayCtrl.PlayM4_GetPort(ref cameraRealPlayPort)) {
-                            Tracker.LogE($"PlayM4_GetPort fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 设置流播放模式
-                        if (!PlayCtrl.PlayM4_SetStreamOpenMode(cameraRealPlayPort, PlayCtrl.STREAME_REALTIME)) {
-                            Tracker.LogE($"Set STREAME_REALTIME mode fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 打开码流,送入头数据
-                        if (!PlayCtrl.PlayM4_OpenStream(cameraRealPlayPort, pBuffer, dwBufSize, 2 * 1024 * 1024)) {
-                            Tracker.LogE($"PlayM4_OpenStream fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 设置显示缓冲区个数
-                        if (!PlayCtrl.PlayM4_SetDisplayBuf(cameraRealPlayPort, FRAME_BUFFER_COUNT)) {
-                            Tracker.LogE($"PlayM4_SetDisplayBuf fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 设置显示模式
-                        if (!PlayCtrl.PlayM4_SetOverlayMode(cameraRealPlayPort, 0, 0)) {
-                            Tracker.LogE($"PlayM4_SetOverlayMode fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 设置解码回调函数
-                        if (!PlayCtrl.PlayM4_SetDecCallBackEx(cameraRealPlayPort, new PlayCtrl.DECCBFUN(DecoderCallback), IntPtr.Zero, 0)) {
-                            Tracker.LogE($"PlayM4_SetDecCallBackEx fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        // 开始解码
-                        if (!PlayCtrl.PlayM4_Play(cameraRealPlayPort, IntPtr.Zero)) {
-                            Tracker.LogE($"PlayM4_Play fail: {PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
-                            break;
-                        }
-
-                        break;
-                    }
-
-                    case CHCNetSDK.NET_DVR_STREAMDATA: {
-                        if (dwBufSize <= 0) {
-                            break;
-                        }
-
-                        if (cameraRealPlayPort < 0) {
-                            break;
-                        }
-
-                        // 送入其他数据
-                        for (var i = 0; i < 999; i++) {
-                            if (!PlayCtrl.PlayM4_InputData(cameraRealPlayPort, pBuffer, dwBufSize)) {
-                                Thread.Sleep(2);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-            }
-
             var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
                 hPlayWnd = IntPtr.Zero, // 预览窗口
                 lChannel = irCameraChannel, // 预览的设备通道
                 dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
                 dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
                 bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                dwDisplayBufNum = FRAME_BUFFER_COUNT, // 播放库显示缓冲区最大帧数
                 byVideoCodingType = 1
             };
 
-            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, onIrCameraReceived, IntPtr.Zero);
+            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, OnIrCameraReceived, IntPtr.Zero);
             if (irCameraRealPlayHandle < 0) {
                 Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
                 return false;
@@ -738,12 +615,171 @@ namespace HIKVisionDevice
             }
         }
 
+        /// <summary>
+        /// 接收红外摄像机数据回调函数
+        /// </summary>
+        /// <param name="lRealHandle">句柄</param>
+        /// <param name="dwDataType">数据类型</param>
+        /// <param name="pBuffer">数据</param>
+        /// <param name="dwBufSize">大小</param>
+        /// <param name="pUser">用户数据</param>
+        void OnIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+        {
+            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref irCameraRealPlayPort);
+
+            if ((dwDataType != CHCNetSDK.NET_DVR_STREAMDATA) || (dwBufSize <= 0)) {
+                return;
+            }
+
+            var hasHeader = false;
+            var headerSize = 0;
+            var st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
+            if (st_frame_info.u32MagicNo == 0x70827773) {
+                // 检查红外摄像机参数是否一致
+                if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.width) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.height)) {
+                    Tracker.LogE("invalid irCameraParameters");
+                    return;
+                }
+                headerSize = (int)st_frame_info.u32HeaderSize;
+                mHasHeader = hasHeader = true;
+            }
+
+            var buffer = temperatureBuffer.GetWritableBuffer();
+            var length = (int)dwBufSize - headerSize;
+            if (((!mHasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
+                buffer.Reset();
+                mHasHeader = false;
+                return;
+            }
+
+            buffer.Push(pBuffer + headerSize, length);
+            if (buffer.IsFull()) {
+                temperatureBuffer.SwapWritableBuffer();
+                mHasHeader = false;
+            }
+        }
+
+        /// <summary>
+        /// 接收可见光摄像机数据回调函数
+        /// </summary>
+        /// <param name="lRealHandle">句柄</param>
+        /// <param name="dwDataType">数据类型</param>
+        /// <param name="pBuffer">数据</param>
+        /// <param name="dwBufSize">大小</param>
+        /// <param name="pUser">用户数据</param>
+        void onCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
+        {
+            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref cameraRealPlayPort);
+        }
+
+        /// <summary>
+        /// 接收数据回调函数
+        /// </summary>
+        /// <param name="lRealHandle">句柄</param>
+        /// <param name="dwDataType">数据类型</param>
+        /// <param name="pBuffer">数据</param>
+        /// <param name="dwBufSize">大小</param>
+        /// <param name="pUser">用户数据</param>
+        /// <param name="port">实时播放端口</param>
+        void onFrameReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser, ref int port)
+        {
+            switch (dwDataType) {
+                case CHCNetSDK.NET_DVR_SYSHEAD: {
+                    if (dwBufSize <= 0) {
+                        break;
+                    }
+
+                    // 同一路码流不需要多次调用开流接口
+                    if (port >= 0) {
+                        break;
+                    }
+
+                    // 获取播放句柄
+                    if (!PlayCtrl.PlayM4_GetPort(ref port)) {
+                        Tracker.LogE($"PlayM4_GetPort fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 设置流播放模式
+                    if (!PlayCtrl.PlayM4_SetStreamOpenMode(port, PlayCtrl.STREAME_REALTIME)) {
+                        Tracker.LogE($"Set STREAME_REALTIME mode fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 打开码流,送入头数据
+                    if (!PlayCtrl.PlayM4_OpenStream(port, pBuffer, dwBufSize, 2 * 1024 * 1024)) {
+                        Tracker.LogE($"PlayM4_OpenStream fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 设置显示缓冲区个数
+                    if (!PlayCtrl.PlayM4_SetDisplayBuf(port, FRAME_BUFFER_COUNT)) {
+                        Tracker.LogE($"PlayM4_SetDisplayBuf fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 设置显示模式
+                    if (!PlayCtrl.PlayM4_SetOverlayMode(port, 0, 0)) {
+                        Tracker.LogE($"PlayM4_SetOverlayMode fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 设置解码回调函数
+                    if (!PlayCtrl.PlayM4_SetDecCallBackEx(port, new PlayCtrl.DECCBFUN(DecoderCallback), IntPtr.Zero, 0)) {
+                        Tracker.LogE($"PlayM4_SetDecCallBackEx fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    // 开始解码
+                    if (!PlayCtrl.PlayM4_Play(port, IntPtr.Zero)) {
+                        Tracker.LogE($"PlayM4_Play fail: {PlayCtrl.PlayM4_GetLastError(port)}");
+                        break;
+                    }
+
+                    break;
+                }
+
+                case CHCNetSDK.NET_DVR_STREAMDATA: {
+                    if (dwBufSize <= 0) {
+                        break;
+                    }
+
+                    if (port < 0) {
+                        break;
+                    }
+
+                    // 送入其他数据
+                    for (var i = 0; i < 999; i++) {
+                        if (!PlayCtrl.PlayM4_InputData(port, pBuffer, dwBufSize)) {
+                            Thread.Sleep(2);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+
         private void DecoderCallback(int nPort, IntPtr pBuf, int nSize, ref PlayCtrl.FRAME_INFO pFrameInfo, int nReserved1, int nReserved2)
         {
-            var length = cameraParameters.width * cameraParameters.height * 3 / 2;
-            Debug.Assert(nSize == length);
-            imageBuffer.GetWritableBuffer().Push(pBuf, length);
-            imageBuffer.SwapWritableBuffer();
+            if (nPort == irCameraRealPlayPort) {
+                var length = cameraParameters.width * cameraParameters.height * 3 / 2;
+                Debug.Assert(nSize == length);
+                irImageBuffer.GetWritableBuffer().Push(pBuf, length);
+                irImageBuffer.SwapWritableBuffer();
+            }
+            else if (nPort == cameraRealPlayPort) {
+                var length = cameraParameters.width * cameraParameters.height * 3 / 2;
+                Debug.Assert(nSize == length);
+                imageBuffer.GetWritableBuffer().Push(pBuf, length);
+                imageBuffer.SwapWritableBuffer();
+            }
         }
 
         #endregion
