@@ -17,7 +17,7 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 设备单元服务
         /// </summary>
-        private CellService service;
+        private CellService cell;
 
         /// <summary>
         /// 设备
@@ -56,7 +56,7 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
-            service = arguments["service"] as CellService;
+            cell = arguments["service"] as CellService;
             device = arguments["device"] as IDevice;
 
             // 读取配置信息
@@ -69,14 +69,14 @@ namespace IRService.Services.Cell.Worker
 
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
-                if (args[0] == device) {
-                    temperature = Arrays.Clone(args[1] as float[], temperature);
+                if ((args[0] == cell) && (args[1] == device)) {
+                    temperature = Arrays.Clone(args[2] as float[], temperature);
                 }
             };
 
             onReceiveImage = (args) => {
-                if (args[0] == device) {
-                    image = Arrays.Clone(args[1] as byte[], image);
+                if ((args[0] == cell) && (args[1] == device)) {
+                    image = Arrays.Clone(args[2] as byte[], image);
                 }
             };
 
@@ -103,7 +103,7 @@ namespace IRService.Services.Cell.Worker
 
             while (!IsTerminated()) {
                 // 克隆数据
-                var selections = service.selections.Clone();
+                var selections = cell.selections.Clone();
                 temperature = Arrays.Clone(this.temperature, temperature);
 
                 // 计算选取温度
@@ -217,7 +217,7 @@ namespace IRService.Services.Cell.Worker
         private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
         {
             var data = new Repository.Entities.Alarm() {
-                cellName = service.cell.name,
+                cellName = cell.cell.name,
                 selectionName = selection.Entity.name,
                 startTime = DateTime.Now,
                 alarmType = alarm.type,

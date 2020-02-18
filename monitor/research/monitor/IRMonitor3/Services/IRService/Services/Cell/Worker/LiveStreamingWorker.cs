@@ -14,6 +14,11 @@ namespace IRService.Services.Cell.Worker
     public class LiveStreamingWorker : BaseWorker
     {
         /// <summary>
+        /// 设备单元服务
+        /// </summary>
+        private CellService cell;
+
+        /// <summary>
         /// 设备
         /// </summary>
         private IDevice device;
@@ -65,6 +70,7 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
+            cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
             uri = arguments["uri"] as string;
             width = (int)arguments["width"];
@@ -74,8 +80,8 @@ namespace IRService.Services.Cell.Worker
             duration = 1000 / frameRate;
 
             onReceiveImage = (args) => {
-                if (args[0] == device) {
-                    image = Arrays.Clone(args[1] as byte[], image);
+                if ((args[0] == cell) && (args[1] == device)) {
+                    image = Arrays.Clone(args[2] as byte[], image);
                 }
             };
 

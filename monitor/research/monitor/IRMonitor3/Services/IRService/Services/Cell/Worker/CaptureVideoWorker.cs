@@ -13,6 +13,11 @@ namespace IRService.Services.Cell.Worker
     public class CaptureVideoWorker : BaseWorker
     {
         /// <summary>
+        /// 设备单元服务
+        /// </summary>
+        private CellService cell;
+
+        /// <summary>
         /// 设备
         /// </summary>
         private IDevice device;
@@ -52,28 +57,25 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
+            cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
 
             // 读取配置信息
-            if (!device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
-                return ARESULT.E_INVALIDARG;
+            if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
+                // 创建资源
+                Repository.Entities.Configuration.IrCameraParameters irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+                temperature = PinnedBuffer<float>.Alloc(irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight);
+                irImage = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height * 3 / 2);
+                tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
             }
-
-            // 创建资源
-            Repository.Entities.Configuration.IrCameraParameters irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-            temperature = PinnedBuffer<float>.Alloc(irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight);
-            irImage = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height * 3 / 2);
-            tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
 
             // 读取配置信息
-            if (!device.Read(ReadMode.CameraParameters, null, out outData, out _)) {
-                return ARESULT.E_INVALIDARG;
+            if (device.Read(ReadMode.CameraParameters, null, out outData, out _)) {
+                // 创建资源
+                Repository.Entities.Configuration.CameraParameters cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
+                image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2);
+                videoDuration = 1000 / cameraParameters.videoFrameRate;
             }
-
-            // 创建资源
-            Repository.Entities.Configuration.CameraParameters cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
-            image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2);
-            videoDuration = 1000 / cameraParameters.videoFrameRate;
 
             return base.Initialize(arguments);
         }
@@ -96,27 +98,29 @@ namespace IRService.Services.Cell.Worker
 
                 // 读取温度
                 if (duration1 > tempertureDuration) {
-                    if (!device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))) {
-                        device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _);
+                    if ((temperature != null)
+                        && (device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))
+                        || device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _))) {
+                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, cell, device, temperature.buffer);
                     }
-
-                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, device, temperature.buffer);
 
                     duration1 = 0;
                 }
 
                 // 读取可见光与红外图像
                 if (duration2 > videoDuration) {
-                    if (!device.Read(ReadMode.IrImage, irImage.ptr, irImage.Length * sizeof(float))) {
-                        device.Read(ReadMode.IrImage, irImage.buffer, out _, out _);
+                    if ((irImage != null)
+                        && (device.Read(ReadMode.IrImage, irImage.ptr, irImage.Length * sizeof(float))
+                        || device.Read(ReadMode.IrImage, irImage.buffer, out _, out _))) {
+                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IRIMAGE, cell, device, irImage.buffer);
                     }
 
-                    if (!device.Read(ReadMode.Image, image.ptr, image.Length * sizeof(byte))) {
-                        device.Read(ReadMode.Image, image.buffer, out _, out _);
+                    if ((image != null)
+                        && (device.Read(ReadMode.Image, image.ptr, image.Length * sizeof(byte))
+                        || device.Read(ReadMode.Image, image.buffer, out _, out _))) {
+                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, cell, device, image.buffer);
                     }
 
-                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IRIMAGE, device, irImage.buffer);
-                    EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, device, image.buffer);
                     duration2 = 0;
                 }
 

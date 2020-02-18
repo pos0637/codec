@@ -54,7 +54,7 @@ namespace IRService.Services.Cell
             try {
                 var category = Enum.Parse(typeof(DeviceType), device.category);
                 switch (category) {
-                    case DeviceType.Camera:
+                    case DeviceType.Camera: {
                         // TODO: 启动服务线程并设置参数
                         if (!instance.Write(WriteMode.URI, device.uri)) {
                             Tracker.LogE($"Write parameters fail: {device.model}");
@@ -66,8 +66,23 @@ namespace IRService.Services.Cell
                             return false;
                         }
 
+                        // 启动获取数据工作线程
+                        var worker = new CaptureVideoWorker();
+                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
+                            Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
+                            return false;
+                        }
+
+                        if (ARESULT.AFAILED(worker.Start())) {
+                            Tracker.LogE($"CaptureVideoWorker start fail: {device.model}");
+                            return false;
+                        }
+
+                        workers.Add(worker);
+
                         break;
-                    case DeviceType.IrCamera:
+                    }
+                    case DeviceType.IrCamera: {
                         // TODO: 启动服务线程并设置参数
                         if (!instance.Write(WriteMode.URI, device.uri)) {
                             Tracker.LogE($"Write parameters fail: {device.model}");
@@ -86,7 +101,7 @@ namespace IRService.Services.Cell
 
                         // 启动获取数据工作线程
                         var worker = new CaptureVideoWorker();
-                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "device", instance } }))) {
+                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
                             return false;
                         }
@@ -99,6 +114,7 @@ namespace IRService.Services.Cell
                         workers.Add(worker);
 
                         break;
+                    }
                     default:
                         return false;
                 }
