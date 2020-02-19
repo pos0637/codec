@@ -15,6 +15,11 @@ namespace IRApplication.Components
         private float[] temperature;
 
         /// <summary>
+        /// 温度图像
+        /// </summary>
+        private byte[] temperatureImage;
+
+        /// <summary>
         /// 红外图像
         /// </summary>
         private PinnedBuffer<byte> irImage;
@@ -51,6 +56,13 @@ namespace IRApplication.Components
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
                     temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
+                    if (IsHandleCreated) {
+                        BeginInvoke((Action)(() => {
+                            temperatureImage = ImageUtils.GetIrImage(temperature, temperatureImage);
+                            DrawYImage(temperatureImage, temperatureImage.Length);
+                            Render();
+                        }));
+                    }
                 }
             };
 

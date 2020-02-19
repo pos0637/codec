@@ -2,6 +2,7 @@
 using OpenGL;
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace IRApplication.Components
@@ -111,6 +112,28 @@ namespace IRApplication.Components
         protected unsafe void DrawYV12Image(IntPtr image, int length)
         {
             System.Buffer.MemoryCopy(image.ToPointer(), yuv.Data.ToPointer(), length, length);
+            Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
+        }
+
+        /// <summary>
+        /// 绘制图像
+        /// </summary>
+        /// <param name="image">Y图像</param>
+        /// <param name="length">长度</param>
+        protected unsafe void DrawYImage(IntPtr image, int length)
+        {
+            System.Buffer.MemoryCopy(image.ToPointer(), yuv.Data.ToPointer(), length, length);
+            Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
+        }
+
+        /// <summary>
+        /// 绘制图像
+        /// </summary>
+        /// <param name="image">Y图像</param>
+        /// <param name="length">长度</param>
+        protected unsafe void DrawYImage(byte[] image, int length)
+        {
+            Marshal.Copy(image, 0, yuv.Data, length);
             Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
         }
 

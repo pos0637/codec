@@ -9,27 +9,41 @@ namespace Miscs
     public static class ImageUtils
     {
         /// <summary>
-        /// 显示红外图像
+        /// 获取红外图像
         /// </summary>
-        /// <param name="name">名称</param>
-        /// <param name="width">宽度</param>
-        /// <param name="height">高度</param>
-        /// <param name="buffer">数据</param>
-        public static void ShowIrImage(string name, int width, int height, float[] buffer)
+        /// <param name="buffer">温度矩阵</param>
+        /// <param name="dst">红外图像</param>
+        /// <returns>红外图像</returns>
+        public static byte[] GetIrImage(float[] buffer, byte[] dst = null)
         {
             var min = buffer.Min();
             var max = buffer.Max();
             float span = max - min;
             if (span <= float.Epsilon) {
-                return;
+                return null;
             }
 
-            var image = new byte[buffer.Length];
+            var image = dst;
+            if ((image == null) || (image.Length != buffer.Length)) {
+                image = new byte[buffer.Length];
+            }
             for (var i = 0; i < buffer.Length; ++i) {
                 image[i] = (byte)((buffer[i] - min) * 255.0F / span);
             }
 
-            ShowYImage(name, width, height, image);
+            return image;
+        }
+
+        /// <summary>
+        /// 显示红外图像
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="buffer">温度矩阵</param>
+        public static void ShowIrImage(string name, int width, int height, float[] buffer)
+        {
+            ShowYImage(name, width, height, GetIrImage(buffer));
         }
 
         /// <summary>
