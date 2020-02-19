@@ -280,7 +280,7 @@ namespace HIKVisionIrDevice
                     var buffer = temperatureBuffer.SwapReadableBuffer().ToArray();
                     var scale = BitConverter.ToInt32(buffer, 4);
                     for (int i = 0, j = 4; i < length; ++i, j += 4) {
-                        dst[i] = BitConverter.ToSingle(buffer, j) * scale;
+                        dst[i] = BitConverter.ToSingle(buffer, j);
                     }
 
                     return true;
@@ -471,52 +471,58 @@ namespace HIKVisionIrDevice
         {
             decoderCallback = new PlayCtrl.DECCBFUN(DecoderCallback);
 
-            var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
-                hPlayWnd = IntPtr.Zero, // 预览窗口
-                lChannel = irCameraChannel, // 预览的设备通道
-                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
-                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
-                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
-                byVideoCodingType = 1
-            };
+            if ((irCameraParameters.temperatureWidth != 0) && (irCameraParameters.temperatureHeight != 0)) {
+                var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                    hPlayWnd = IntPtr.Zero, // 预览窗口
+                    lChannel = irCameraChannel, // 预览的设备通道
+                    dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                    dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                    bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                    byVideoCodingType = 1
+                };
 
-            readTemperatureDataCallback = new CHCNetSDK.REALDATACALLBACK(OnTemperatureReceived);
-            temperatureRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readTemperatureDataCallback, IntPtr.Zero);
-            if (temperatureRealPlayHandle < 0) {
-                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
-                return false;
+                readTemperatureDataCallback = new CHCNetSDK.REALDATACALLBACK(OnTemperatureReceived);
+                temperatureRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readTemperatureDataCallback, IntPtr.Zero);
+                if (temperatureRealPlayHandle < 0) {
+                    Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+                    return false;
+                }
             }
 
-            lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
-                hPlayWnd = IntPtr.Zero, // 预览窗口
-                lChannel = irCameraChannel, // 预览的设备通道
-                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
-                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
-                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
-                dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
-            };
+            if ((irCameraParameters.width != 0) && (irCameraParameters.height != 0)) {
+                var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                    hPlayWnd = IntPtr.Zero, // 预览窗口
+                    lChannel = irCameraChannel, // 预览的设备通道
+                    dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                    dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                    bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                    dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
+                };
 
-            readIrCameraDataCallback = new CHCNetSDK.REALDATACALLBACK(OnIrCameraReceived);
-            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readIrCameraDataCallback, IntPtr.Zero);
-            if (irCameraRealPlayHandle < 0) {
-                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
-                return false;
+                readIrCameraDataCallback = new CHCNetSDK.REALDATACALLBACK(OnIrCameraReceived);
+                irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readIrCameraDataCallback, IntPtr.Zero);
+                if (irCameraRealPlayHandle < 0) {
+                    Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+                    return false;
+                }
             }
 
-            lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
-                hPlayWnd = IntPtr.Zero, // 预览窗口
-                lChannel = cameraChannel, // 预览的设备通道
-                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
-                dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
-                bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
-                dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
-            };
+            if ((cameraParameters.width != 0) && (cameraParameters.height != 0)) {
+                var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                    hPlayWnd = IntPtr.Zero, // 预览窗口
+                    lChannel = cameraChannel, // 预览的设备通道
+                    dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                    dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                    bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
+                    dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
+                };
 
-            readCameraDataCallback = new CHCNetSDK.REALDATACALLBACK(OnCameraReceived);
-            cameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readCameraDataCallback, IntPtr.Zero);
-            if (cameraRealPlayHandle < 0) {
-                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={cameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
-                return false;
+                readCameraDataCallback = new CHCNetSDK.REALDATACALLBACK(OnCameraReceived);
+                cameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readCameraDataCallback, IntPtr.Zero);
+                if (cameraRealPlayHandle < 0) {
+                    Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={cameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+                    return false;
+                }
             }
 
             return true;
@@ -842,13 +848,6 @@ namespace HIKVisionIrDevice
                         }
                     }
 
-                    //if (port == irCameraRealPlayPort) {
-                    //    Console.Write('@');
-                    //}
-                    //else {
-                    //    Console.Write('*');
-                    //}
-
                     break;
                 }
 
@@ -866,7 +865,6 @@ namespace HIKVisionIrDevice
                     return;
                 }
 
-                Console.Write('@');
                 irImageBuffer.GetWritableBuffer().Push(pBuf, length);
                 irImageBuffer.SwapWritableBuffer();
             }
@@ -877,7 +875,6 @@ namespace HIKVisionIrDevice
                     return;
                 }
 
-                Console.Write('*');
                 imageBuffer.GetWritableBuffer().Push(pBuf, length);
                 imageBuffer.SwapWritableBuffer();
             }

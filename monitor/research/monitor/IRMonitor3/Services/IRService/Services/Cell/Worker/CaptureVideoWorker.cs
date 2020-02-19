@@ -100,7 +100,7 @@ namespace IRService.Services.Cell.Worker
                 if (duration1 > tempertureDuration) {
                     if ((temperature != null)
                         && (device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))
-                        || device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _))) {
+                        || device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _))) {                        
                         EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, cell, device, temperature);
                     }
 

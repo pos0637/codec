@@ -54,8 +54,9 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static T[] Clone<T>(T[] from, T[] to)
+        public static T[] Clone<T>(T[] from, T[] to, int size)
         {
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
@@ -63,7 +64,7 @@ namespace Miscs
             }
 
             lock (result) {
-                Buffer.BlockCopy(from, 0, result, 0, from.Length);
+                Buffer.BlockCopy(from, 0, result, 0, from.Length * size);
             }
 
             return result;
@@ -75,10 +76,11 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static T[] Clone<T>(PinnedBuffer<T> from, T[] to)
+        public static T[] Clone<T>(PinnedBuffer<T> from, T[] to, int size)
         {
-            return Clone(from.buffer, to);
+            return Clone(from.buffer, to, size);
         }
 
         /// <summary>
@@ -87,8 +89,9 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static PinnedBuffer<T> Clone<T>(T[] from, PinnedBuffer<T> to)
+        public static PinnedBuffer<T> Clone<T>(T[] from, PinnedBuffer<T> to, int size)
         {
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
@@ -96,7 +99,7 @@ namespace Miscs
             }
 
             lock (result) {
-                Buffer.BlockCopy(from, 0, result.buffer, 0, from.Length);
+                Buffer.BlockCopy(from, 0, result.buffer, 0, from.Length * size);
             }
 
             return result;
@@ -108,8 +111,9 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static PinnedBuffer<T> Clone<T>(PinnedBuffer<T> from, PinnedBuffer<T> to)
+        public static PinnedBuffer<T> Clone<T>(PinnedBuffer<T> from, PinnedBuffer<T> to, int size)
         {
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
@@ -119,7 +123,7 @@ namespace Miscs
             }
 
             lock (result) {
-                Buffer.BlockCopy(from.buffer, 0, result.buffer, 0, from.Length);
+                Buffer.BlockCopy(from.buffer, 0, result.buffer, 0, from.Length * size);
             }
 
             return result;
@@ -131,10 +135,11 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static T[] Clone<T>(Buffer<T> from, T[] to)
+        public static T[] Clone<T>(Buffer<T> from, T[] to, int size)
         {
-            return Clone(from.buffer, to);
+            return Clone(from.buffer, to, size);
         }
 
         /// <summary>
@@ -143,8 +148,9 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static Buffer<T> Clone<T>(T[] from, Buffer<T> to)
+        public static Buffer<T> Clone<T>(T[] from, Buffer<T> to, int size)
         {
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
@@ -152,7 +158,7 @@ namespace Miscs
             }
 
             lock (result) {
-                Buffer.BlockCopy(from, 0, result.buffer, 0, from.Length);
+                Buffer.BlockCopy(from, 0, result.buffer, 0, from.Length * size);
             }
 
             return result;
@@ -164,8 +170,9 @@ namespace Miscs
         /// <typeparam name="T">类型</typeparam>
         /// <param name="from">原数组</param>
         /// <param name="to">目标数组</param>
+        /// <param name="size">元素大小</param>
         /// <returns>数组</returns>
-        public static Buffer<T> Clone<T>(PinnedBuffer<T> from, Buffer<T> to)
+        public static Buffer<T> Clone<T>(PinnedBuffer<T> from, Buffer<T> to, int size)
         {
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
@@ -175,7 +182,7 @@ namespace Miscs
             }
 
             lock (result) {
-                Buffer.BlockCopy(from.buffer, 0, result.buffer, 0, from.Length);
+                Buffer.BlockCopy(from.buffer, 0, result.buffer, 0, from.Length * size);
             }
 
             return result;

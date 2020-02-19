@@ -179,10 +179,6 @@
       <Project>{13332dad-2a17-48d1-8711-92bdd172a604}</Project>
       <Name>IRService</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Renderer\Renderer.vcxproj">
-      <Project>{26e6568f-25b5-46c2-92c3-d087dc69b60a}</Project>
-      <Name>Renderer</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Alarm.wav" />

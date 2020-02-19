@@ -20,7 +20,7 @@ namespace Miscs
             var max = buffer.Max();
             float span = max - min;
             if (span <= float.Epsilon) {
-                return null;
+                return dst;
             }
 
             var image = dst;
@@ -43,7 +43,10 @@ namespace Miscs
         /// <param name="buffer">温度矩阵</param>
         public static void ShowIrImage(string name, int width, int height, float[] buffer)
         {
-            ShowYImage(name, width, height, GetIrImage(buffer));
+            var image = GetIrImage(buffer);
+            if (image != null) {
+                ShowYImage(name, width, height, image);
+            }
         }
 
         /// <summary>
@@ -58,7 +61,7 @@ namespace Miscs
             var src = new Mat(height + height / 2, width, MatType.CV_8UC1, buffer);
             var dst = src.CvtColor(ColorConversionCodes.YUV2BGR_YV12);
             Cv2.ImShow(name, dst);
-            Cv2.WaitKey(0);
+            Cv2.WaitKey(1);
         }
 
         /// <summary>
@@ -72,7 +75,7 @@ namespace Miscs
         {
             var src = new Mat(height, width, MatType.CV_8UC1, buffer);
             Cv2.ImShow(name, src);
-            Cv2.WaitKey(0);
+            Cv2.WaitKey(1);
         }
     }
 }

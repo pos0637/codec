@@ -80,19 +80,19 @@ namespace IRService.Services.Cell.Worker
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
+                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature, sizeof(float));
                 }
             };
 
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage);
+                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage, sizeof(byte));
                 }
             };
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image, sizeof(byte));
                 }
             };
 
@@ -122,7 +122,7 @@ namespace IRService.Services.Cell.Worker
             while (!IsTerminated()) {
                 // 克隆数据
                 var selections = cell.selections.Clone();
-                temperature = Arrays.Clone(this.temperature, temperature);
+                temperature = Arrays.Clone(this.temperature, temperature, sizeof(float));
 
                 // 计算选取温度
                 CalculateTemperature(selections, temperature);
@@ -220,9 +220,9 @@ namespace IRService.Services.Cell.Worker
             if (level != alarm.level) {
                 if (level == Repository.Entities.Alarm.Level.None) {
                     // 启动告警保存数据
-                    alarm.temperature = Arrays.Clone(this.temperature, alarm.temperature);
-                    alarm.irImage = Arrays.Clone(this.irImage, alarm.irImage);
-                    alarm.image = Arrays.Clone(this.image, alarm.image);
+                    alarm.temperature = Arrays.Clone(this.temperature, alarm.temperature, sizeof(float));
+                    alarm.irImage = Arrays.Clone(this.irImage, alarm.irImage, sizeof(byte));
+                    alarm.image = Arrays.Clone(this.image, alarm.image, sizeof(byte));
                 }
                 else {
                     // TODO: 结束告警停止告警自动录像

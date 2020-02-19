@@ -20,12 +20,12 @@ cells:
     model: HIKVisionIrDevice
     version: 1.0
     serialNumber: 
-    uri: 'ip=192.168.8.64&port=8000&username=admin&password=abcd1234'
+    uri: 'ip=192.168.0.64&port=8000&username=admin&password=abcd1234'
     irCameraParameters:
       uri: 'channel=2'
-      width: 1280
-      stride: 1280
-      height: 720
+      width: 0
+      stride: 0
+      height: 0
       bpp: 4
       videoFrameRate: 15
       temperatureWidth: 160

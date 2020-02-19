@@ -55,7 +55,7 @@ namespace IRApplication.Components
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
+                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature, sizeof(float));
                     if (IsHandleCreated) {
                         BeginInvoke((Action)(() => {
                             temperatureImage = ImageUtils.GetIrImage(temperature, temperatureImage);
@@ -68,7 +68,7 @@ namespace IRApplication.Components
 
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage);
+                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage, sizeof(byte));
                     if (IsHandleCreated) {
                         BeginInvoke((Action)(() => {
                             DrawYV12Image(irImage.ptr, irImage.Length);

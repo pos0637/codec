@@ -81,7 +81,7 @@ namespace IRService.Services.Cell.Worker
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image, sizeof(byte));
                 }
             };
 
@@ -121,7 +121,7 @@ namespace IRService.Services.Cell.Worker
 
             while (!IsTerminated()) {
                 // 克隆数据
-                image = Arrays.Clone(this.image.buffer, image);
+                image = Arrays.Clone(this.image.buffer, image, sizeof(byte));
 
                 try {
                     // 编码

@@ -79,19 +79,19 @@ namespace IRService.Services.Cell.Worker
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
+                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature, sizeof(float));
                 }
             };
 
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage);
+                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage, sizeof(byte));
                 }
             };
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image, sizeof(byte));
                 }
             };
 
@@ -152,9 +152,9 @@ namespace IRService.Services.Cell.Worker
                     return;
             }
 
-            alarm.temperature = Arrays.Clone(this.temperature, alarm.temperature);
-            alarm.irImage = Arrays.Clone(this.irImage, alarm.irImage);
-            alarm.image = Arrays.Clone(this.image, alarm.image);
+            alarm.temperature = Arrays.Clone(this.temperature, alarm.temperature, sizeof(float));
+            alarm.irImage = Arrays.Clone(this.irImage, alarm.irImage, sizeof(byte));
+            alarm.image = Arrays.Clone(this.image, alarm.image, sizeof(byte));
 
             alarms.Enqueue(alarm);
         }
