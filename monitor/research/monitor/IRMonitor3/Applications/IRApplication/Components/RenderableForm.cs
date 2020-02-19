@@ -174,20 +174,24 @@ namespace IRApplication.Components
 
         private void glControl_Render(object sender, GlControlEventArgs e)
         {
-            var control = sender as Control;
-            Gl.Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height);
-            Gl.Clear(ClearBufferMask.ColorBufferBit);
+            try {
+                var control = sender as Control;
+                Gl.Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height);
+                Gl.Clear(ClearBufferMask.ColorBufferBit);
 
-            if (Gl.CurrentVersion >= Gl.Version_110) {
-                Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
-            }
-            else {
-                Gl.Begin(PrimitiveType.TriangleStrip);
-                for (var i = 0; i < ArrayPosition.Length; i += 2) {
-                    Gl.TexCoord2(ArrayTexCoord[i], ArrayTexCoord[i + 1]);
-                    Gl.Vertex2(ArrayPosition[i], ArrayPosition[i + 1]);
+                if (Gl.CurrentVersion >= Gl.Version_110) {
+                    Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
                 }
-                Gl.End();
+                else {
+                    Gl.Begin(PrimitiveType.TriangleStrip);
+                    for (var i = 0; i < ArrayPosition.Length; i += 2) {
+                        Gl.TexCoord2(ArrayTexCoord[i], ArrayTexCoord[i + 1]);
+                        Gl.Vertex2(ArrayPosition[i], ArrayPosition[i + 1]);
+                    }
+                    Gl.End();
+                }
+            }
+            catch {
             }
         }
     }

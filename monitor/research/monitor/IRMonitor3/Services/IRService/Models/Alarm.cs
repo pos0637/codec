@@ -76,18 +76,18 @@ namespace IRService.Models
         /// 温度矩阵
         /// </summary>
         [NonSerialized]
-        public float[] temperature;
+        public Buffer<float> temperature;
 
         /// <summary>
         /// 红外图像
         /// </summary>
         [NonSerialized]
-        public byte[] irImage;
+        public Buffer<byte> irImage;
 
         /// <summary>
         /// 可见光图像
         /// </summary>
         [NonSerialized]
-        public byte[] image;
+        public Buffer<byte> image;
     }
 }

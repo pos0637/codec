@@ -1,27 +1,14 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace Common
+﻿namespace Common
 {
     /// <summary>
-    /// 高速缓存
+    /// 缓存
     /// </summary>
-    public class PinnedBuffer<T> : IDisposable
+    public class Buffer<T>
     {
         /// <summary>
         /// 缓存
         /// </summary>
         public T[] buffer;
-
-        /// <summary>
-        /// 缓存句柄
-        /// </summary>
-        public GCHandle handle;
-
-        /// <summary>
-        /// 缓存地址
-        /// </summary>
-        public IntPtr ptr;
 
         /// <summary>
         /// 宽度
@@ -42,15 +29,13 @@ namespace Common
         /// 创建缓存
         /// </summary>
         /// <param name="size">缓存大小</param>
-        /// <returns>缓存</returns>
-        public static PinnedBuffer<T> Alloc(int size)
+        /// <returns>缓冲区</returns>
+        public static Buffer<T> Alloc(int size)
         {
-            var buffer = new PinnedBuffer<T> {
+            var buffer = new Buffer<T> {
                 buffer = new T[size]
             };
 
-            buffer.handle = GCHandle.Alloc(buffer.buffer, GCHandleType.Pinned);
-            buffer.ptr = buffer.handle.AddrOfPinnedObject();
             buffer.width = size;
             buffer.height = 1;
 
@@ -64,7 +49,7 @@ namespace Common
         /// <param name="width">宽度</param>
         /// <param name="height">高度</param>
         /// <returns>缓存</returns>
-        public static PinnedBuffer<T> Alloc(int size, int width, int height)
+        public static Buffer<T> Alloc(int size, int width, int height)
         {
             var buffer = Alloc(size);
             buffer.width = width;
@@ -73,22 +58,6 @@ namespace Common
             return buffer;
         }
 
-        ~PinnedBuffer()
-        {
-            Dispose();
-        }
-
-        /// <summary>
-        /// 释放资源
-        /// </summary>
-        public void Dispose()
-        {
-            if (ptr != IntPtr.Zero) {
-                handle.Free();
-                ptr = IntPtr.Zero;
-            }
-        }
-
-        private PinnedBuffer() { }
+        private Buffer() { }
     }
 }

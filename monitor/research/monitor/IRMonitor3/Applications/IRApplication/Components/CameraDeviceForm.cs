@@ -40,7 +40,7 @@ namespace IRApplication.Components
             // 声明事件处理函数
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as byte[], image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
                     if (IsHandleCreated) {
                         BeginInvoke((Action)(() => {
                             DrawYV12Image(image.ptr, image.Length);

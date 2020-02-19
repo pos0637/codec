@@ -48,6 +48,7 @@
     <Compile Include="BaseWorker.cs" />
     <Compile Include="ByteBuffer.cs" />
     <Compile Include="FixedLengthQueue.cs" />
+    <Compile Include="Buffer.cs" />
     <Compile Include="PinnedBuffer.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

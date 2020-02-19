@@ -31,17 +31,17 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 温度矩阵
         /// </summary>
-        private float[] temperature;
+        private PinnedBuffer<float> temperature;
 
         /// <summary>
         /// 红外图像
         /// </summary>
-        private byte[] irImage;
+        private PinnedBuffer<byte> irImage;
 
         /// <summary>
         /// 可见光图像
         /// </summary>
-        private byte[] image;
+        private PinnedBuffer<byte> image;
 
         /// <summary>
         /// 接收温度事件处理函数
@@ -65,7 +65,7 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
-            cell = arguments["service"] as CellService;
+            cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
 
             // 读取配置信息
@@ -74,23 +74,24 @@ namespace IRService.Services.Cell.Worker
             }
 
             irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+            device.handler += OnDeviceAlarm;
 
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as float[], temperature);
+                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
                 }
             };
 
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    irImage = Arrays.Clone(args[2] as byte[], irImage);
+                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage);
                 }
             };
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as byte[], image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
                 }
             };
 
@@ -120,11 +121,9 @@ namespace IRService.Services.Cell.Worker
                 alarms.Wait(1000);
 
                 var alarm = alarms.Dequeue();
-                if (alarm == null) {
-                    continue;
+                if (alarm != null) {
+                    AddAlarm(null, alarm);
                 }
-
-
             }
         }
 
@@ -135,8 +134,7 @@ namespace IRService.Services.Cell.Worker
         /// <param name="arguments">参数</param>
         private void OnDeviceAlarm(DeviceEvent deviceEvent, params object[] arguments)
         {
-            Alarm alarm = null;
-
+            Alarm alarm;
             switch (deviceEvent) {
                 case DeviceEvent.HumanHighTemperatureAlarm: {
                     alarm = new Alarm() {
@@ -168,7 +166,6 @@ namespace IRService.Services.Cell.Worker
         /// <param name="alarm">告警</param>
         private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
         {
-            // 保存图片
             var data = new Repository.Entities.Alarm() {
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
@@ -176,11 +173,11 @@ namespace IRService.Services.Cell.Worker
                 alarmType = alarm.type,
                 temperatureType = alarm.temperatureType,
                 level = alarm.level,
-                detail = "",
-                temperatureUrl = "",
-                irImageUrl = "",
-                imageUrl = "",
-                videoUrl = "",
+                detail = null,
+                temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature.buffer),
+                irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage.width, alarm.irImage.height, alarm.irImage.buffer),
+                imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image.width, alarm.image.height, alarm.image.buffer),
+                videoUrl = null,
                 irCameraParameters = irCameraParameters
             };
 

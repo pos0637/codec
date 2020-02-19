@@ -81,7 +81,7 @@ namespace IRService.Services.Cell.Worker
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as byte[], image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
                 }
             };
 

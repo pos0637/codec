@@ -100,7 +100,7 @@ namespace IRService.Services.Cell
                         }
 
                         // 启动获取数据工作线程
-                        var worker = new CaptureVideoWorker();
+                        dynamic worker = new CaptureVideoWorker();
                         if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
                             return false;
@@ -108,6 +108,20 @@ namespace IRService.Services.Cell
 
                         if (ARESULT.AFAILED(worker.Start())) {
                             Tracker.LogE($"CaptureVideoWorker start fail: {device.model}");
+                            return false;
+                        }
+
+                        workers.Add(worker);
+
+                        // 启动处理告警工作线程
+                        worker = new ProcessAlarmWorker();
+                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
+                            Tracker.LogE($"ProcessAlarmWorker initialize fail: {device.model}");
+                            return false;
+                        }
+
+                        if (ARESULT.AFAILED(worker.Start())) {
+                            Tracker.LogE($"ProcessAlarmWorker start fail: {device.model}");
                             return false;
                         }
 

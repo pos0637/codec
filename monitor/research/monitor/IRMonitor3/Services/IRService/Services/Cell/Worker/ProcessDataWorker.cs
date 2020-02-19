@@ -32,17 +32,17 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 温度矩阵
         /// </summary>
-        private float[] temperature;
+        private PinnedBuffer<float> temperature;
 
         /// <summary>
         /// 红外图像
         /// </summary>
-        private byte[] irImage;
+        private PinnedBuffer<byte> irImage;
 
         /// <summary>
         /// 可见光图像
         /// </summary>
-        private byte[] image;
+        private PinnedBuffer<byte> image;
 
         /// <summary>
         /// 接收温度事件处理函数
@@ -80,19 +80,19 @@ namespace IRService.Services.Cell.Worker
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as float[], temperature);
+                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature);
                 }
             };
 
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    irImage = Arrays.Clone(args[2] as byte[], irImage);
+                    irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage);
                 }
             };
 
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
-                    image = Arrays.Clone(args[2] as byte[], image);
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image);
                 }
             };
 

@@ -1,8 +1,10 @@
 ﻿using Common;
 using Microsoft.EntityFrameworkCore;
+using OpenCvSharp;
 using Repository.Entities;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using YamlDotNet.Serialization;
 
@@ -13,8 +15,25 @@ namespace Repository
     /// </summary>
     public static class Repository
     {
+        /// <summary>
+        /// 应用配置文件路径
+        /// </summary>
         private static readonly string AppConfigurationPath = AppDomain.CurrentDomain.BaseDirectory + @"\app.yml";
+
+        /// <summary>
+        /// 选区配置文件路径
+        /// </summary>
         private static readonly string SelectionsConfigurationPath = AppDomain.CurrentDomain.BaseDirectory + @"\selections.json";
+
+        /// <summary>
+        /// 配置
+        /// </summary>
+        private static Configuration configuration;
+
+        static Repository()
+        {
+            configuration = LoadConfiguation();
+        }
 
         /// <summary>
         /// 数据仓库
@@ -111,6 +130,91 @@ namespace Repository
             catch (Exception e) {
                 Tracker.LogE(e);
                 throw e;
+            }
+        }
+
+        /// <summary>
+        /// 读取告警温度矩阵
+        /// </summary>
+        /// <param name="filename">文件名</param>
+        /// <returns>温度矩阵</returns>
+        public static float[] LoadAlarmTemperature(string filename)
+        {
+            try {
+                var content = File.ReadAllText(filename);
+                var data = Convert.FromBase64String(content);
+                return data.Select(value => Convert.ToSingle(value)).ToArray();
+            }
+            catch {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存告警温度矩阵
+        /// </summary>
+        /// <param name="temperature">温度矩阵</param>
+        /// <returns>文件名</returns>
+        public static string SaveAlarmTemperature(float[] temperature)
+        {
+            if (temperature == null) {
+                return null;
+            }
+
+            try {
+                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.temp";
+                byte[] data = temperature.Select(value => Convert.ToByte(value)).ToArray();
+                File.WriteAllText(filename, Convert.ToBase64String(data));
+                return filename;
+            }
+            catch {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存告警图像
+        /// </summary>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
+        public static string SaveAlarmYV12Image(int width, int height, byte[] image)
+        {
+            if (image == null) {
+                return null;
+            }
+
+            try {
+                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
+                var mat = new Mat(height + height / 2, width, MatType.CV_8UC1, image);
+                return mat.SaveImage(filename) ? filename : null;
+            }
+            catch {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存告警图像
+        /// </summary>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
+        public static string SaveAlarmRGBAImage(int width, int height, byte[] image)
+        {
+            if (image == null) {
+                return null;
+            }
+
+            try {
+                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
+                var mat = new Mat(height, width, MatType.CV_8UC4, image);
+                return mat.SaveImage(filename) ? filename : null;
+            }
+            catch {
+                return null;
             }
         }
     }
