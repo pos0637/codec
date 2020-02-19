@@ -212,9 +212,6 @@ namespace HIKVisionIrDevice
         public override bool Control(ControlMode mode)
         {
             switch (mode) {
-                case ControlMode.AutoFocus:
-                    return CHCNetSDK.NET_DVR_FocusOnePush(userId, irCameraChannel);
-
                 case ControlMode.FocusFar:
                     if (!CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 0))
                         return false;
@@ -433,23 +430,6 @@ namespace HIKVisionIrDevice
         /// <returns></returns>
         private bool Config(int channel, float distance, float emissivity, float reflectedTemperature)
         {
-            IntPtr lpOutputXml = Marshal.AllocHGlobal(1024 * 1024);
-
-            CHCNetSDK.NET_DVR_STD_ABILITY struSTDAbility = new CHCNetSDK.NET_DVR_STD_ABILITY();
-            struSTDAbility.lpCondBuffer = new IntPtr(channel);
-            struSTDAbility.dwCondSize = sizeof(int);
-
-            struSTDAbility.lpOutBuffer = lpOutputXml;
-            struSTDAbility.dwOutSize = 1024 * 1024;
-            struSTDAbility.lpStatusBuffer = lpOutputXml;
-            struSTDAbility.dwStatusSize = 1024 * 1024;
-
-            if (!CHCNetSDK.NET_DVR_GetSTDAbility(userId, CHCNetSDK.NET_DVR_GET_THERMAL_CAPABILITIES, ref struSTDAbility)) {
-                Marshal.FreeHGlobal(lpOutputXml);
-                lpOutputXml = IntPtr.Zero;
-                return false;
-            }
-
             var configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam/capabilities");
             Tracker.LogD($"get streamParam capabilities: {configuration}");
 
@@ -480,23 +460,7 @@ namespace HIKVisionIrDevice
             configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam", szPixelToPixelParam);
             Tracker.LogD($"get pixelToPixelParam: {configuration}");
 
-            CHCNetSDK.NET_DVR_FOCUSMODE_CFG cfg = new CHCNetSDK.NET_DVR_FOCUSMODE_CFG();
-            uint returnBytes = 0;
-            int outSize = Marshal.SizeOf(cfg);
-            IntPtr outBuffer = Marshal.AllocHGlobal(outSize);
-            Marshal.StructureToPtr(cfg, outBuffer, false);
-            if (!CHCNetSDK.NET_DVR_GetDVRConfig(userId, CHCNetSDK.NET_DVR_GET_FOCUSMODECFG, channel, outBuffer, (uint)outSize, ref returnBytes)) {
-                Marshal.FreeHGlobal(outBuffer);
-                outBuffer = IntPtr.Zero;
-                return false;
-            }
-
-            cfg.byFocusMode = 2;
-            bool ret = CHCNetSDK.NET_DVR_SetDVRConfig(userId, CHCNetSDK.NET_DVR_SET_FOCUSMODECFG, channel, outBuffer, (uint)outSize);
-            Marshal.FreeHGlobal(outBuffer);
-            outBuffer = IntPtr.Zero;
-
-            return ret;
+            return true;
         }
 
         /// <summary>
@@ -564,7 +528,43 @@ namespace HIKVisionIrDevice
         /// <returns></returns>
         private bool StopRealPlay()
         {
-            return CHCNetSDK.NET_DVR_SerialStop(temperatureRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(irCameraRealPlayHandle) || CHCNetSDK.NET_DVR_SerialStop(cameraChannel);
+            if (!CHCNetSDK.NET_DVR_StopRealPlay(temperatureRealPlayHandle)) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+            }
+
+            if (!CHCNetSDK.NET_DVR_StopRealPlay(irCameraRealPlayHandle)) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+            }
+
+            if (!CHCNetSDK.NET_DVR_StopRealPlay(cameraRealPlayHandle)) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+            }
+
+            if (!PlayCtrl.PlayM4_Stop(irCameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_Stop failed, port={irCameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(irCameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_CloseStream(irCameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_CloseStream failed, port={irCameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(irCameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_FreePort(irCameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_FreePort failed, port={irCameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(irCameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_Stop(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_Stop failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_CloseStream(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_CloseStream failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_FreePort(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_FreePort failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -590,17 +590,22 @@ namespace HIKVisionIrDevice
         private string GetConfiguration(string url, string configuration = null, int outputBufferSize = 1024 * 1024)
         {
             IntPtr lpOutputXml = IntPtr.Zero;
+            IntPtr lpUrl = IntPtr.Zero;
+            IntPtr lpInBuffer = IntPtr.Zero;
             url = $"GET {url}";
 
             try {
                 lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                lpUrl = Marshal.StringToHGlobalAnsi(url);
+                lpInBuffer = Marshal.StringToHGlobalAnsi(configuration);
+
                 var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
                 var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
 
                 struInput.dwSize = (uint)Marshal.SizeOf(struInput);
-                struInput.lpRequestUrl = url;
+                struInput.lpRequestUrl = lpUrl;
                 struInput.dwRequestUrlLen = (uint)url.Length;
-                struInput.lpInBuffer = configuration;
+                struInput.lpInBuffer = lpInBuffer;
                 struInput.dwInBufferSize = (uint)(configuration?.Length ?? 0);
 
                 struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
@@ -618,6 +623,14 @@ namespace HIKVisionIrDevice
                 if (lpOutputXml != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpOutputXml);
                 }
+
+                if (lpUrl != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpUrl);
+                }
+
+                if (lpInBuffer != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpInBuffer);
+                }
             }
         }
 
@@ -631,17 +644,22 @@ namespace HIKVisionIrDevice
         private string SetConfiguration(string url, string configuration, int outputBufferSize = 1024 * 1024)
         {
             IntPtr lpOutputXml = IntPtr.Zero;
+            IntPtr lpUrl = IntPtr.Zero;
+            IntPtr lpInBuffer = IntPtr.Zero;
             url = $"PUT {url}";
 
             try {
                 lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                lpUrl = Marshal.StringToHGlobalAnsi(url);
+                lpInBuffer = Marshal.StringToHGlobalAnsi(configuration);
+
                 var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
                 var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
 
                 struInput.dwSize = (uint)Marshal.SizeOf(struInput);
-                struInput.lpRequestUrl = url;
+                struInput.lpRequestUrl = lpUrl;
                 struInput.dwRequestUrlLen = (uint)url.Length;
-                struInput.lpInBuffer = configuration;
+                struInput.lpInBuffer = lpInBuffer;
                 struInput.dwInBufferSize = (uint)configuration.Length;
 
                 struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
@@ -658,6 +676,14 @@ namespace HIKVisionIrDevice
             finally {
                 if (lpOutputXml != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpOutputXml);
+                }
+
+                if (lpUrl != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpUrl);
+                }
+
+                if (lpInBuffer != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpInBuffer);
                 }
             }
         }
@@ -678,10 +704,10 @@ namespace HIKVisionIrDevice
 
             var hasHeader = false;
             var headerSize = 0;
-            var st_frame_info = (CHCNetSDK.STREAM_FRAME_INFO_S)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK.STREAM_FRAME_INFO_S));
+            var st_frame_info = (CHCNetSDK._STREAM_FRAME_INFO_S_)Marshal.PtrToStructure(pBuffer, typeof(CHCNetSDK._STREAM_FRAME_INFO_S_));
             if (st_frame_info.u32MagicNo == 0x70827773) {
                 // 检查红外摄像机参数是否一致
-                if ((st_frame_info.stRTDataInfo.u32Width != irCameraParameters.temperatureWidth) || (st_frame_info.stRTDataInfo.u32Height != irCameraParameters.temperatureHeight)) {
+                if ((st_frame_info.DataInfo.stRTDataInfo.u32Width != irCameraParameters.temperatureWidth) || (st_frame_info.DataInfo.stRTDataInfo.u32Height != irCameraParameters.temperatureHeight)) {
                     Tracker.LogE("invalid irCameraParameters");
                     return;
                 }
@@ -816,6 +842,13 @@ namespace HIKVisionIrDevice
                         }
                     }
 
+                    //if (port == irCameraRealPlayPort) {
+                    //    Console.Write('@');
+                    //}
+                    //else {
+                    //    Console.Write('*');
+                    //}
+
                     break;
                 }
 
@@ -833,6 +866,7 @@ namespace HIKVisionIrDevice
                     return;
                 }
 
+                Console.Write('@');
                 irImageBuffer.GetWritableBuffer().Push(pBuf, length);
                 irImageBuffer.SwapWritableBuffer();
             }
@@ -843,6 +877,7 @@ namespace HIKVisionIrDevice
                     return;
                 }
 
+                Console.Write('*');
                 imageBuffer.GetWritableBuffer().Push(pBuf, length);
                 imageBuffer.SwapWritableBuffer();
             }
