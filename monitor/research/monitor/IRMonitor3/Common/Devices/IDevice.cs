@@ -9,6 +9,13 @@ namespace Devices
     public abstract class IDevice : IDisposable
     {
         /// <summary>
+        /// 事件处理器
+        /// </summary>
+        /// <param name="deviceEvent">事件</param>
+        /// <param name="arguments">参数</param>
+        public delegate void EventHandler(DeviceEvent deviceEvent, params object[] arguments);
+
+        /// <summary>
         /// 设备索引
         /// </summary>
         public long Id {
@@ -96,5 +103,20 @@ namespace Devices
         /// 释放资源
         /// </summary>
         public abstract void Dispose();
+
+        /// <summary>
+        /// 事件
+        /// </summary>
+        public event EventHandler handler;
+
+        /// <summary>
+        /// 触发事件
+        /// </summary>
+        /// <param name="deviceEvent">事件</param>
+        /// <param name="arguments">参数</param>
+        protected void RaiseEvent(DeviceEvent deviceEvent, params object[] arguments)
+        {
+            handler?.Invoke(deviceEvent, arguments);
+        }
     }
 }
