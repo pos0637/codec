@@ -3,6 +3,7 @@ using Devices;
 using IRService.Common;
 using IRService.Services.Cell;
 using Miscs;
+using System;
 
 namespace IRApplication.Components
 {
@@ -38,7 +39,7 @@ namespace IRApplication.Components
             InitializeComponent();
 
             // 初始化窗体
-            if (device.Read(ReadMode.CameraParameters, null, out object outData, out _)) {
+            if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
                 var irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
                 InitializeComponent(irCameraParameters.width, irCameraParameters.stride, irCameraParameters.height);
             }
@@ -56,7 +57,12 @@ namespace IRApplication.Components
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
                     irImage = Arrays.Clone(args[2] as byte[], irImage);
-                    DrawYV12Image(irImage.ptr, irImage.Length);
+                    if (IsHandleCreated) {
+                        BeginInvoke((Action)(() => {
+                            DrawYV12Image(irImage.ptr, irImage.Length);
+                            Render();
+                        }));
+                    }
                 }
             };
         }

@@ -16,15 +16,32 @@
 cells:
 - name: cell0
   devices:
-  - category: Camera
-    model: HIKVisionDevice
+  - category: IrCamera
+    model: HIKVisionIrDevice
     version: 1.0
     serialNumber: 
     uri: 'ip=192.168.8.64&port=8000&username=admin&password=abcd1234'
-    cameraParameters:
-      uri: 'channel=1'
+    irCameraParameters:
+      uri: 'channel=2'
       width: 1280
       stride: 1280
       height: 720
+      bpp: 4
+      videoFrameRate: 15
+      temperatureWidth: 160
+      temperatureStride: 160
+      temperatureHeight: 120
+      temperatureFrameRate: 15
+      emissivity: 
+      reflectedTemperature: 
+      transmission: 
+      atmosphericTemperature: 
+      relativeHumidity: 
+      distance: 
+    cameraParameters:
+      uri: 'channel=1'
+      width: 2688
+      stride: 2688
+      height: 1520
       bpp: 4
       videoFrameRate: 15

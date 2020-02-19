@@ -14,7 +14,7 @@ namespace IRApplication.UI
         {
             InitializeComponent();
 
-            ShowForm(new CameraDeviceForm(cell, cell.devices[0]));
+            ShowForm(new IrCameraDeviceForm(cell, cell.devices[0]));
         }
 
         /// <summary>

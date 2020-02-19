@@ -176,8 +176,9 @@ namespace HIKVisionIrDevice
 
             CHCNetSDK.NET_DVR_Init();
 
-            if (!Login(mIp, mPort, mUserName, mPassword))
+            if (!Login(mIp, mPort, mUserName, mPassword)) {
                 return false;
+            }
 
             if (!Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature)) {
                 Logout();
@@ -532,7 +533,7 @@ namespace HIKVisionIrDevice
             };
 
             readIrCameraDataCallback = new CHCNetSDK.REALDATACALLBACK(OnIrCameraReceived);
-            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, OnIrCameraReceived, IntPtr.Zero);
+            irCameraRealPlayHandle = CHCNetSDK.NET_DVR_RealPlay_V40(userId, ref lpPreviewInfo, readIrCameraDataCallback, IntPtr.Zero);
             if (irCameraRealPlayHandle < 0) {
                 Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
                 return false;
