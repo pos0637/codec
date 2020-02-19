@@ -50,7 +50,7 @@ namespace Devices
             try {
                 IDevice device = (Activator.CreateInstance(deviceType)) as IDevice;
                 device.Id = id;
-                device.DeviceName = name;
+                device.Name = name;
 
                 if (!device.Initialize()) {
                     device.Dispose();

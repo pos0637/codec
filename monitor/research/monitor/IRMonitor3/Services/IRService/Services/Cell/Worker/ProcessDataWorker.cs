@@ -35,6 +35,11 @@ namespace IRService.Services.Cell.Worker
         private float[] temperature;
 
         /// <summary>
+        /// 红外图像
+        /// </summary>
+        private byte[] irImage;
+
+        /// <summary>
         /// 可见光图像
         /// </summary>
         private byte[] image;
@@ -43,6 +48,11 @@ namespace IRService.Services.Cell.Worker
         /// 接收温度事件处理函数
         /// </summary>
         private EventEmitter.EventHandler onReceiveTemperature;
+
+        /// <summary>
+        /// 接收红外图像事件处理函数
+        /// </summary>
+        private EventEmitter.EventHandler onReceiveIrImage;
 
         /// <summary>
         /// 接收可见光图像事件处理函数
@@ -74,6 +84,12 @@ namespace IRService.Services.Cell.Worker
                 }
             };
 
+            onReceiveIrImage = (args) => {
+                if ((args[0] == cell) && (args[1] == device)) {
+                    irImage = Arrays.Clone(args[2] as byte[], irImage);
+                }
+            };
+
             onReceiveImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
                     image = Arrays.Clone(args[2] as byte[], image);
@@ -86,6 +102,7 @@ namespace IRService.Services.Cell.Worker
         public override ARESULT Start()
         {
             EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
             EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
             return base.Start();
         }
@@ -93,6 +110,7 @@ namespace IRService.Services.Cell.Worker
         public override void Discard()
         {
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
             base.Discard();
         }
@@ -201,7 +219,13 @@ namespace IRService.Services.Cell.Worker
 
             if (level != alarm.level) {
                 if (level == Repository.Entities.Alarm.Level.None) {
-                    // TODO: 停止告警自动录像
+                    // 启动告警保存数据
+                    alarm.temperature = Arrays.Clone(this.temperature, alarm.temperature);
+                    alarm.irImage = Arrays.Clone(this.irImage, alarm.irImage);
+                    alarm.image = Arrays.Clone(this.image, alarm.image);
+                }
+                else {
+                    // TODO: 结束告警停止告警自动录像
                 }
 
                 // 添加选区告警

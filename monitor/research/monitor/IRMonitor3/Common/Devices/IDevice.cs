@@ -28,7 +28,7 @@ namespace Devices
         /// <summary>
         /// 设备名称
         /// </summary>
-        public string DeviceName {
+        public string Name {
             [MethodImpl(MethodImplOptions.Synchronized)]
             get;
             [MethodImpl(MethodImplOptions.Synchronized)]

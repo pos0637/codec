@@ -68,11 +68,13 @@ namespace IRService.Models
             /// </summary>
             public virtual void Initialize()
             {
+                // 根据告警配置添加默认告警
                 alarms = new List<Alarm>();
                 foreach (var configuration in Entity.alarmConfigurations) {
                     alarms.Add(new Alarm() {
                         type = configuration.type,
-                        temperatureType = configuration.temperatureType
+                        temperatureType = configuration.temperatureType,
+                        level = Repository.Entities.Alarm.Level.None
                     });
                 }
             }

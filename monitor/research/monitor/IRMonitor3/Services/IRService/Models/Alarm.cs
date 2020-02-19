@@ -13,11 +13,6 @@ namespace IRService.Models
     public class Alarm
     {
         /// <summary>
-        /// 历史温度队列长度
-        /// </summary>
-        private const int queueLength = 3;
-
-        /// <summary>
         /// 告警类型
         /// </summary>
         [DataMember]
@@ -34,6 +29,24 @@ namespace IRService.Models
         /// </summary>
         [DataMember]
         public Level level;
+
+        /// <summary>
+        /// 设备单元名称
+        /// </summary>
+        [DataMember]
+        public string cellName;
+
+        /// <summary>
+        /// 设备名称
+        /// </summary>
+        [DataMember]
+        public string deviceName;
+
+        /// <summary>
+        /// 选区名称
+        /// </summary>
+        [DataMember]
+        public string selectionName;
 
         /// <summary>
         /// 开始时间
@@ -57,6 +70,24 @@ namespace IRService.Models
         /// 历史温度队列
         /// </summary>
         [NonSerialized]
-        public FixedLengthQueue<float> temperatures = new FixedLengthQueue<float>(queueLength);
+        public FixedLengthQueue<float> temperatures;
+
+        /// <summary>
+        /// 温度矩阵
+        /// </summary>
+        [NonSerialized]
+        public float[] temperature;
+
+        /// <summary>
+        /// 红外图像
+        /// </summary>
+        [NonSerialized]
+        public byte[] irImage;
+
+        /// <summary>
+        /// 可见光图像
+        /// </summary>
+        [NonSerialized]
+        public byte[] image;
     }
 }

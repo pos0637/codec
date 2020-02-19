@@ -98,6 +98,11 @@ namespace Repository.Entities
         public string cellName;
 
         /// <summary>
+        /// 设备名称
+        /// </summary>
+        public string deviceName;
+
+        /// <summary>
         /// 选区名称
         /// </summary>
         public string selectionName;
@@ -138,14 +143,19 @@ namespace Repository.Entities
         public string comment;
 
         /// <summary>
-        /// 可见光快照资源地址
-        /// </summary>
-        public string imageUrl;
-
-        /// <summary>
-        /// 温度快照资源地址
+        /// 温度矩阵快照资源地址
         /// </summary>
         public string temperatureUrl;
+
+        /// <summary>
+        /// 红外图像快照资源地址
+        /// </summary>
+        public string irImageUrl;
+
+        /// <summary>
+        /// 可见光图像快照资源地址
+        /// </summary>
+        public string imageUrl;
 
         /// <summary>
         /// 告警录像资源地址
