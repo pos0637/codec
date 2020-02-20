@@ -2,6 +2,7 @@
 using Devices;
 using Miscs;
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -82,6 +83,16 @@ namespace HIKVisionIrDevice
         /// 用户索引
         /// </summary>
         private int userId;
+
+        /// <summary>
+        /// 布防句柄
+        /// </summary>
+        private int alarmId = -1;
+
+        /// <summary>
+        /// 告警回调函数
+        /// </summary>
+        private CHCNetSDK.MSGCallBack_V31 alarmCallback;
 
         /// <summary>
         /// 红外摄像机温度实时播放句柄
@@ -185,6 +196,11 @@ namespace HIKVisionIrDevice
                 return false;
             }
 
+            if (!RegisterAlarmEvent()) {
+                Logout();
+                return false;
+            }
+
             if (!StartRealPlay()) {
                 Logout();
                 return false;
@@ -200,6 +216,7 @@ namespace HIKVisionIrDevice
         public override bool Close()
         {
             StopRealPlay();
+            UnregisterAlarmEvent();
             Logout();
 
             lock (this) {
@@ -587,6 +604,43 @@ namespace HIKVisionIrDevice
         }
 
         /// <summary>
+        /// 开启布防
+        /// </summary>
+        /// <returns>是否成功</returns>
+        private bool RegisterAlarmEvent()
+        {
+            var alarmId = CHCNetSDK.NET_DVR_SetupAlarmChan_V30(userId);
+            if (alarmId < 0) {
+                return false;
+            }
+
+            // 设置报警回调函数
+            alarmCallback = new CHCNetSDK.MSGCallBack_V31(OnAlarm);
+            if (!CHCNetSDK.NET_DVR_SetDVRMessageCallBack_V31(alarmCallback, IntPtr.Zero)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 撤销布防
+        /// </summary>
+        /// <returns>是否成功</returns>
+        private bool UnregisterAlarmEvent()
+        {
+            if (alarmId >= 0) {
+                if (!CHCNetSDK.NET_DVR_CloseAlarmChan_V30(alarmId)) {
+                    return false;
+                }
+
+                alarmId = -1;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 读取配置
         /// </summary>
         /// <param name="url">请求信令</param>
@@ -746,7 +800,7 @@ namespace HIKVisionIrDevice
         /// <param name="pUser">用户数据</param>
         void OnIrCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
         {
-            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref irCameraRealPlayPort);
+            OnFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref irCameraRealPlayPort);
         }
 
         /// <summary>
@@ -759,7 +813,7 @@ namespace HIKVisionIrDevice
         /// <param name="pUser">用户数据</param>
         void OnCameraReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
         {
-            onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref cameraRealPlayPort);
+            OnFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref cameraRealPlayPort);
         }
 
         /// <summary>
@@ -771,7 +825,7 @@ namespace HIKVisionIrDevice
         /// <param name="dwBufSize">大小</param>
         /// <param name="pUser">用户数据</param>
         /// <param name="port">实时播放端口</param>
-        void onFrameReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser, ref int port)
+        void OnFrameReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser, ref int port)
         {
             switch (dwDataType) {
                 case CHCNetSDK.NET_DVR_SYSHEAD: {
@@ -878,6 +932,20 @@ namespace HIKVisionIrDevice
                 imageBuffer.GetWritableBuffer().Push(pBuf, length);
                 imageBuffer.SwapWritableBuffer();
             }
+        }
+
+        private bool OnAlarm(int lCommand, ref CHCNetSDK.NET_DVR_ALARMER pAlarmer, IntPtr pAlarmInfo, uint dwBufLen, IntPtr pUser)
+        {
+            // 判断报警是否为温度异常
+            if (lCommand != 0x5212) {
+                return false;
+            }
+
+            var struThermAlarm = (CHCNetSDK.NET_DVR_THERMOMETRY_ALARM)Marshal.PtrToStructure(pAlarmInfo, typeof(CHCNetSDK.NET_DVR_THERMOMETRY_ALARM));
+            RectangleF rect = new RectangleF(struThermAlarm.struRegion.struPos[0].fX, struThermAlarm.struRegion.struPos[0].fY, struThermAlarm.struRegion.struPos[1].fX - struThermAlarm.struRegion.struPos[0].fX, struThermAlarm.struRegion.struPos[2].fY - struThermAlarm.struRegion.struPos[0].fY);
+            RaiseEvent(DeviceEvent.Alarm, rect, struThermAlarm.fCurrTemperature);
+
+            return true;
         }
 
         #endregion
