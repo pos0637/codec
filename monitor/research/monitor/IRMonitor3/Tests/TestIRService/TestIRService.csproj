@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Services\IRService\IRService.csproj">
-      <Project>{13332dad-2a17-48d1-8711-92bdd172a604}</Project>
+      <Project>{aa5252be-f718-494f-af56-5c0730d47be8}</Project>
       <Name>IRService</Name>
     </ProjectReference>
   </ItemGroup>

@@ -58,13 +58,19 @@ namespace IRService.Models
         /// 告警区域
         /// </summary>
         [DataMember]
-        public Rectangle area;
+        public RectangleF? area;
 
         /// <summary>
         /// 告警点
         /// </summary>
         [DataMember]
-        public Point point;
+        public PointF? point;
+
+        /// <summary>
+        /// 告警详情
+        /// </summary>
+        [DataMember]
+        public string detail;
 
         /// <summary>
         /// 历史温度队列

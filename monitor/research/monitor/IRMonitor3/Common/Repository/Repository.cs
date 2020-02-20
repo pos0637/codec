@@ -1,8 +1,8 @@
 ﻿using Common;
-using Microsoft.EntityFrameworkCore;
 using OpenCvSharp;
 using Repository.Entities;
 using System;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,7 +28,7 @@ namespace Repository
         /// <summary>
         /// 配置
         /// </summary>
-        private static Configuration configuration;
+        private static readonly Configuration configuration;
 
         static Repository()
         {
@@ -40,10 +40,9 @@ namespace Repository
         /// </summary>
         public class RepositoyContext : DbContext
         {
-            protected override void OnConfiguring(DbContextOptionsBuilder options)
-                => options.UseSqlite("Data Source=ir.db");
+            public DbSet<Alarm> Alarms { get; set; }
 
-            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            protected override void OnModelCreating(DbModelBuilder modelBuilder)
             {
                 base.OnModelCreating(modelBuilder);
                 modelBuilder.Entity<Alarm>().ToTable("t_alarm");
@@ -55,7 +54,7 @@ namespace Repository
             /// <param name="alarm">告警</param>
             public void AddAlarm(Alarm alarm)
             {
-                Add(alarm);
+                Alarms.Add(alarm);
                 SaveChanges();
             }
         }

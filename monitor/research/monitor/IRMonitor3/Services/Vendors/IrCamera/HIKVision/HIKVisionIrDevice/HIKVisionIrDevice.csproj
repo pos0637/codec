@@ -169,7 +169,7 @@
       <Name>Miscs</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Common\Repository\Repository.csproj">
-      <Project>{9e6d73c1-daf1-4082-a322-743581d4d9ef}</Project>
+      <Project>{f0d36adc-dd65-4f05-85f5-cb107464aad3}</Project>
       <Name>Repository</Name>
     </ProjectReference>
   </ItemGroup>

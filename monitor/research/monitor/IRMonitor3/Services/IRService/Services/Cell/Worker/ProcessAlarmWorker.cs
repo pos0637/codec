@@ -5,6 +5,7 @@ using IRService.Models;
 using Miscs;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace IRService.Services.Cell.Worker
 {
@@ -144,7 +145,9 @@ namespace IRService.Services.Cell.Worker
                         cellName = cell.cell.name,
                         deviceName = device.Name,
                         selectionName = null,
-                        startTime = DateTime.Now
+                        startTime = DateTime.Now,
+                        area = (RectangleF)arguments[0],
+                        detail = arguments[1] as string
                     };
                     break;
                 }
@@ -164,7 +167,7 @@ namespace IRService.Services.Cell.Worker
         /// </summary>
         /// <param name="selection">选区</param>
         /// <param name="alarm">告警</param>
-        private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
+        private void AddAlarm(Selections.Selection selection, Alarm alarm)
         {
             var data = new Repository.Entities.Alarm() {
                 cellName = cell.cell.name,
@@ -173,7 +176,9 @@ namespace IRService.Services.Cell.Worker
                 alarmType = alarm.type,
                 temperatureType = alarm.temperatureType,
                 level = alarm.level,
-                detail = null,
+                area = alarm.area,
+                point = alarm.point,
+                detail = alarm.detail,
                 temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature.buffer),
                 irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage.width, alarm.irImage.height, alarm.irImage.buffer),
                 imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image.width, alarm.image.height, alarm.image.buffer),
@@ -181,9 +186,9 @@ namespace IRService.Services.Cell.Worker
                 irCameraParameters = irCameraParameters
             };
 
-            using (var db = new Repository.Repository.RepositoyContext()) {
-                db.AddAlarm(data);
-            }
+            //using (var db = new Repository.Repository.RepositoyContext()) {
+            //    db.AddAlarm(data);
+            //}
         }
     }
 }

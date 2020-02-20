@@ -253,10 +253,11 @@ namespace IRService.Services.Cell.Worker
                 videoUrl = "",
                 irCameraParameters = irCameraParameters
             };
-
+            /*
             using (var db = new Repository.Repository.RepositoyContext()) {
                 db.AddAlarm(data);
             }
+            */
         }
     }
 }

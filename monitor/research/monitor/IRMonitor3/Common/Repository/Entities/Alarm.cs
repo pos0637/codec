@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace Repository.Entities
@@ -93,6 +94,11 @@ namespace Repository.Entities
         }
 
         /// <summary>
+        /// 索引
+        /// </summary>
+        public long id;
+
+        /// <summary>
         /// 设备单元名称
         /// </summary>
         public string cellName;
@@ -131,6 +137,16 @@ namespace Repository.Entities
         /// 告警等级
         /// </summary>
         public Level level;
+
+        /// <summary>
+        /// 告警区域
+        /// </summary>
+        public RectangleF? area;
+
+        /// <summary>
+        /// 告警点
+        /// </summary>
+        public PointF? point;
 
         /// <summary>
         /// 告警详情

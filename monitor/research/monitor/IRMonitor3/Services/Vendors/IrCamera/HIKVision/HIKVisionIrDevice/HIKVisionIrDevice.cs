@@ -943,7 +943,7 @@ namespace HIKVisionIrDevice
 
             var struThermAlarm = (CHCNetSDK.NET_DVR_THERMOMETRY_ALARM)Marshal.PtrToStructure(pAlarmInfo, typeof(CHCNetSDK.NET_DVR_THERMOMETRY_ALARM));
             RectangleF rect = new RectangleF(struThermAlarm.struRegion.struPos[0].fX, struThermAlarm.struRegion.struPos[0].fY, struThermAlarm.struRegion.struPos[1].fX - struThermAlarm.struRegion.struPos[0].fX, struThermAlarm.struRegion.struPos[2].fY - struThermAlarm.struRegion.struPos[0].fY);
-            RaiseEvent(DeviceEvent.Alarm, rect, struThermAlarm.fCurrTemperature);
+            RaiseEvent(DeviceEvent.HumanHighTemperatureAlarm, rect, struThermAlarm.fCurrTemperature);
 
             return true;
         }
