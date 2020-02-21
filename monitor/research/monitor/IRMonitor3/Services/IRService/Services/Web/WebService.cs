@@ -58,21 +58,24 @@ namespace IRService.Services.Web
             while (!worker.IsTerminated()) {
                 var info = WebMethod.GetDevice(configuration.information.clientId);
                 if (info == null) {
-                    Tracker.LogE(" WebMethod: GetDevice fail");
+                    Tracker.LogE("WebMethod: GetDevice fail");
                     Thread.Sleep(3000);
                     continue;
                 }
 
                 // 获取并检查设备信息
-                if (info.Equals(device)) {
-                    Thread.Sleep(1000 * 60);
-                    continue;
+                if (!info.Equals(device)) {
+                    device = info;
+                    EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_START_STREAMING, new Dictionary<string, string>() {
+                        { "0001", device.pushUrl },
+                        { "0002", device.irPushUrl }
+                    });
                 }
 
-                device = info;
-                EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_START_STREAMING, new Dictionary<string, string>() {
-                    { "0001", device.pushUrl },
-                    { "0002", device.pushUrl }
+                // 更新设备状态
+                WebMethod.UpdateDeviceStatus(new WebMethod.DeviceParameter() {
+                    serialNumber = configuration.information.clientId,
+                    status = "1"
                 });
 
                 Thread.Sleep(1000 * 60);

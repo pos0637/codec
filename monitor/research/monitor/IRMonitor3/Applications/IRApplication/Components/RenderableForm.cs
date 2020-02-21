@@ -201,6 +201,11 @@ namespace IRApplication.Components
         private void glControl_Render(object sender, GlControlEventArgs e)
         {
             try {
+                Gl.VertexPointer(2, VertexPointerType.Float, 0, ArrayPosition);
+                Gl.EnableClientState(EnableCap.VertexArray);
+                Gl.TexCoordPointer(2, TexCoordPointerType.Float, 0, ArrayTexCoord);
+                Gl.EnableClientState(EnableCap.TextureCoordArray);
+
                 var control = sender as Control;
                 Gl.Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height);
                 Gl.Clear(ClearBufferMask.ColorBufferBit);

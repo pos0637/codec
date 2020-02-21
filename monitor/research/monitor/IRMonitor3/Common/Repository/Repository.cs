@@ -58,7 +58,14 @@ namespace Repository
         /// </summary>
         public class RepositoyContext : DbContext
         {
+            /// <summary>
+            /// 数据库连接
+            /// </summary>
             private static readonly DbConnection connection;
+
+            /// <summary>
+            /// 告警信息列表
+            /// </summary>
             public DbSet<Alarm> Alarm { get; set; }
 
             static RepositoyContext()
@@ -274,11 +281,20 @@ namespace Repository
         /// 添加告警
         /// </summary>
         /// <param name="alarm">告警</param>
-        public static void AddAlarm(Alarm alarm)
+        /// <returns>是否成功</returns>
+        public static bool AddAlarm(Alarm alarm)
         {
-            using (var db = new RepositoyContext()) {
-                db.Set<Alarm>().Add(alarm);
-                db.SaveChanges();
+            try {
+                using (var db = new RepositoyContext()) {
+                    db.Set<Alarm>().Add(alarm);
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
             }
         }
 
@@ -289,8 +305,14 @@ namespace Repository
         /// <returns>告警列表</returns>
         public static List<Alarm> GetLastAlarms(int count)
         {
-            using (var db = new RepositoyContext()) {
-                return db.Set<Alarm>().OrderByDescending(alarm => alarm.startTime).Take(count).ToList();
+            try {
+                using (var db = new RepositoyContext()) {
+                    return db.Set<Alarm>().OrderByDescending(alarm => alarm.startTime).Take(count).ToList();
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
             }
         }
     }

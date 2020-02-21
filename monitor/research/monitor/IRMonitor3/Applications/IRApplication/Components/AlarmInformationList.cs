@@ -19,7 +19,7 @@ namespace IRApplication.Components
             InitializeComponent();
             timer = new System.Threading.Timer((state) => {
                 var alarms = Repository.Repository.GetLastAlarms(10);
-                if (IsHandleCreated) {
+                if ((IsHandleCreated) && (alarms != null)) {
                     BeginInvoke((Action)(() => {
                         flowLayoutPanel1.Controls.Clear();
                         foreach (var alarm in alarms) {
@@ -36,6 +36,14 @@ namespace IRApplication.Components
                     }));
                 }
             }, null, 0, 2000);
+        }
+
+        protected override CreateParams CreateParams {
+            get {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000;
+                return cp;
+            }
         }
     }
 }

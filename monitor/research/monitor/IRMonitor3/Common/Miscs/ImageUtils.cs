@@ -1,4 +1,6 @@
-﻿using OpenCvSharp;
+﻿using Common;
+using OpenCvSharp;
+using System;
 using System.Linq;
 
 namespace Miscs
@@ -76,6 +78,23 @@ namespace Miscs
             var src = new Mat(height, width, MatType.CV_8UC1, buffer);
             Cv2.ImShow(name, src);
             Cv2.WaitKey(1);
+        }
+
+        /// <summary>
+        /// 获取图像文件的Base64字符串
+        /// </summary>
+        /// <param name="filename">图像文件</param>
+        /// <returns>Base64字符串</returns>
+        public static string ImageFileToBase64(string filename)
+        {
+            try {
+                var image = System.IO.File.ReadAllBytes(filename);
+                return Convert.ToBase64String(image);
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
         }
     }
 }

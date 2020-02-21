@@ -66,9 +66,14 @@ namespace IRService.Miscs
             public string serialNumber { get; set; }
 
             /// <summary>
-            /// 推流地址
+            /// 可见光视频流推流地址
             /// </summary>
             public string pushUrl { get; set; }
+
+            /// <summary>
+            /// 红外视频流推流地址
+            /// </summary>
+            public string irPushUrl { get; set; }
 
             /// <summary>
             /// 状态
@@ -85,6 +90,7 @@ namespace IRService.Miscs
                 return (id == device.id)
                     && string.Equals(serialNumber, device.serialNumber)
                     && string.Equals(pushUrl, device.pushUrl)
+                    && string.Equals(irPushUrl, device.irPushUrl)
                     && string.Equals(status, device.status);
             }
 
@@ -100,9 +106,9 @@ namespace IRService.Miscs
         public class DeviceParameter
         {
             /// <summary>
-            /// 索引
+            /// 序列号
             /// </summary>
-            public long id;
+            public string serialNumber;
 
             /// <summary>
             /// 设备状态 1-工作 2-空闲 3-告警
@@ -230,7 +236,7 @@ namespace IRService.Miscs
         /// <returns>结果</returns>
         public static UpdateDeviceResponse UpdateDeviceStatus(DeviceParameter deviceParameter, int timeout = 3000)
         {
-            var result = HttpMethod.Put($"{serverUrl}/api/v1/ir/devices/status/{deviceParameter.id}", JsonUtils.ObjectToJson(deviceParameter), timeout);
+            var result = HttpMethod.Put($"{serverUrl}/api/v1/ir/devices/status/{deviceParameter.serialNumber}", JsonUtils.ObjectToJson(deviceParameter), timeout);
             return JsonUtils.ObjectFromJson<UpdateDeviceResponse>(result);
         }
 
@@ -242,7 +248,7 @@ namespace IRService.Miscs
         /// <returns>结果</returns>
         public static AddAlarmResponse AddAlarm(Alarm alarm, int timeout = 3000)
         {
-            var result = HttpMethod.Put($"{serverUrl}/api/v1/ir/alarms", JsonUtils.ObjectToJson(alarm), timeout);
+            var result = HttpMethod.Post($"{serverUrl}/api/v1/ir/alarms", JsonUtils.ObjectToJson(alarm), timeout);
             return JsonUtils.ObjectFromJson<AddAlarmResponse>(result);
         }
     }

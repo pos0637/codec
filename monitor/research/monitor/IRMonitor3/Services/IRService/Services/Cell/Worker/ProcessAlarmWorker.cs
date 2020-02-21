@@ -1,8 +1,10 @@
 ﻿using Common;
 using Devices;
 using IRService.Common;
+using IRService.Miscs;
 using IRService.Models;
 using Miscs;
+using Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,6 +16,11 @@ namespace IRService.Services.Cell.Worker
     /// </summary>
     public class ProcessAlarmWorker : BaseWorker
     {
+        /// <summary>
+        /// TODO: delete 配置信息
+        /// </summary>
+        private Configuration configuration;
+
         /// <summary>
         /// 设备单元服务
         /// </summary>
@@ -27,7 +34,7 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 红外摄像机参数
         /// </summary>
-        private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;
+        private Configuration.IrCameraParameters irCameraParameters;
 
         /// <summary>
         /// 温度矩阵
@@ -67,17 +74,20 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 先入先出告警队列
         /// </summary>
-        private readonly FixedLengthQueue<Alarm> alarms = new FixedLengthQueue<Alarm>(100);
+        private readonly FixedLengthQueue<Models.Alarm> alarms = new FixedLengthQueue<Models.Alarm>(100);
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
+            // TODO: delete 读取配置信息
+            configuration = Repository.Repository.LoadConfiguation();
+
             cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
             device.Handler += OnDeviceEvent;
 
             // 读取配置信息
             if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
-                irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+                irCameraParameters = outData as Configuration.IrCameraParameters;
                 return ARESULT.E_INVALIDARG;
             }
 
@@ -167,10 +177,10 @@ namespace IRService.Services.Cell.Worker
             var rect = (RectangleF?)arguments[3];
             var detail = arguments[4] as string;
 
-            Alarm alarm;
+            Models.Alarm alarm;
             switch (type) {
                 case Repository.Entities.Alarm.Type.HumanHighTemperature: {
-                    alarm = new Alarm() {
+                    alarm = new Models.Alarm() {
                         type = Repository.Entities.Alarm.Type.High,
                         temperatureType = Repository.Entities.Selections.TemperatureType.max,
                         level = Repository.Entities.Alarm.Level.General,
@@ -199,7 +209,7 @@ namespace IRService.Services.Cell.Worker
         /// </summary>
         /// <param name="selection">选区</param>
         /// <param name="alarm">告警</param>
-        private void AddAlarm(Selections.Selection selection, Alarm alarm)
+        private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
         {
             var data = new Repository.Entities.Alarm() {
                 cellName = cell.cell.name,
@@ -218,7 +228,17 @@ namespace IRService.Services.Cell.Worker
                 irCameraParameters = JsonUtils.ObjectToJson(irCameraParameters)
             };
 
-            Repository.Repository.AddAlarm(data);
+            if (!Repository.Repository.AddAlarm(data)) {
+                alarms.Enqueue(alarm);
+            }
+
+            WebMethod.AddAlarm(new WebMethod.Alarm() {
+                serialNumber = configuration.information.clientId,
+                datetime = alarm.startTime.ToString(),
+                image = ImageUtils.ImageFileToBase64(data.imageUrl),
+                irImage = ImageUtils.ImageFileToBase64(data.irImageUrl),
+                data = alarm.detail
+            });
         }
     }
 }
