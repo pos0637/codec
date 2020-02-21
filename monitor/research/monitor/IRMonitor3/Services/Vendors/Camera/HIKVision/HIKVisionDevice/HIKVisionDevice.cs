@@ -296,7 +296,24 @@ namespace HIKVisionDevice
         /// <returns></returns>
         private bool StopRealPlay()
         {
-            return CHCNetSDK.NET_DVR_SerialStop(cameraChannel);
+            if (!CHCNetSDK.NET_DVR_StopRealPlay(cameraRealPlayHandle)) {
+                Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={cameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
+            }
+
+            if (!PlayCtrl.PlayM4_Stop(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_Stop failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_CloseStream(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_CloseStream failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+            }
+
+            if (!PlayCtrl.PlayM4_FreePort(cameraRealPlayPort)) {
+                Tracker.LogE($"PlayM4_FreePort failed, port={cameraRealPlayPort} error code={PlayCtrl.PlayM4_GetLastError(cameraRealPlayPort)}");
+
+            }
+
+            return true;
         }
 
         /// <summary>

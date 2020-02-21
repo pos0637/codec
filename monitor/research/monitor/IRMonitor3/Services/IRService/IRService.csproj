@@ -54,6 +54,7 @@
     <Compile Include="Services\Cell\CellService_Devices.cs" />
     <Compile Include="Services\Cell\CellService_Selections.cs" />
     <Compile Include="Services\Cell\Worker\CaptureVideoWorker.cs" />
+    <None Include="app.config" />
     <None Include="Services\Cell\Worker\GetIrDataWorker.cs" />
     <Compile Include="Services\Cell\Worker\LiveStreamingWorker.cs" />
     <Compile Include="Services\Cell\Worker\ProcessAlarmWorker.cs" />

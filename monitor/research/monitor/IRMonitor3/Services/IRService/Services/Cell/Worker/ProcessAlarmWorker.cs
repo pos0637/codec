@@ -173,22 +173,20 @@ namespace IRService.Services.Cell.Worker
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
                 startTime = DateTime.Now,
-                alarmType = alarm.type,
-                temperatureType = alarm.temperatureType,
-                level = alarm.level,
-                area = alarm.area,
-                point = alarm.point,
+                // AlarmType = alarm.type,
+                // TemperatureType = alarm.temperatureType,
+                // Alarmlevel = alarm.level,
+                // Area = alarm.area,
+                // Point = alarm.point,
                 detail = alarm.detail,
                 temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature.buffer),
                 irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage.width, alarm.irImage.height, alarm.irImage.buffer),
                 imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image.width, alarm.image.height, alarm.image.buffer),
                 videoUrl = null,
-                irCameraParameters = irCameraParameters
+                // IrCameraParameters = irCameraParameters
             };
 
-            //using (var db = new Repository.Repository.RepositoyContext()) {
-            //    db.AddAlarm(data);
-            //}
+            Repository.Repository.AddAlarm(data);
         }
     }
 }

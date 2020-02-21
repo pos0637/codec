@@ -2,7 +2,12 @@
 using OpenCvSharp;
 using Repository.Entities;
 using System;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.Entity;
+using System.Data.Entity.Core.Common;
+using System.Data.SQLite;
+using System.Data.SQLite.EF6;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -36,26 +41,36 @@ namespace Repository
         }
 
         /// <summary>
+        /// 数据库配置
+        /// </summary>
+        private class SQLiteConfiguration : DbConfiguration
+        {
+            public SQLiteConfiguration()
+            {
+                SetProviderFactory("System.Data.SQLite", SQLiteFactory.Instance);
+                SetProviderFactory("System.Data.SQLite.EF6", SQLiteProviderFactory.Instance);
+                SetProviderServices("System.Data.SQLite", (DbProviderServices)SQLiteProviderFactory.Instance.GetService(typeof(DbProviderServices)));
+            }
+        }
+
+        /// <summary>
         /// 数据仓库
         /// </summary>
         public class RepositoyContext : DbContext
         {
-            public DbSet<Alarm> Alarms { get; set; }
+            private static readonly DbConnection connection;
+            public DbSet<Alarm> Alarm { get; set; }
 
-            protected override void OnModelCreating(DbModelBuilder modelBuilder)
+            static RepositoyContext()
             {
-                base.OnModelCreating(modelBuilder);
-                modelBuilder.Entity<Alarm>().ToTable("t_alarm");
+                connection = SQLiteProviderFactory.Instance.CreateConnection();
+                connection.ConnectionString = $"Data Source={AppDomain.CurrentDomain.BaseDirectory}ir.s3db";
             }
 
-            /// <summary>
-            /// 添加告警
-            /// </summary>
-            /// <param name="alarm">告警</param>
-            public void AddAlarm(Alarm alarm)
+            public RepositoyContext()
+                : base(connection, false)
             {
-                Alarms.Add(alarm);
-                SaveChanges();
+                DbConfiguration.SetConfiguration(new SQLiteConfiguration());
             }
         }
 
@@ -214,6 +229,30 @@ namespace Repository
             }
             catch {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 添加告警
+        /// </summary>
+        /// <param name="alarm">告警</param>
+        public static void AddAlarm(Alarm alarm)
+        {
+            using (var db = new RepositoyContext()) {
+                db.Set<Alarm>().Add(alarm);
+                db.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// 获取最新告警
+        /// </summary>
+        /// <param name="count">数量</param>
+        /// <returns>告警列表</returns>
+        public static List<Alarm> GetLastAlarms(int count)
+        {
+            using (var db = new RepositoyContext()) {
+                return db.Set<Alarm>().OrderByDescending(alarm => alarm.startTime).Take(count).ToList();
             }
         }
     }

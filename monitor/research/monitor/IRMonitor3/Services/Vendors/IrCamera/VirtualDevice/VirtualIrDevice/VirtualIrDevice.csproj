@@ -53,6 +53,10 @@
       <Project>{4fdcc306-a96e-4601-bcf1-171eaa019dc5}</Project>
       <Name>Devices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Common\Repository\Repository.csproj">
+      <Project>{f0d36adc-dd65-4f05-85f5-cb107464aad3}</Project>
+      <Name>Repository</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

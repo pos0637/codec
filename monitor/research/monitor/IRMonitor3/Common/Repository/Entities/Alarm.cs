@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace Repository.Entities
@@ -96,91 +95,91 @@ namespace Repository.Entities
         /// <summary>
         /// 索引
         /// </summary>
-        public long id;
+        public int id { get; set; }
 
         /// <summary>
         /// 设备单元名称
         /// </summary>
-        public string cellName;
+        public string cellName { get; set; }
 
         /// <summary>
         /// 设备名称
         /// </summary>
-        public string deviceName;
+        public string deviceName { get; set; }
 
         /// <summary>
         /// 选区名称
         /// </summary>
-        public string selectionName;
+        public string selectionName { get; set; }
 
         /// <summary>
         /// 开始时间
         /// </summary>
-        public DateTime startTime;
+        public DateTime startTime { get; set; }
 
         /// <summary>
         /// 结束时间
         /// </summary>
-        public DateTime endTime;
+        public DateTime endTime { get; set; }
 
         /// <summary>
         /// 告警类型
         /// </summary>
-        public Type alarmType;
+        public Type alarmType { get; set; }
 
         /// <summary>
         /// 温度类型
         /// </summary>
-        public Selections.TemperatureType temperatureType;
+        public Selections.TemperatureType temperatureType { get; set; }
 
         /// <summary>
         /// 告警等级
         /// </summary>
-        public Level level;
+        public Level level { get; set; }
 
         /// <summary>
         /// 告警区域
         /// </summary>
-        public RectangleF? area;
+        public string area { get; set; }
 
         /// <summary>
         /// 告警点
         /// </summary>
-        public PointF? point;
+        public string point { get; set; }
 
         /// <summary>
         /// 告警详情
         /// </summary>
-        public string detail;
+        public string detail { get; set; }
 
         /// <summary>
         /// 处理意见
         /// </summary>
-        public string comment;
+        public string comment { get; set; }
 
         /// <summary>
         /// 温度矩阵快照资源地址
         /// </summary>
-        public string temperatureUrl;
+        public string temperatureUrl { get; set; }
 
         /// <summary>
         /// 红外图像快照资源地址
         /// </summary>
-        public string irImageUrl;
+        public string irImageUrl { get; set; }
 
         /// <summary>
         /// 可见光图像快照资源地址
         /// </summary>
-        public string imageUrl;
+        public string imageUrl { get; set; }
 
         /// <summary>
         /// 告警录像资源地址
         /// </summary>
-        public string videoUrl;
+        public string videoUrl { get; set; }
 
         /// <summary>
         /// 红外摄像机参数
         /// </summary>
-        public Configuration.IrCameraParameters irCameraParameters;
+        public string irCameraParameters { get; set; }
     }
 }

@@ -244,20 +244,17 @@ namespace IRService.Services.Cell.Worker
                 cellName = cell.cell.name,
                 selectionName = selection.Entity.name,
                 startTime = DateTime.Now,
-                alarmType = alarm.type,
-                temperatureType = alarm.temperatureType,
-                level = alarm.level,
+                // AlarmType = alarm.type,
+                // TemperatureType = alarm.temperatureType,
+                // Alarmlevel = alarm.level,
                 detail = "",
                 imageUrl = "",
                 temperatureUrl = "",
                 videoUrl = "",
-                irCameraParameters = irCameraParameters
+                // IrCameraParameters = irCameraParameters
             };
-            /*
-            using (var db = new Repository.Repository.RepositoyContext()) {
-                db.AddAlarm(data);
-            }
-            */
+
+            Repository.Repository.AddAlarm(data);
         }
     }
 }
