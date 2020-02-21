@@ -101,17 +101,17 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Start()
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
             return base.Start();
         }
 
         public override void Discard()
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
             base.Discard();
         }
 

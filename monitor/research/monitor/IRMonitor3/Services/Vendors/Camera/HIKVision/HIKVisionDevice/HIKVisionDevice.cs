@@ -141,9 +141,9 @@ namespace HIKVisionDevice
             return false;
         }
 
-        public override DeviceType GetDeviceType()
+        public override DeviceCategory GetDeviceType()
         {
-            return DeviceType.Camera;
+            return DeviceCategory.Camera;
         }
 
         public override DeviceStatus GetDeviceStatus()
@@ -265,7 +265,7 @@ namespace HIKVisionDevice
             };
 
             readDataCallback = new CHCNetSDK.REALDATACALLBACK((int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser) => {
-                onFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref cameraRealPlayPort);
+                OnFrameReceived(lRealHandle, dwDataType, pBuffer, dwBufSize, pUser, ref cameraRealPlayPort);
             });
 
             decoderCallback = new PlayCtrl.DECCBFUN((int nPort, IntPtr pBuf, int nSize, ref PlayCtrl.FRAME_INFO pFrameInfo, int nReserved1, int nReserved2) => {
@@ -407,7 +407,7 @@ namespace HIKVisionDevice
         /// <param name="dwBufSize">大小</param>
         /// <param name="pUser">用户数据</param>
         /// <param name="port">实时播放端口</param>
-        void onFrameReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser, ref int port)
+        void OnFrameReceived(int lRealHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser, ref int port)
         {
             switch (dwDataType) {
                 case CHCNetSDK.NET_DVR_SYSHEAD: {

@@ -12,6 +12,11 @@ namespace IRService.Services.Cell
     public partial class CellService
     {
         /// <summary>
+        /// 选区列表
+        /// </summary>
+        public readonly List<Models.Selections.Selection> selections = new List<Models.Selections.Selection>();
+
+        /// <summary>
         /// 获取选区
         /// </summary>
         /// <param name="name">选区名称</param>

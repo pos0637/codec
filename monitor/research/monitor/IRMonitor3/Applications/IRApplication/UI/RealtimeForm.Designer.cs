@@ -1,4 +1,6 @@
-﻿namespace IRApplication.UI
+﻿using IRApplication.Components;
+
+namespace IRApplication.UI
 {
     partial class RealtimeForm
     {
@@ -31,10 +33,14 @@
             this.button1OverFocus = new System.Windows.Forms.Button();
             this.buttonDisplayMode = new System.Windows.Forms.Button();
             this.panelAlarmLamp = new System.Windows.Forms.Panel();
+            this.pictureBoxAlarmLampGreen = new System.Windows.Forms.PictureBox();
+            this.pictureBoxAlarmLampYellow = new System.Windows.Forms.PictureBox();
+            this.pictureBoxAlarmLampRed = new System.Windows.Forms.PictureBox();
             this.panelToolButtonRight = new System.Windows.Forms.Panel();
             this.buttonAutoFocus = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonManualVideo = new System.Windows.Forms.Button();
+            this.buttonArrow = new System.Windows.Forms.Button();
             this.buttonPalette = new System.Windows.Forms.Button();
             this.buttonPoint = new System.Windows.Forms.Button();
             this.buttonSaveBitmap = new System.Windows.Forms.Button();
@@ -45,11 +51,7 @@
             this.buttonLine = new System.Windows.Forms.Button();
             this.panelToolButtonLeft = new System.Windows.Forms.Panel();
             this.panelTop = new System.Windows.Forms.Panel();
-            this.buttonCurvePanelReturn = new System.Windows.Forms.Button();
-            this.buttonGeneral = new System.Windows.Forms.Button();
             this.panelButton = new System.Windows.Forms.Panel();
-            this.button664Help = new System.Windows.Forms.Button();
-            this.button664 = new System.Windows.Forms.Button();
             this.panelRight = new System.Windows.Forms.Panel();
             this.panelAlarmForm = new System.Windows.Forms.Panel();
             this.panelForm = new System.Windows.Forms.Panel();
@@ -57,28 +59,18 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.panelCurveSidebar = new System.Windows.Forms.Panel();
-            this.panelCurve = new System.Windows.Forms.Panel();
-            this.panelSideBottom = new System.Windows.Forms.Panel();
-            this.buttonArrow = new System.Windows.Forms.Button();
-            this.pictureBoxAlarmLampGreen = new System.Windows.Forms.PictureBox();
-            this.pictureBoxAlarmLampYellow = new System.Windows.Forms.PictureBox();
-            this.pictureBoxAlarmLampRed = new System.Windows.Forms.PictureBox();
             this.panelAlarmLamp.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampGreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampYellow)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampRed)).BeginInit();
             this.panelToolButtonRight.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panelToolButtonLeft.SuspendLayout();
             this.panelTop.SuspendLayout();
-            this.panelButton.SuspendLayout();
             this.panelRight.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.panelIRViewForm.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
-            this.panelCurveSidebar.SuspendLayout();
-            this.panelSideBottom.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampGreen)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampYellow)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampRed)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonCloseFocus
@@ -134,6 +126,38 @@
             this.panelAlarmLamp.Size = new System.Drawing.Size(42, 58);
             this.panelAlarmLamp.TabIndex = 6;
             this.panelAlarmLamp.Visible = false;
+            // 
+            // pictureBoxAlarmLampGreen
+            // 
+            this.pictureBoxAlarmLampGreen.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pictureBoxAlarmLampGreen.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxAlarmLampGreen.ErrorImage = null;
+            this.pictureBoxAlarmLampGreen.Image = global::IRApplication.Properties.Resources.AlarmLampGreen;
+            this.pictureBoxAlarmLampGreen.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampGreen.Name = "pictureBoxAlarmLampGreen";
+            this.pictureBoxAlarmLampGreen.Size = new System.Drawing.Size(35, 39);
+            this.pictureBoxAlarmLampGreen.TabIndex = 8;
+            this.pictureBoxAlarmLampGreen.TabStop = false;
+            // 
+            // pictureBoxAlarmLampYellow
+            // 
+            this.pictureBoxAlarmLampYellow.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pictureBoxAlarmLampYellow.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxAlarmLampYellow.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampYellow.Name = "pictureBoxAlarmLampYellow";
+            this.pictureBoxAlarmLampYellow.Size = new System.Drawing.Size(35, 39);
+            this.pictureBoxAlarmLampYellow.TabIndex = 5;
+            this.pictureBoxAlarmLampYellow.TabStop = false;
+            // 
+            // pictureBoxAlarmLampRed
+            // 
+            this.pictureBoxAlarmLampRed.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pictureBoxAlarmLampRed.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxAlarmLampRed.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampRed.Name = "pictureBoxAlarmLampRed";
+            this.pictureBoxAlarmLampRed.Size = new System.Drawing.Size(35, 39);
+            this.pictureBoxAlarmLampRed.TabIndex = 7;
+            this.pictureBoxAlarmLampRed.TabStop = false;
             // 
             // panelToolButtonRight
             // 
@@ -207,6 +231,18 @@
             this.buttonManualVideo.TabIndex = 2;
             this.buttonManualVideo.UseVisualStyleBackColor = false;
             this.buttonManualVideo.Visible = false;
+            // 
+            // buttonArrow
+            // 
+            this.buttonArrow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.buttonArrow.FlatAppearance.BorderSize = 0;
+            this.buttonArrow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonArrow.Image = global::IRApplication.Properties.Resources.箭头;
+            this.buttonArrow.Location = new System.Drawing.Point(3, 3);
+            this.buttonArrow.Name = "buttonArrow";
+            this.buttonArrow.Size = new System.Drawing.Size(55, 62);
+            this.buttonArrow.TabIndex = 2;
+            this.buttonArrow.UseVisualStyleBackColor = true;
             // 
             // buttonPalette
             // 
@@ -334,72 +370,15 @@
             this.panelTop.Size = new System.Drawing.Size(957, 70);
             this.panelTop.TabIndex = 0;
             // 
-            // buttonCurvePanelReturn
-            // 
-            this.buttonCurvePanelReturn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCurvePanelReturn.BackColor = System.Drawing.Color.Gray;
-            this.buttonCurvePanelReturn.FlatAppearance.BorderSize = 0;
-            this.buttonCurvePanelReturn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonCurvePanelReturn.ForeColor = System.Drawing.Color.White;
-            this.buttonCurvePanelReturn.Location = new System.Drawing.Point(182, 3);
-            this.buttonCurvePanelReturn.Name = "buttonCurvePanelReturn";
-            this.buttonCurvePanelReturn.Size = new System.Drawing.Size(100, 36);
-            this.buttonCurvePanelReturn.TabIndex = 25;
-            this.buttonCurvePanelReturn.Text = "返回";
-            this.buttonCurvePanelReturn.UseVisualStyleBackColor = false;
-            // 
-            // buttonGeneral
-            // 
-            this.buttonGeneral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.buttonGeneral.FlatAppearance.BorderSize = 0;
-            this.buttonGeneral.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonGeneral.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonGeneral.ForeColor = System.Drawing.Color.White;
-            this.buttonGeneral.Location = new System.Drawing.Point(52, 12);
-            this.buttonGeneral.Name = "buttonGeneral";
-            this.buttonGeneral.Size = new System.Drawing.Size(100, 40);
-            this.buttonGeneral.TabIndex = 23;
-            this.buttonGeneral.Text = "一  般";
-            this.buttonGeneral.UseVisualStyleBackColor = false;
-            // 
             // panelButton
             // 
             this.panelButton.BackColor = System.Drawing.SystemColors.Control;
             this.panelButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelButton.Controls.Add(this.button664Help);
-            this.panelButton.Controls.Add(this.buttonGeneral);
-            this.panelButton.Controls.Add(this.button664);
             this.panelButton.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelButton.Location = new System.Drawing.Point(0, 0);
             this.panelButton.Name = "panelButton";
             this.panelButton.Size = new System.Drawing.Size(310, 70);
             this.panelButton.TabIndex = 24;
-            // 
-            // button664Help
-            // 
-            this.button664Help.FlatAppearance.BorderSize = 0;
-            this.button664Help.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button664Help.ForeColor = System.Drawing.Color.Transparent;
-            this.button664Help.Location = new System.Drawing.Point(260, 13);
-            this.button664Help.Name = "button664Help";
-            this.button664Help.Size = new System.Drawing.Size(39, 39);
-            this.button664Help.TabIndex = 24;
-            this.button664Help.UseVisualStyleBackColor = true;
-            this.button664Help.Visible = false;
-            // 
-            // button664
-            // 
-            this.button664.BackColor = System.Drawing.Color.Gray;
-            this.button664.FlatAppearance.BorderSize = 0;
-            this.button664.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button664.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button664.ForeColor = System.Drawing.Color.White;
-            this.button664.Location = new System.Drawing.Point(152, 12);
-            this.button664.Name = "button664";
-            this.button664.Size = new System.Drawing.Size(100, 40);
-            this.button664.TabIndex = 23;
-            this.button664.UseVisualStyleBackColor = false;
-            this.button664.Visible = false;
             // 
             // panelRight
             // 
@@ -422,7 +401,6 @@
             // panelForm
             // 
             this.panelForm.Controls.Add(this.panelIRViewForm);
-            this.panelForm.Controls.Add(this.panelCurveSidebar);
             this.panelForm.Controls.Add(this.panelTop);
             this.panelForm.Controls.Add(this.panelRight);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -473,78 +451,6 @@
             this.panel2.Size = new System.Drawing.Size(473, 415);
             this.panel2.TabIndex = 1;
             // 
-            // panelCurveSidebar
-            // 
-            this.panelCurveSidebar.BackColor = System.Drawing.SystemColors.Control;
-            this.panelCurveSidebar.Controls.Add(this.panelCurve);
-            this.panelCurveSidebar.Controls.Add(this.panelSideBottom);
-            this.panelCurveSidebar.Location = new System.Drawing.Point(979, 100);
-            this.panelCurveSidebar.Name = "panelCurveSidebar";
-            this.panelCurveSidebar.Size = new System.Drawing.Size(282, 391);
-            this.panelCurveSidebar.TabIndex = 25;
-            // 
-            // panelCurve
-            // 
-            this.panelCurve.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelCurve.Location = new System.Drawing.Point(0, 0);
-            this.panelCurve.Name = "panelCurve";
-            this.panelCurve.Size = new System.Drawing.Size(282, 344);
-            this.panelCurve.TabIndex = 30;
-            // 
-            // panelSideBottom
-            // 
-            this.panelSideBottom.Controls.Add(this.buttonCurvePanelReturn);
-            this.panelSideBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelSideBottom.Location = new System.Drawing.Point(0, 344);
-            this.panelSideBottom.MinimumSize = new System.Drawing.Size(200, 38);
-            this.panelSideBottom.Name = "panelSideBottom";
-            this.panelSideBottom.Size = new System.Drawing.Size(282, 47);
-            this.panelSideBottom.TabIndex = 29;
-            // 
-            // buttonArrow
-            // 
-            this.buttonArrow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonArrow.FlatAppearance.BorderSize = 0;
-            this.buttonArrow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonArrow.Image = global::IRApplication.Properties.Resources.箭头;
-            this.buttonArrow.Location = new System.Drawing.Point(3, 3);
-            this.buttonArrow.Name = "buttonArrow";
-            this.buttonArrow.Size = new System.Drawing.Size(55, 62);
-            this.buttonArrow.TabIndex = 2;
-            this.buttonArrow.UseVisualStyleBackColor = true;
-            // 
-            // pictureBoxAlarmLampGreen
-            // 
-            this.pictureBoxAlarmLampGreen.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pictureBoxAlarmLampGreen.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxAlarmLampGreen.ErrorImage = null;
-            this.pictureBoxAlarmLampGreen.Image = global::IRApplication.Properties.Resources.AlarmLampGreen;
-            this.pictureBoxAlarmLampGreen.Location = new System.Drawing.Point(3, 7);
-            this.pictureBoxAlarmLampGreen.Name = "pictureBoxAlarmLampGreen";
-            this.pictureBoxAlarmLampGreen.Size = new System.Drawing.Size(35, 39);
-            this.pictureBoxAlarmLampGreen.TabIndex = 8;
-            this.pictureBoxAlarmLampGreen.TabStop = false;
-            // 
-            // pictureBoxAlarmLampYellow
-            // 
-            this.pictureBoxAlarmLampYellow.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pictureBoxAlarmLampYellow.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxAlarmLampYellow.Location = new System.Drawing.Point(3, 7);
-            this.pictureBoxAlarmLampYellow.Name = "pictureBoxAlarmLampYellow";
-            this.pictureBoxAlarmLampYellow.Size = new System.Drawing.Size(35, 39);
-            this.pictureBoxAlarmLampYellow.TabIndex = 5;
-            this.pictureBoxAlarmLampYellow.TabStop = false;
-            // 
-            // pictureBoxAlarmLampRed
-            // 
-            this.pictureBoxAlarmLampRed.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pictureBoxAlarmLampRed.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxAlarmLampRed.Location = new System.Drawing.Point(3, 7);
-            this.pictureBoxAlarmLampRed.Name = "pictureBoxAlarmLampRed";
-            this.pictureBoxAlarmLampRed.Size = new System.Drawing.Size(35, 39);
-            this.pictureBoxAlarmLampRed.TabIndex = 7;
-            this.pictureBoxAlarmLampRed.TabStop = false;
-            // 
             // RealtimeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -557,20 +463,17 @@
             this.Text = "RealtimeForm";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.panelAlarmLamp.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampGreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampYellow)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampRed)).EndInit();
             this.panelToolButtonRight.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panelToolButtonLeft.ResumeLayout(false);
             this.panelTop.ResumeLayout(false);
-            this.panelButton.ResumeLayout(false);
             this.panelRight.ResumeLayout(false);
             this.panelForm.ResumeLayout(false);
             this.panelIRViewForm.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
-            this.panelCurveSidebar.ResumeLayout(false);
-            this.panelSideBottom.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampGreen)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampYellow)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlarmLampRed)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -599,11 +502,7 @@
         private System.Windows.Forms.Button buttonLine;
         private System.Windows.Forms.Panel panelToolButtonLeft;
         private System.Windows.Forms.Panel panelTop;
-        private System.Windows.Forms.Button buttonCurvePanelReturn;
-        private System.Windows.Forms.Button buttonGeneral;
         private System.Windows.Forms.Panel panelButton;
-        private System.Windows.Forms.Button button664Help;
-        private System.Windows.Forms.Button button664;
         private System.Windows.Forms.Panel panelRight;
         private System.Windows.Forms.Panel panelAlarmForm;
         private System.Windows.Forms.Panel panelForm;
@@ -611,8 +510,5 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panelCurveSidebar;
-        private System.Windows.Forms.Panel panelCurve;
-        private System.Windows.Forms.Panel panelSideBottom;
     }
 }

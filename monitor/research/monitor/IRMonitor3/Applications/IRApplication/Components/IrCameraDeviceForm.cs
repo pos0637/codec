@@ -81,14 +81,14 @@ namespace IRApplication.Components
 
         private void IrCameraDeviceForm_Load(object sender, System.EventArgs e)
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
         }
 
         private void IrCameraDeviceForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using Common;
-using Devices;
+﻿using IRService.Common;
+using Miscs;
 using Repository.Entities;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -17,21 +17,6 @@ namespace IRService.Services.Cell
         /// 设备单元配置
         /// </summary>
         public Configuration.Cell cell;
-
-        /// <summary>
-        /// 选区列表
-        /// </summary>
-        public readonly List<Models.Selections.Selection> selections = new List<Models.Selections.Selection>();
-
-        /// <summary>
-        /// 设备列表
-        /// </summary>
-        public readonly List<IDevice> devices = new List<IDevice>();
-
-        /// <summary>
-        /// 工作线程列表
-        /// </summary>
-        public readonly List<BaseWorker> workers = new List<BaseWorker>();
 
         #endregion
 
@@ -57,7 +42,9 @@ namespace IRService.Services.Cell
 
         public override void Stop()
         {
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
             CloseDevices();
+
             base.Stop();
         }
 
@@ -67,6 +54,9 @@ namespace IRService.Services.Cell
             if (!LoadDevices()) {
                 return;
             }
+
+            onStartLiveStreaming = (args) => { StartLiveStreaming(args[0] as Dictionary<string, string>); };
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
 
             base.OnStart();
         }

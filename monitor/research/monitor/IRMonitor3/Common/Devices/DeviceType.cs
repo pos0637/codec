@@ -4,7 +4,7 @@ namespace Devices
     /// <summary>
     /// 设备类型
     /// </summary>
-    public enum DeviceType
+    public enum DeviceCategory
     {
         Unknown = 0, // 未知
         Camera, // 可见光摄像头

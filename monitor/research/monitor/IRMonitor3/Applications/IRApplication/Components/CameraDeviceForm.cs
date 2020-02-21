@@ -53,12 +53,12 @@ namespace IRApplication.Components
 
         private void CameraDeviceForm_Load(object sender, System.EventArgs e)
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
         }
 
         private void CameraDeviceForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
         }
     }
 }

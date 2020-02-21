@@ -115,12 +115,12 @@ namespace Repository.Entities
         /// <summary>
         /// 开始时间
         /// </summary>
-        public DateTime startTime { get; set; }
+        public DateTime? startTime { get; set; }
 
         /// <summary>
         /// 结束时间
         /// </summary>
-        public DateTime endTime { get; set; }
+        public DateTime? endTime { get; set; }
 
         /// <summary>
         /// 告警类型

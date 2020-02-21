@@ -32,24 +32,27 @@ namespace Devices
         /// <summary>
         /// 获取设备
         /// </summary>
-        /// <param name="id">设备索引</param>
-        /// <param name="typeName">设备类名称</param>
-        /// <param name="name">设备名称</param>
+        /// <param name="id">索引</param>
+        /// <param name="category">类型</param>
+        /// <param name="model">型号</param>
+        /// <param name="name">名称</param>
         /// <returns>设备对象</returns>
-        public IDevice GetDevice(long id, string typeName, string name)
+        public IDevice GetDevice(long id, string category, string model, string name)
         {
             Type deviceType;
             lock (deviceTypeList) {
-                if (!deviceTypeList.Contains(typeName)) {
+                if (!deviceTypeList.Contains(model)) {
                     return null;
                 }
 
-                deviceType = deviceTypeList[typeName] as Type;
+                deviceType = deviceTypeList[model] as Type;
             }
 
             try {
                 IDevice device = (Activator.CreateInstance(deviceType)) as IDevice;
                 device.Id = id;
+                device.Category = category;
+                device.Model = model;
                 device.Name = name;
 
                 if (!device.Initialize()) {

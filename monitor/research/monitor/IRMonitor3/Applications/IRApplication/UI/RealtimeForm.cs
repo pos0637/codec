@@ -6,6 +6,8 @@ namespace IRApplication.UI
 {
     public partial class RealtimeForm : Form
     {
+        private AlarmInformationList alarmInformationList;
+
         /// <summary>
         /// 设备单元服务
         /// </summary>
@@ -13,6 +15,11 @@ namespace IRApplication.UI
         public RealtimeForm(CellService cell)
         {
             InitializeComponent();
+
+            alarmInformationList = new AlarmInformationList {
+                Dock = DockStyle.Fill
+            };
+            panelAlarmForm.Controls.Add(alarmInformationList);
 
             ShowForm(new CameraDeviceForm(cell, cell.devices[0]));
         }

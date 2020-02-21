@@ -51,6 +51,11 @@
             public string clientId;
 
             /// <summary>
+            /// 服务器地址
+            /// </summary>
+            public string serverUrl;
+
+            /// <summary>
             /// MQTT服务器地址
             /// </summary>
             public string mqttServerIp;

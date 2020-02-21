@@ -63,7 +63,7 @@ namespace IRService.Services.Cell.Worker
             // 读取配置信息
             if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
                 // 创建资源
-                Repository.Entities.Configuration.IrCameraParameters irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
+                var irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
                 temperature = PinnedBuffer<float>.Alloc(irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight, irCameraParameters.temperatureWidth, irCameraParameters.temperatureHeight);
                 irImage = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height * 3 / 2, irCameraParameters.width, irCameraParameters.height);
                 tempertureDuration = 1000 / irCameraParameters.temperatureFrameRate;
@@ -72,7 +72,7 @@ namespace IRService.Services.Cell.Worker
             // 读取配置信息
             if (device.Read(ReadMode.CameraParameters, null, out outData, out _)) {
                 // 创建资源
-                Repository.Entities.Configuration.CameraParameters cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
+                var cameraParameters = outData as Repository.Entities.Configuration.CameraParameters;
                 image = PinnedBuffer<byte>.Alloc(cameraParameters.width * cameraParameters.height * 3 / 2, cameraParameters.width, cameraParameters.height);
                 videoDuration = 1000 / cameraParameters.videoFrameRate;
             }
@@ -101,7 +101,7 @@ namespace IRService.Services.Cell.Worker
                     if ((temperature != null)
                         && (device.Read(ReadMode.TemperatureArray, temperature.ptr, temperature.Length * sizeof(float))
                         || device.Read(ReadMode.TemperatureArray, temperature.buffer, out _, out _))) {                        
-                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_TEMPERATURE, cell, device, temperature);
+                        EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, cell, device, temperature);
                     }
 
                     duration1 = 0;
@@ -112,13 +112,13 @@ namespace IRService.Services.Cell.Worker
                     if ((irImage != null)
                         && (device.Read(ReadMode.IrImage, irImage.ptr, irImage.Length * sizeof(float))
                         || device.Read(ReadMode.IrImage, irImage.buffer, out _, out _))) {
-                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IRIMAGE, cell, device, irImage);
+                        EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, cell, device, irImage);
                     }
 
                     if ((image != null)
                         && (device.Read(ReadMode.Image, image.ptr, image.Length * sizeof(byte))
                         || device.Read(ReadMode.Image, image.buffer, out _, out _))) {
-                        EventEmitter.Instance.Publish(Constants.EVENT_RECEIVE_IMAGE, cell, device, image);
+                        EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_RECEIVE_IMAGE, cell, device, image);
                     }
 
                     duration2 = 0;

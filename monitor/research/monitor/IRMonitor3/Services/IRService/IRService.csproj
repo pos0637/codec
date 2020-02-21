@@ -45,6 +45,8 @@
   <ItemGroup>
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="Miscs\HttpMethod.cs" />
+    <Compile Include="Miscs\WebMethod.cs" />
     <Compile Include="Models\Alarm.cs" />
     <Compile Include="Models\Selections.cs" />
     <Compile Include="Program.cs" />
@@ -54,6 +56,8 @@
     <Compile Include="Services\Cell\CellService_Devices.cs" />
     <Compile Include="Services\Cell\CellService_Selections.cs" />
     <Compile Include="Services\Cell\Worker\CaptureVideoWorker.cs" />
+    <Compile Include="Services\Web\WebServiceManager.cs" />
+    <Compile Include="Services\Web\WebService.cs" />
     <None Include="app.config" />
     <None Include="Services\Cell\Worker\GetIrDataWorker.cs" />
     <Compile Include="Services\Cell\Worker\LiveStreamingWorker.cs" />

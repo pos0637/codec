@@ -62,7 +62,7 @@ namespace IRService.Services.Cell.Worker
         /// <summary>
         /// 先入先出告警队列
         /// </summary>
-        private FixedLengthQueue<Alarm> alarms = new FixedLengthQueue<Alarm>(100);
+        private readonly FixedLengthQueue<Alarm> alarms = new FixedLengthQueue<Alarm>(100);
 
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
@@ -75,7 +75,7 @@ namespace IRService.Services.Cell.Worker
             }
 
             irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-            device.handler += OnDeviceAlarm;
+            device.Handler += OnDeviceAlarm;
 
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
@@ -101,18 +101,18 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Start()
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
-            EventEmitter.Instance.Subscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
             return base.Start();
         }
 
         public override void Discard()
         {
             alarms.Notify();
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_TEMPERATURE, onReceiveTemperature);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IRIMAGE, onReceiveIrImage);
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
             base.Discard();
         }
 
@@ -173,17 +173,17 @@ namespace IRService.Services.Cell.Worker
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
                 startTime = DateTime.Now,
-                // AlarmType = alarm.type,
-                // TemperatureType = alarm.temperatureType,
-                // Alarmlevel = alarm.level,
-                // Area = alarm.area,
-                // Point = alarm.point,
+                alarmType = alarm.type,
+                temperatureType = alarm.temperatureType,
+                level = alarm.level,
+                area = JsonUtils.ObjectToJson(alarm.area),
+                point = JsonUtils.ObjectToJson(alarm.point),
                 detail = alarm.detail,
                 temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature.buffer),
                 irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage.width, alarm.irImage.height, alarm.irImage.buffer),
                 imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image.width, alarm.image.height, alarm.image.buffer),
                 videoUrl = null,
-                // IrCameraParameters = irCameraParameters
+                irCameraParameters = JsonUtils.ObjectToJson(irCameraParameters)
             };
 
             Repository.Repository.AddAlarm(data);

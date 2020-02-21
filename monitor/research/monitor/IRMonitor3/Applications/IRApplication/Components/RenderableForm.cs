@@ -7,6 +7,9 @@ using System.Windows.Forms;
 
 namespace IRApplication.Components
 {
+    /// <summary>
+    /// 可渲染窗体
+    /// </summary>
     public class RenderableForm : Form
     {
         /// <summary>

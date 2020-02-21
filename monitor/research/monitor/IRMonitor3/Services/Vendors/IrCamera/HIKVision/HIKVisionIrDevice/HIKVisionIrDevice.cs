@@ -248,9 +248,9 @@ namespace HIKVisionIrDevice
             }
         }
 
-        public override DeviceType GetDeviceType()
+        public override DeviceCategory GetDeviceType()
         {
-            return DeviceType.IrCamera;
+            return DeviceCategory.IrCamera;
         }
 
         public override DeviceStatus GetDeviceStatus()

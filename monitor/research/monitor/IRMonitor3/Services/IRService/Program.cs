@@ -1,6 +1,7 @@
 ﻿using Common;
 using Communication;
 using IRService.Services.Cell;
+using IRService.Services.Web;
 using Miscs;
 using System;
 
@@ -15,6 +16,9 @@ namespace IRService
 
             // 初始化设备单元服务管理器
             CellServiceManager.Instance.Initialize();
+
+            // 初始化平台服务管理器
+            WebServiceManager.Instance.Initialize();
         }
 
         /// <summary>

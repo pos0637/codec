@@ -70,6 +70,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Constants.cs" />
+    <Compile Include="Components\AlarmInformationItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\AlarmInformationItem.designer.cs">
+      <DependentUpon>AlarmInformationItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Components\AlarmInformationList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\AlarmInformationList.Designer.cs">
+      <DependentUpon>AlarmInformationList.cs</DependentUpon>
+    </Compile>
     <Compile Include="Components\CameraDeviceForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +129,9 @@
     <Compile Include="UI\WebViewForm.Designer.cs">
       <DependentUpon>WebViewForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Components\AlarmInformationItem.resx">
+      <DependentUpon>AlarmInformationItem.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Components\CameraDeviceForm.resx">
       <DependentUpon>CameraDeviceForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -244,6 +259,7 @@
     <Content Include="Resources\返回1.png" />
     <Content Include="Resources\锁定.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

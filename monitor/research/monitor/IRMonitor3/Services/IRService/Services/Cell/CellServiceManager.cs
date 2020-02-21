@@ -20,16 +20,16 @@ namespace IRService.Services.Cell
             // 读取所有设备单元信息
             Configuration configuration = Repository.Repository.LoadConfiguation();
             if (configuration == null) {
-                Tracker.LogI("LoadConfiguration FAIL");
+                Tracker.LogI("LoadConfiguration fail");
                 return false;
             }
 
             if (!CheckConfiguration(configuration)) {
-                Tracker.LogI("CheckConfiguration FAIL");
+                Tracker.LogI("CheckConfiguration fail");
                 return false;
             }
 
-            Tracker.LogI($"LoadConfiguration SUCCEED, Cell count: {configuration.cells.Length}");
+            Tracker.LogI($"LoadConfiguration succeed, cell count: {configuration.cells.Length}");
 
             // 创建服务
             foreach (var cell in configuration.cells) {
@@ -37,7 +37,7 @@ namespace IRService.Services.Cell
 
                 // 初始化设备单元服务
                 if (!service.Initialize(new Dictionary<string, object>() { ["cell"] = cell })) {
-                    Tracker.LogE($"CellService: {cell.name} Initialize FAIL");
+                    Tracker.LogE($"CellService: {cell.name} initialize fail");
                     return false;
                 }
 
@@ -45,7 +45,7 @@ namespace IRService.Services.Cell
                 service.Start();
 
                 AddService(cell.name, service);
-                Tracker.LogI($"CellService: {cell.name} Start SUCCEED");
+                Tracker.LogI($"CellService: {cell.name} start succeed");
             }
 
             return true;

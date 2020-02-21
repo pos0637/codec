@@ -121,10 +121,15 @@ namespace IRService.Services.Cell.Worker
 
             while (!IsTerminated()) {
                 // 克隆数据
-                image = Arrays.Clone(this.image.buffer, image, sizeof(byte));
+                var temp = this.image;
+                if (temp == null) {
+                    Thread.Sleep(duration);
+                    continue;
+                }
 
                 try {
                     // 编码
+                    image = Arrays.Clone(temp, image, sizeof(byte));
                     encoder.Encode(image.ptr, image.ptr + size, image.ptr + size + size / 4);
                 }
                 catch (Exception e) {

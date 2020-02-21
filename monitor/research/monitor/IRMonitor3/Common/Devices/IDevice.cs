@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace Devices
 {
@@ -18,22 +17,22 @@ namespace Devices
         /// <summary>
         /// 设备索引
         /// </summary>
-        public long Id {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get;
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set;
-        }
+        public long Id { get; set; }
+
+        /// <summary>
+        /// 设备类型
+        /// </summary>
+        public string Category { get; set; }
+
+        /// <summary>
+        /// 设备型号
+        /// </summary>
+        public string Model { get; set; }
 
         /// <summary>
         /// 设备名称
         /// </summary>
-        public string Name {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get;
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set;
-        }
+        public string Name { get; set; }
 
         /// <summary>
         /// 初始化设备
@@ -91,7 +90,7 @@ namespace Devices
         /// 获取设备类型
         /// </summary>
         /// <returns>设备类型</returns>
-        public abstract DeviceType GetDeviceType();
+        public abstract DeviceCategory GetDeviceType();
 
         /// <summary>
         /// 获取设备状态
@@ -107,7 +106,7 @@ namespace Devices
         /// <summary>
         /// 事件
         /// </summary>
-        public event EventHandler handler;
+        public event EventHandler Handler;
 
         /// <summary>
         /// 触发事件
@@ -116,7 +115,7 @@ namespace Devices
         /// <param name="arguments">参数</param>
         protected void RaiseEvent(DeviceEvent deviceEvent, params object[] arguments)
         {
-            handler?.Invoke(deviceEvent, arguments);
+            Handler?.Invoke(deviceEvent, arguments);
         }
     }
 }
