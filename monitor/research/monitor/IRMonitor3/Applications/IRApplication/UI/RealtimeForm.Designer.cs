@@ -186,6 +186,7 @@ namespace IRApplication.UI
             this.buttonAutoFocus.TabIndex = 3;
             this.buttonAutoFocus.Text = "自动";
             this.buttonAutoFocus.UseVisualStyleBackColor = false;
+            this.buttonAutoFocus.Click += new System.EventHandler(this.buttonAutoFocus_Click);
             // 
             // tableLayoutPanel1
             // 

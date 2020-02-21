@@ -26,7 +26,12 @@ namespace Repository.Entities
             /// <summary>
             /// 低于阈值告警
             /// </summary>
-            Low
+            Low,
+
+            /// <summary>
+            /// 人体体温超温
+            /// </summary>
+            HumanHighTemperature
         }
 
         /// <summary>

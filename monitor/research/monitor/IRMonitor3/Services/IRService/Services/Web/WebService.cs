@@ -58,7 +58,8 @@ namespace IRService.Services.Web
             while (!worker.IsTerminated()) {
                 var info = WebMethod.GetDevice(configuration.information.clientId);
                 if (info == null) {
-                    Thread.Sleep(1000);
+                    Tracker.LogE(" WebMethod: GetDevice fail");
+                    Thread.Sleep(3000);
                     continue;
                 }
 

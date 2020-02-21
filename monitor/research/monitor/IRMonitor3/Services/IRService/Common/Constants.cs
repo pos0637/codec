@@ -21,6 +21,11 @@
         public static readonly string EVENT_SERVICE_RECEIVE_IMAGE = "EVENT_SERVICE_RECEIVE_IMAGE";
 
         /// <summary>
+        /// 触发告警事件名称
+        /// </summary>
+        public static readonly string EVENT_SERVICE_ON_ALARM = "EVENT_SERVICE_ON_ALARM";
+
+        /// <summary>
         /// 开启推流事件名称
         /// </summary>
         public static readonly string EVENT_SERVICE_START_STREAMING = "EVENT_SERVICE_START_STREAMING";

@@ -43,6 +43,10 @@ namespace IRService.Services.Cell
         private bool LoadDevices()
         {
             foreach (var device in cell.devices) {
+                if (!device.enabled) {
+                    continue;
+                }
+
                 var instance = DeviceFactory.Instance.GetDevice(UUID.GenerateUUID(), device.category, device.model, device.serialNumber);
                 if (instance == null) {
                     Tracker.LogE($"Load device fail: {device.model}");
@@ -88,7 +92,7 @@ namespace IRService.Services.Cell
                         }
 
                         // 启动获取数据工作线程
-                        var worker = new CaptureVideoWorker();
+                        dynamic worker = new CaptureVideoWorker();
                         if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
                             return false;
@@ -101,6 +105,21 @@ namespace IRService.Services.Cell
 
                         workers.Add(worker);
                         Tracker.LogE($"CaptureVideoWorker start succeed: {device.model}");
+
+                        // 启动处理告警工作线程
+                        worker = new ProcessAlarmWorker();
+                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
+                            Tracker.LogE($"ProcessAlarmWorker initialize fail: {device.model}");
+                            return false;
+                        }
+
+                        if (ARESULT.AFAILED(worker.Start())) {
+                            Tracker.LogE($"ProcessAlarmWorker start fail: {device.model}");
+                            return false;
+                        }
+
+                        workers.Add(worker);
+                        Tracker.LogE($"ProcessAlarmWorker start succeed: {device.model}");
 
                         break;
                     }

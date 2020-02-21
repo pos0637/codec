@@ -60,6 +60,11 @@ namespace IRService.Services.Cell.Worker
         private EventEmitter.EventHandler onReceiveImage;
 
         /// <summary>
+        /// 触发告警事件处理函数
+        /// </summary>
+        private EventEmitter.EventHandler onAlarm;
+
+        /// <summary>
         /// 先入先出告警队列
         /// </summary>
         private readonly FixedLengthQueue<Alarm> alarms = new FixedLengthQueue<Alarm>(100);
@@ -68,14 +73,13 @@ namespace IRService.Services.Cell.Worker
         {
             cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
+            device.Handler += OnDeviceEvent;
 
             // 读取配置信息
-            if (!device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
+            if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
+                irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
                 return ARESULT.E_INVALIDARG;
             }
-
-            irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-            device.Handler += OnDeviceAlarm;
 
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
@@ -96,6 +100,12 @@ namespace IRService.Services.Cell.Worker
                 }
             };
 
+            onAlarm = (args) => {
+                if ((args[0] == cell) && (args[1] == device)) {
+                    OnAlarm(args);
+                }
+            };
+
             return base.Initialize(arguments);
         }
 
@@ -104,6 +114,7 @@ namespace IRService.Services.Cell.Worker
             EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
             EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
             EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_ON_ALARM, onAlarm);
             return base.Start();
         }
 
@@ -113,6 +124,7 @@ namespace IRService.Services.Cell.Worker
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
+            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_ON_ALARM, onAlarm);
             base.Discard();
         }
 
@@ -129,15 +141,35 @@ namespace IRService.Services.Cell.Worker
         }
 
         /// <summary>
-        /// 设备告警事件处理函数
+        /// 设备事件处理函数
         /// </summary>
         /// <param name="deviceEvent">事件</param>
         /// <param name="arguments">参数</param>
-        private void OnDeviceAlarm(DeviceEvent deviceEvent, params object[] arguments)
+        private void OnDeviceEvent(DeviceEvent deviceEvent, params object[] arguments)
         {
-            Alarm alarm;
             switch (deviceEvent) {
                 case DeviceEvent.HumanHighTemperatureAlarm: {
+                    OnAlarm(cell, device, Repository.Entities.Alarm.Type.HumanHighTemperature, arguments[0], arguments[1]);
+                    break;
+                }
+                default:
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// 设备事件处理函数
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        private void OnAlarm(params object[] arguments)
+        {
+            var type = (Repository.Entities.Alarm.Type)arguments[2];
+            var rect = (RectangleF?)arguments[3];
+            var detail = arguments[4] as string;
+
+            Alarm alarm;
+            switch (type) {
+                case Repository.Entities.Alarm.Type.HumanHighTemperature: {
                     alarm = new Alarm() {
                         type = Repository.Entities.Alarm.Type.High,
                         temperatureType = Repository.Entities.Selections.TemperatureType.max,
@@ -146,8 +178,8 @@ namespace IRService.Services.Cell.Worker
                         deviceName = device.Name,
                         selectionName = null,
                         startTime = DateTime.Now,
-                        area = (RectangleF)arguments[0],
-                        detail = arguments[1] as string
+                        area = rect,
+                        detail = detail
                     };
                     break;
                 }
@@ -179,9 +211,9 @@ namespace IRService.Services.Cell.Worker
                 area = JsonUtils.ObjectToJson(alarm.area),
                 point = JsonUtils.ObjectToJson(alarm.point),
                 detail = alarm.detail,
-                temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature.buffer),
-                irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage.width, alarm.irImage.height, alarm.irImage.buffer),
-                imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image.width, alarm.image.height, alarm.image.buffer),
+                temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature),
+                irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage),
+                imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image),
                 videoUrl = null,
                 irCameraParameters = JsonUtils.ObjectToJson(irCameraParameters)
             };

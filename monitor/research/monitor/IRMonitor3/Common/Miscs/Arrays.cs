@@ -58,6 +58,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static T[] Clone<T>(T[] from, T[] to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
                 result = new T[from.Length];
@@ -93,6 +97,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static PinnedBuffer<T> Clone<T>(T[] from, PinnedBuffer<T> to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
                 result = PinnedBuffer<T>.Alloc(from.Length);
@@ -115,6 +123,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static PinnedBuffer<T> Clone<T>(PinnedBuffer<T> from, PinnedBuffer<T> to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
                 result = PinnedBuffer<T>.Alloc(from.Length);
@@ -139,6 +151,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static T[] Clone<T>(Buffer<T> from, T[] to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             return Clone(from.buffer, to, size);
         }
 
@@ -152,6 +168,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static Buffer<T> Clone<T>(T[] from, Buffer<T> to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
                 result = Buffer<T>.Alloc(from.Length);
@@ -174,6 +194,10 @@ namespace Miscs
         /// <returns>数组</returns>
         public static Buffer<T> Clone<T>(PinnedBuffer<T> from, Buffer<T> to, int size)
         {
+            if (from == null) {
+                return to;
+            }
+
             var result = to;
             if ((to == null) || (to.Length != from.Length)) {
                 result = Buffer<T>.Alloc(from.Length);

@@ -25,8 +25,8 @@ namespace IRApplication.Components
                         foreach (var alarm in alarms) {
                             var picture = new AlarmInformationItem();
                             picture.NameLabel1.Text = alarm.cellName;
-                            picture.pictureEdit.Image = Image.FromFile(alarm.imageUrl); ;
-                            picture.pictureIrEdit.Image = Image.FromFile(alarm.irImageUrl);
+                            picture.pictureEdit.Image = alarm.imageUrl != null ? Image.FromFile(alarm.imageUrl) : null;
+                            picture.pictureIrEdit.Image = alarm.irImageUrl != null ? Image.FromFile(alarm.irImageUrl) : null;
                             picture.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
                             picture.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
                             picture.pictureIrEdit.BackgroundImageLayout = ImageLayout.Stretch;

@@ -106,8 +106,8 @@ namespace IRService.Services.Cell.Worker
 
         public override void Discard()
         {
-            encoder.Stop();
-            encoder.Dispose();
+            encoder?.Stop();
+            encoder?.Dispose();
             encoder = null;
 
             EventEmitter.Instance.Unsubscribe(eventName, onReceiveImage);

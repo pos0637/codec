@@ -7,6 +7,7 @@
   substation: 
   location: 
   clientId: 0001
+  serverUrl: http://ircloud.gh-i.com
   mqttServerIp: 112.51.3.158
   mqttServerPort: 1883
   rtmpServerIp: 127.0.0.1
@@ -16,7 +17,21 @@
 cells:
 - name: cell0
   devices:
-  - category: IrCamera
+  - enabled: true
+    category: Camera
+    model: HIKVisionDevice
+    version: 1.0
+    serialNumber: 0001
+    uri: 'ip=192.168.8.64&port=8000&username=admin&password=abcd1234'
+    cameraParameters:
+      uri: 'channel=1'
+      width: 1280
+      stride: 1280
+      height: 720
+      bpp: 4
+      videoFrameRate: 15
+  - enabled: false
+    category: IrCamera
     model: HIKVisionIrDevice
     version: 1.0
     serialNumber: 

@@ -132,6 +132,9 @@
     <EmbeddedResource Include="Components\AlarmInformationItem.resx">
       <DependentUpon>AlarmInformationItem.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Components\AlarmInformationList.resx">
+      <DependentUpon>AlarmInformationList.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Components\CameraDeviceForm.resx">
       <DependentUpon>CameraDeviceForm.cs</DependentUpon>
     </EmbeddedResource>

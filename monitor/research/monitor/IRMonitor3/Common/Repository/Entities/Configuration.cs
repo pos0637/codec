@@ -108,6 +108,11 @@
         public class Device
         {
             /// <summary>
+            /// 是否启用
+            /// </summary>
+            public bool enabled;
+
+            /// <summary>
             /// 类型
             /// </summary>
             public string category;

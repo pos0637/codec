@@ -169,6 +169,16 @@ namespace Repository
         /// </summary>
         /// <param name="temperature">温度矩阵</param>
         /// <returns>文件名</returns>
+        public static string SaveAlarmTemperature(Buffer<float> temperature)
+        {
+            return SaveAlarmTemperature(temperature?.buffer);
+        }
+
+        /// <summary>
+        /// 保存告警温度矩阵
+        /// </summary>
+        /// <param name="temperature">温度矩阵</param>
+        /// <returns>文件名</returns>
         public static string SaveAlarmTemperature(float[] temperature)
         {
             if (temperature == null) {
@@ -184,6 +194,20 @@ namespace Repository
             catch {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 保存告警图像
+        /// </summary>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
+        public static string SaveAlarmYV12Image(Buffer<byte> image)
+        {
+            if (image == null) {
+                return null;
+            }
+
+            return SaveAlarmYV12Image(image.width, image.height, image.buffer);
         }
 
         /// <summary>
@@ -207,6 +231,20 @@ namespace Repository
             catch {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 保存告警图像
+        /// </summary>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
+        public static string SaveAlarmRGBAImage(Buffer<byte> image)
+        {
+            if (image == null) {
+                return null;
+            }
+
+            return SaveAlarmRGBAImage(image.width, image.height, image.buffer);
         }
 
         /// <summary>
