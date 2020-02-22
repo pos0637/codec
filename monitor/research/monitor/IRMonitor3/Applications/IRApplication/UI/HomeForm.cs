@@ -10,7 +10,15 @@ namespace IRApplication.UI
 {
     public partial class HomeForm : Form
     {
+        /// <summary>
+        /// 实时窗体
+        /// </summary>
         private RealtimeForm mRealtimeForm;
+
+        /// <summary>
+        /// 查询告警窗体
+        /// </summary>
+        private SearchAlarmForm mSearchAlarmForm = new SearchAlarmForm();
 
         public HomeForm()
         {
@@ -45,11 +53,16 @@ namespace IRApplication.UI
             form.Show();
 
             SetTitle(title);
+            CloseSidebar();
             sidebarBtn.Visible = true;
             buttonReturn.Visible = false;
             panelSidebar.Visible = false;
         }
 
+        /// <summary>
+        /// 设置标题栏
+        /// </summary>
+        /// <param name="title">标题</param>
         private void SetTitle(string title)
         {
             titleLabel.Text = title;
@@ -124,22 +137,27 @@ namespace IRApplication.UI
 
         #endregion
 
-        private void HomeForm_Load(object sender, System.EventArgs e)
+        private void HomeForm_Load(object sender, EventArgs e)
         {
             InitializeSideBar();
         }
 
-        private void buttonRealtime_Click(object sender, System.EventArgs e)
+        private void buttonRealtime_Click(object sender, EventArgs e)
         {
             ShowRealtimeForm();
         }
 
-        private void buttonSidebarRealtime_Click(object sender, System.EventArgs e)
+        private void buttonSidebarRealtime_Click(object sender, EventArgs e)
         {
             ShowRealtimeForm();
         }
 
-        private void sidebarBtn_Click(object sender, System.EventArgs e)
+        private void buttonSidebarAlarmSearch_Click(object sender, EventArgs e)
+        {
+            ShowForm(mSearchAlarmForm, "告警查询");
+        }
+
+        private void sidebarBtn_Click(object sender, EventArgs e)
         {
             OpenSidebar();
         }

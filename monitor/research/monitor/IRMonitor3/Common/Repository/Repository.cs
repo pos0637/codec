@@ -59,23 +59,23 @@ namespace Repository
         public class RepositoyContext : DbContext
         {
             /// <summary>
-            /// 数据库连接
-            /// </summary>
-            private static readonly DbConnection connection;
-
-            /// <summary>
             /// 告警信息列表
             /// </summary>
             public DbSet<Alarm> Alarm { get; set; }
 
-            static RepositoyContext()
+            /// <summary>
+            /// 获取数据库连接
+            /// </summary>
+            /// <returns>数据库连接</returns>
+            private static DbConnection GetConnection()
             {
-                connection = SQLiteProviderFactory.Instance.CreateConnection();
+                var connection = SQLiteProviderFactory.Instance.CreateConnection();
                 connection.ConnectionString = $"Data Source={AppDomain.CurrentDomain.BaseDirectory}ir.s3db";
+                return connection;
             }
 
             public RepositoyContext()
-                : base(connection, false)
+                : base(GetConnection(), true)
             {
                 DbConfiguration.SetConfiguration(new SQLiteConfiguration());
             }
@@ -299,6 +299,32 @@ namespace Repository
         }
 
         /// <summary>
+        /// 获取告警数量
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        public static int GetAlarmsCount(DateTime start, DateTime end)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    if ((start != null) && (end != null)) {
+                        return db.Set<Alarm>()
+                            .Where(a => a.startTime >= start)
+                            .Where(a => a.startTime <= end)
+                            .Count();
+                    }
+                    else {
+                        return db.Set<Alarm>().Count();
+                    }
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// 获取最新告警
         /// </summary>
         /// <param name="count">数量</param>
@@ -313,6 +339,60 @@ namespace Repository
             catch (Exception e) {
                 Tracker.LogE(e);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取告警
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <param name="page">页码</param>
+        /// <param name="count">数量</param>
+        /// <returns>告警列表</returns>
+        public static List<Alarm> GetAlarms(DateTime start, DateTime end, int page, int count)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    if ((start == null) || (end == null)) {
+                        return db.Set<Alarm>()
+                            .Where(a => a.startTime >= start)
+                            .Where(a => a.startTime <= end)
+                            .OrderByDescending(alarm => alarm.startTime)
+                            .Skip((page - 1) * count).Take(count)
+                            .ToList();
+                    }
+                    else {
+                        return db.Set<Alarm>()
+                            .OrderByDescending(alarm => alarm.startTime)
+                            .Skip((page - 1) * count).Take(count)
+                            .ToList();
+                    }
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <param name="ids">索引列表</param>
+        /// <returns>是否成功</returns>
+        public static bool DeleteAlarms(List<int> ids)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    var alarms = db.Set<Alarm>().Where(a => ids.Exists(id => id == a.id)).ToList();
+                    db.Set<Alarm>().BulkDelete(alarms);
+                    return true;
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
             }
         }
     }

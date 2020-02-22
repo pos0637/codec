@@ -255,6 +255,7 @@
             this.buttonSidebarAlarmSearch.Text = "    告警查询";
             this.buttonSidebarAlarmSearch.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonSidebarAlarmSearch.UseVisualStyleBackColor = true;
+            this.buttonSidebarAlarmSearch.Click += new System.EventHandler(this.buttonSidebarAlarmSearch_Click);
             // 
             // buttonCloseSidebar
             // 

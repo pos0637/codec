@@ -38,6 +38,9 @@ namespace IRApplication.Components
             }, null, 0, 2000);
         }
 
+        /// <summary>
+        /// 防止控件闪烁
+        /// </summary>
         protected override CreateParams CreateParams {
             get {
                 CreateParams cp = base.CreateParams;
