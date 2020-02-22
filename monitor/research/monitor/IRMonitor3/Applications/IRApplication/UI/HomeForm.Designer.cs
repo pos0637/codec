@@ -190,6 +190,7 @@
             this.buttonSidebarConfig.Text = "    配置界面";
             this.buttonSidebarConfig.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonSidebarConfig.UseVisualStyleBackColor = true;
+            this.buttonSidebarConfig.Click += new System.EventHandler(this.buttonSidebarConfig_Click);
             // 
             // buttonSidebarRealtime
             // 
@@ -356,6 +357,7 @@
             this.buttonConfig.Text = "配置界面";
             this.buttonConfig.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.buttonConfig.UseVisualStyleBackColor = false;
+            this.buttonConfig.Click += new System.EventHandler(this.buttonConfig_Click);
             // 
             // buttonAlarm
             // 

@@ -13,12 +13,17 @@ namespace IRApplication.UI
         /// <summary>
         /// 实时窗体
         /// </summary>
-        private RealtimeForm mRealtimeForm;
+        private RealtimeForm realtimeForm;
 
         /// <summary>
         /// 查询告警窗体
         /// </summary>
-        private SearchAlarmForm mSearchAlarmForm = new SearchAlarmForm();
+        private SearchAlarmForm searchAlarmForm = new SearchAlarmForm();
+
+        /// <summary>
+        /// 设置窗体
+        /// </summary>
+        private SettingsForm settingsForm = new SettingsForm();
 
         public HomeForm()
         {
@@ -36,12 +41,12 @@ namespace IRApplication.UI
                 return;
             }
 
-            if (mRealtimeForm == null) {
+            if (realtimeForm == null) {
                 var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
-                mRealtimeForm = new RealtimeForm(cell);
+                realtimeForm = new RealtimeForm(cell);
             }
 
-            ShowForm(mRealtimeForm, "实时");
+            ShowForm(realtimeForm, "实时");
         }
 
         private void ShowForm(Form form, string title)
@@ -154,7 +159,17 @@ namespace IRApplication.UI
 
         private void buttonSidebarAlarmSearch_Click(object sender, EventArgs e)
         {
-            ShowForm(mSearchAlarmForm, "告警查询");
+            ShowForm(searchAlarmForm, "告警查询");
+        }
+
+        private void buttonConfig_Click(object sender, EventArgs e)
+        {
+            ShowForm(settingsForm, "配置");
+        }
+
+        private void buttonSidebarConfig_Click(object sender, EventArgs e)
+        {
+            ShowForm(settingsForm, "配置");
         }
 
         private void sidebarBtn_Click(object sender, EventArgs e)

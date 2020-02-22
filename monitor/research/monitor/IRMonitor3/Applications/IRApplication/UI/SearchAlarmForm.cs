@@ -83,9 +83,8 @@ namespace IRApplication.UI
                     alarmDataGridView.Rows[id].Cells[1].Value = alarm.id;
                     alarmDataGridView.Rows[id].Cells[2].Value = alarm.deviceName;
                     alarmDataGridView.Rows[id].Cells[3].Value = alarm.startTime;
-                    alarmDataGridView.Rows[id].Cells[4].Value = alarm.endTime;
-                    alarmDataGridView.Rows[id].Cells[5].Value = alarm.detail;
-                    alarmDataGridView.Rows[id].Cells[6].Value = alarm.comment;
+                    alarmDataGridView.Rows[id].Cells[4].Value = alarm.detail;
+                    alarmDataGridView.Rows[id].Cells[5].Value = alarm.comment;
                     alarmDataGridView.Rows[id].DefaultCellStyle.BackColor = Color.White;
                 }
                 catch {

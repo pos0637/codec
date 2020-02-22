@@ -181,7 +181,7 @@ namespace IRService.Services.Cell.Worker
             switch (type) {
                 case Repository.Entities.Alarm.Type.HumanHighTemperature: {
                     alarm = new Models.Alarm() {
-                        type = Repository.Entities.Alarm.Type.High,
+                        type = type,
                         temperatureType = Repository.Entities.Selections.TemperatureType.max,
                         level = Repository.Entities.Alarm.Level.General,
                         cellName = cell.cell.name,
