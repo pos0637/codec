@@ -18,12 +18,12 @@ namespace IRApplication.UI
         /// <summary>
         /// 查询告警窗体
         /// </summary>
-        private SearchAlarmForm searchAlarmForm = new SearchAlarmForm();
+        private readonly SearchAlarmForm searchAlarmForm = new SearchAlarmForm();
 
         /// <summary>
         /// 设置窗体
         /// </summary>
-        private SettingsForm settingsForm = new SettingsForm();
+        private readonly SettingsForm settingsForm = new SettingsForm();
 
         public HomeForm()
         {
@@ -46,16 +46,29 @@ namespace IRApplication.UI
                 realtimeForm = new RealtimeForm(cell);
             }
 
-            ShowForm(realtimeForm, "实时");
+            ShowControl(realtimeForm, "实时");
         }
 
-        private void ShowForm(Form form, string title)
+        /// <summary>
+        /// 显示控件
+        /// </summary>
+        /// <param name="control">控件</param>
+        /// <param name="title">标题</param>
+        private void ShowControl(Control control, string title)
         {
+            // 关闭实时预览窗体
+            if ((realtimeForm != null) && (realtimeForm != control)) {
+                realtimeForm.Close();
+                realtimeForm = null;
+            }
+
             panelMain.Controls.Clear();
-            form.TopLevel = false;
-            form.Dock = DockStyle.Fill;
-            panelMain.Controls.Add(form);
-            form.Show();
+            if (control is Form) {
+                (control as Form).TopLevel = false;
+            }
+            control.Dock = DockStyle.Fill;
+            panelMain.Controls.Add(control);
+            control.Show();
 
             SetTitle(title);
             CloseSidebar();
@@ -147,6 +160,11 @@ namespace IRApplication.UI
             InitializeSideBar();
         }
 
+        private void buttonSidebarHome_Click(object sender, EventArgs e)
+        {
+            ShowControl(tableLayoutPanelMain, "主界面");
+        }
+
         private void buttonRealtime_Click(object sender, EventArgs e)
         {
             ShowRealtimeForm();
@@ -159,17 +177,17 @@ namespace IRApplication.UI
 
         private void buttonSidebarAlarmSearch_Click(object sender, EventArgs e)
         {
-            ShowForm(searchAlarmForm, "告警查询");
+            ShowControl(searchAlarmForm, "告警查询");
         }
 
         private void buttonConfig_Click(object sender, EventArgs e)
         {
-            ShowForm(settingsForm, "配置");
+            ShowControl(settingsForm, "配置");
         }
 
         private void buttonSidebarConfig_Click(object sender, EventArgs e)
         {
-            ShowForm(settingsForm, "配置");
+            ShowControl(settingsForm, "配置");
         }
 
         private void sidebarBtn_Click(object sender, EventArgs e)

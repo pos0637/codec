@@ -385,8 +385,9 @@ namespace Repository
         {
             try {
                 using (var db = new RepositoyContext()) {
-                    var alarms = db.Set<Alarm>().Where(a => ids.Exists(id => id == a.id)).ToList();
-                    db.Set<Alarm>().BulkDelete(alarms);
+                    var alarms = db.Set<Alarm>().Where(a => ids.Contains(a.id)).ToList();
+                    db.Set<Alarm>().RemoveRange(alarms);
+                    db.SaveChanges();
                     return true;
                 }
             }

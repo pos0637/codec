@@ -211,6 +211,10 @@
       <Project>{f0d36adc-dd65-4f05-85f5-cb107464aad3}</Project>
       <Name>Repository</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Common\Resources\Resources.csproj">
+      <Project>{bf9c3c74-df22-41f7-a88f-084430f2b935}</Project>
+      <Name>Resources</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Services\IRService\IRService.csproj">
       <Project>{aa5252be-f718-494f-af56-5c0730d47be8}</Project>
       <Name>IRService</Name>

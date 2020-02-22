@@ -174,6 +174,7 @@
             this.buttonSidebarHome.Text = "    首  页";
             this.buttonSidebarHome.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonSidebarHome.UseVisualStyleBackColor = true;
+            this.buttonSidebarHome.Click += new System.EventHandler(this.buttonSidebarHome_Click);
             // 
             // buttonSidebarConfig
             // 
