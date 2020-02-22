@@ -1,4 +1,5 @@
-﻿using Repository.Entities;
+﻿using Miscs;
+using Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -194,9 +195,9 @@ namespace IRApplication.UI
 
             var alarm = alarmDataGridView.CurrentRow.Tag as Alarm;
             alarmPicture.Tag = alarm.id;
-            alarmPicture.Image = alarm.imageUrl != null ? System.Drawing.Image.FromFile(alarm.imageUrl) : null;
+            alarmPicture.Image = ImageUtils.LoadImage(alarm.imageUrl);
             irAlarmPicture.Tag = alarm.id;
-            irAlarmPicture.Image = alarm.irImageUrl != null ? System.Drawing.Image.FromFile(alarm.irImageUrl) : null;
+            irAlarmPicture.Image = ImageUtils.LoadImage(alarm.irImageUrl);
         }
 
         private void alarmDataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)

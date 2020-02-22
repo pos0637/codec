@@ -155,11 +155,11 @@ namespace Repository
         }
 
         /// <summary>
-        /// 读取告警温度矩阵
+        /// 读取温度矩阵
         /// </summary>
         /// <param name="filename">文件名</param>
         /// <returns>温度矩阵</returns>
-        public static float[] LoadAlarmTemperature(string filename)
+        public static float[] LoadTemperature(string filename)
         {
             try {
                 var content = File.ReadAllText(filename);
@@ -172,21 +172,21 @@ namespace Repository
         }
 
         /// <summary>
-        /// 保存告警温度矩阵
+        /// 保存温度矩阵
         /// </summary>
         /// <param name="temperature">温度矩阵</param>
         /// <returns>文件名</returns>
         public static string SaveAlarmTemperature(Buffer<float> temperature)
         {
-            return SaveAlarmTemperature(temperature?.buffer);
+            return SaveTemperature(temperature?.buffer);
         }
 
         /// <summary>
-        /// 保存告警温度矩阵
+        /// 保存温度矩阵
         /// </summary>
         /// <param name="temperature">温度矩阵</param>
         /// <returns>文件名</returns>
-        public static string SaveAlarmTemperature(float[] temperature)
+        public static string SaveTemperature(float[] temperature)
         {
             if (temperature == null) {
                 return null;
@@ -204,27 +204,27 @@ namespace Repository
         }
 
         /// <summary>
-        /// 保存告警图像
+        /// 保存图像
         /// </summary>
         /// <param name="image">图像</param>
         /// <returns>是否成功</returns>
-        public static string SaveAlarmYV12Image(Buffer<byte> image)
+        public static string SaveYV12Image(Buffer<byte> image)
         {
             if (image == null) {
                 return null;
             }
 
-            return SaveAlarmYV12Image(image.width, image.height, image.buffer);
+            return SaveYV12Image(image.width, image.height, image.buffer);
         }
 
         /// <summary>
-        /// 保存告警图像
+        /// 保存图像
         /// </summary>
         /// <param name="width">宽度</param>
         /// <param name="height">高度</param>
         /// <param name="image">图像</param>
         /// <returns>是否成功</returns>
-        public static string SaveAlarmYV12Image(int width, int height, byte[] image)
+        public static string SaveYV12Image(int width, int height, byte[] image)
         {
             if (image == null) {
                 return null;
@@ -233,6 +233,7 @@ namespace Repository
             try {
                 var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
                 var mat = new Mat(height + height / 2, width, MatType.CV_8UC1, image);
+                mat = mat.CvtColor(ColorConversionCodes.YUV2BGR_YV12);
                 return mat.SaveImage(filename) ? filename : null;
             }
             catch {

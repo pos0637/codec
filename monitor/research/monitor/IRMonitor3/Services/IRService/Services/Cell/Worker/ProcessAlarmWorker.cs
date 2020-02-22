@@ -2,7 +2,6 @@
 using Devices;
 using IRService.Common;
 using IRService.Miscs;
-using IRService.Models;
 using Miscs;
 using Repository.Entities;
 using System;
@@ -86,10 +85,11 @@ namespace IRService.Services.Cell.Worker
             device.Handler += OnDeviceEvent;
 
             // 读取配置信息
-            if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
-                irCameraParameters = outData as Configuration.IrCameraParameters;
+            if (!device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
                 return ARESULT.E_INVALIDARG;
             }
+
+            irCameraParameters = outData as Configuration.IrCameraParameters;
 
             // 声明事件处理函数
             onReceiveTemperature = (args) => {
@@ -159,7 +159,8 @@ namespace IRService.Services.Cell.Worker
         {
             switch (deviceEvent) {
                 case DeviceEvent.HumanHighTemperatureAlarm: {
-                    OnAlarm(cell, device, Repository.Entities.Alarm.Type.HumanHighTemperature, arguments[0], arguments[1]);
+                    var detail = $"体温异常: {arguments[1]}";
+                    OnAlarm(cell, device, Alarm.Type.HumanHighTemperature, arguments[0], detail);
                     break;
                 }
                 default:
@@ -173,17 +174,17 @@ namespace IRService.Services.Cell.Worker
         /// <param name="arguments">参数</param>
         private void OnAlarm(params object[] arguments)
         {
-            var type = (Repository.Entities.Alarm.Type)arguments[2];
+            var type = (Alarm.Type)arguments[2];
             var rect = (RectangleF?)arguments[3];
             var detail = arguments[4] as string;
 
             Models.Alarm alarm;
             switch (type) {
-                case Repository.Entities.Alarm.Type.HumanHighTemperature: {
+                case Alarm.Type.HumanHighTemperature: {
                     alarm = new Models.Alarm() {
                         type = type,
-                        temperatureType = Repository.Entities.Selections.TemperatureType.max,
-                        level = Repository.Entities.Alarm.Level.General,
+                        temperatureType = Selections.TemperatureType.max,
+                        level = Alarm.Level.General,
                         cellName = cell.cell.name,
                         deviceName = device.Name,
                         selectionName = null,
@@ -211,7 +212,7 @@ namespace IRService.Services.Cell.Worker
         /// <param name="alarm">告警</param>
         private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
         {
-            var data = new Repository.Entities.Alarm() {
+            var data = new Alarm() {
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
                 startTime = DateTime.Now,
@@ -222,8 +223,8 @@ namespace IRService.Services.Cell.Worker
                 point = JsonUtils.ObjectToJson(alarm.point),
                 detail = alarm.detail,
                 temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature),
-                irImageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.irImage),
-                imageUrl = Repository.Repository.SaveAlarmYV12Image(alarm.image),
+                irImageUrl = Repository.Repository.SaveYV12Image(alarm.irImage),
+                imageUrl = Repository.Repository.SaveYV12Image(alarm.image),
                 videoUrl = null,
                 irCameraParameters = JsonUtils.ObjectToJson(irCameraParameters)
             };

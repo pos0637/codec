@@ -1,6 +1,7 @@
 ﻿using Common;
 using OpenCvSharp;
 using System;
+using System.Drawing;
 using System.Linq;
 
 namespace Miscs
@@ -83,13 +84,33 @@ namespace Miscs
         /// <summary>
         /// 获取图像文件的Base64字符串
         /// </summary>
-        /// <param name="filename">图像文件</param>
+        /// <param name="filename">文件名</param>
         /// <returns>Base64字符串</returns>
         public static string ImageFileToBase64(string filename)
         {
             try {
                 var image = System.IO.File.ReadAllBytes(filename);
                 return Convert.ToBase64String(image);
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 加载图片
+        /// </summary>
+        /// <param name="filename">文件名</param>
+        /// <returns>图片</returns>
+        public static Image LoadImage(string filename)
+        {
+            if (filename == null) {
+                return null;
+            }
+
+            try {
+                return Image.FromFile(filename);
             }
             catch (Exception e) {
                 Tracker.LogE(e);

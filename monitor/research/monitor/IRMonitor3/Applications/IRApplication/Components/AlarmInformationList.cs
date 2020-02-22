@@ -1,5 +1,5 @@
-﻿using System;
-using System.Drawing;
+﻿using Miscs;
+using System;
 using System.Windows.Forms;
 
 namespace IRApplication.Components
@@ -24,9 +24,9 @@ namespace IRApplication.Components
                         flowLayoutPanel1.Controls.Clear();
                         foreach (var alarm in alarms) {
                             var picture = new AlarmInformationItem();
-                            picture.NameLabel1.Text = alarm.cellName;
-                            picture.pictureEdit.Image = alarm.imageUrl != null ? Image.FromFile(alarm.imageUrl) : null;
-                            picture.pictureIrEdit.Image = alarm.irImageUrl != null ? Image.FromFile(alarm.irImageUrl) : null;
+                            picture.NameLabel1.Text = alarm.detail;
+                            picture.pictureEdit.Image = ImageUtils.LoadImage(alarm.imageUrl);
+                            picture.pictureIrEdit.Image = ImageUtils.LoadImage(alarm.irImageUrl);
                             picture.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
                             picture.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
                             picture.pictureIrEdit.BackgroundImageLayout = ImageLayout.Stretch;

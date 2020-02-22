@@ -12,12 +12,12 @@ namespace IRApplication.UI
         /// <summary>
         /// 设备单元服务
         /// </summary>
-        private CellService cell;
+        private readonly CellService cell;
 
         /// <summary>
         /// 告警列表
         /// </summary>
-        private AlarmInformationList alarmInformationList;
+        private readonly AlarmInformationList alarmInformationList;
 
         /// <summary>
         /// 设备单元服务
