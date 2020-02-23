@@ -40,7 +40,7 @@ namespace IRApplication.UI
 
             this.cell = cell;
             SetDisplayMode(DisplayMode.TwoViews);
-            panelAlarmForm.Controls.Add(new AlarmInformationList { Dock = DockStyle.Fill });
+            panelAlarmList.Controls.Add(new AlarmInformationList { Dock = DockStyle.Fill });
         }
 
         /// <summary>
@@ -109,13 +109,13 @@ namespace IRApplication.UI
                     tableLayoutPanel_4views.Visible = true;
                     ShowControl(tableLayoutPanel_4views, 1, new CameraDeviceForm(cell, cell.devices[0]));
                     ShowControl(tableLayoutPanel_4views, 2, new IrCameraDeviceForm(cell, cell.devices[0]));
-                    buttonDisplayMode.Text = "4视图";
+                    buttonDisplayMode.Text = "四视图";
                     break;
                 case DisplayMode.SixteenViews:
                     tableLayoutPanel_16views.Visible = true;
                     ShowControl(tableLayoutPanel_16views, 1, new CameraDeviceForm(cell, cell.devices[0]));
                     ShowControl(tableLayoutPanel_16views, 2, new IrCameraDeviceForm(cell, cell.devices[0]));
-                    buttonDisplayMode.Text = "16视图";
+                    buttonDisplayMode.Text = "电视墙";
                     break;
                 default:
                     return;
@@ -126,6 +126,7 @@ namespace IRApplication.UI
 
         private void buttonAutoFocus_Click(object sender, System.EventArgs e)
         {
+            // TODO: delete it
             EventEmitter.Instance.Publish("EVENT_SERVICE_ON_ALARM", cell, cell.devices[0], Repository.Entities.Alarm.Type.HumanHighTemperature, new RectangleF(), "test");
         }
 

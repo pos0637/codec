@@ -240,6 +240,7 @@ namespace IRService.Services.Cell.Worker
                 datetime = alarm.startTime.ToString(),
                 image = ImageUtils.ImageFileToBase64(data.imageUrl),
                 irImage = ImageUtils.ImageFileToBase64(data.irImageUrl),
+                temperature = ImageUtils.ImageFileToBase64(data.temperatureUrl),
                 data = alarm.detail
             });
         }

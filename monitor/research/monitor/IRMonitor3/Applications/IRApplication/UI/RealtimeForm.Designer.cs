@@ -51,9 +51,9 @@ namespace IRApplication.UI
             this.buttonLine = new System.Windows.Forms.Button();
             this.panelToolButtonLeft = new System.Windows.Forms.Panel();
             this.panelTop = new System.Windows.Forms.Panel();
-            this.panelButton = new System.Windows.Forms.Panel();
+            this.panelAlarmInfo = new System.Windows.Forms.Panel();
             this.panelRight = new System.Windows.Forms.Panel();
-            this.panelAlarmForm = new System.Windows.Forms.Panel();
+            this.panelAlarmList = new System.Windows.Forms.Panel();
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelIRViewForm = new System.Windows.Forms.Panel();
             this.tableLayoutPanel_16views = new System.Windows.Forms.TableLayoutPanel();
@@ -109,7 +109,7 @@ namespace IRApplication.UI
             this.buttonCloseFocus.ForeColor = System.Drawing.Color.White;
             this.buttonCloseFocus.Location = new System.Drawing.Point(88, 5);
             this.buttonCloseFocus.Name = "buttonCloseFocus";
-            this.buttonCloseFocus.Size = new System.Drawing.Size(70, 58);
+            this.buttonCloseFocus.Size = new System.Drawing.Size(70, 60);
             this.buttonCloseFocus.TabIndex = 2;
             this.buttonCloseFocus.Text = "近焦";
             this.buttonCloseFocus.UseVisualStyleBackColor = false;
@@ -123,7 +123,7 @@ namespace IRApplication.UI
             this.button1OverFocus.ForeColor = System.Drawing.Color.White;
             this.button1OverFocus.Location = new System.Drawing.Point(226, 5);
             this.button1OverFocus.Name = "button1OverFocus";
-            this.button1OverFocus.Size = new System.Drawing.Size(70, 58);
+            this.button1OverFocus.Size = new System.Drawing.Size(70, 60);
             this.button1OverFocus.TabIndex = 4;
             this.button1OverFocus.Text = "远焦";
             this.button1OverFocus.UseVisualStyleBackColor = false;
@@ -137,7 +137,7 @@ namespace IRApplication.UI
             this.buttonDisplayMode.ForeColor = System.Drawing.Color.White;
             this.buttonDisplayMode.Location = new System.Drawing.Point(2, 5);
             this.buttonDisplayMode.Name = "buttonDisplayMode";
-            this.buttonDisplayMode.Size = new System.Drawing.Size(80, 58);
+            this.buttonDisplayMode.Size = new System.Drawing.Size(80, 60);
             this.buttonDisplayMode.TabIndex = 1;
             this.buttonDisplayMode.Text = "单视图";
             this.buttonDisplayMode.UseVisualStyleBackColor = false;
@@ -151,7 +151,7 @@ namespace IRApplication.UI
             this.panelAlarmLamp.Controls.Add(this.pictureBoxAlarmLampRed);
             this.panelAlarmLamp.Location = new System.Drawing.Point(296, 6);
             this.panelAlarmLamp.Name = "panelAlarmLamp";
-            this.panelAlarmLamp.Size = new System.Drawing.Size(42, 58);
+            this.panelAlarmLamp.Size = new System.Drawing.Size(42, 60);
             this.panelAlarmLamp.TabIndex = 6;
             this.panelAlarmLamp.Visible = false;
             // 
@@ -161,7 +161,7 @@ namespace IRApplication.UI
             this.pictureBoxAlarmLampGreen.BackColor = System.Drawing.Color.Transparent;
             this.pictureBoxAlarmLampGreen.ErrorImage = null;
             this.pictureBoxAlarmLampGreen.Image = global::IRApplication.Properties.Resources.AlarmLampGreen;
-            this.pictureBoxAlarmLampGreen.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampGreen.Location = new System.Drawing.Point(3, 8);
             this.pictureBoxAlarmLampGreen.Name = "pictureBoxAlarmLampGreen";
             this.pictureBoxAlarmLampGreen.Size = new System.Drawing.Size(35, 39);
             this.pictureBoxAlarmLampGreen.TabIndex = 8;
@@ -171,7 +171,7 @@ namespace IRApplication.UI
             // 
             this.pictureBoxAlarmLampYellow.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pictureBoxAlarmLampYellow.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxAlarmLampYellow.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampYellow.Location = new System.Drawing.Point(3, 8);
             this.pictureBoxAlarmLampYellow.Name = "pictureBoxAlarmLampYellow";
             this.pictureBoxAlarmLampYellow.Size = new System.Drawing.Size(35, 39);
             this.pictureBoxAlarmLampYellow.TabIndex = 5;
@@ -181,7 +181,7 @@ namespace IRApplication.UI
             // 
             this.pictureBoxAlarmLampRed.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pictureBoxAlarmLampRed.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxAlarmLampRed.Location = new System.Drawing.Point(3, 7);
+            this.pictureBoxAlarmLampRed.Location = new System.Drawing.Point(3, 8);
             this.pictureBoxAlarmLampRed.Name = "pictureBoxAlarmLampRed";
             this.pictureBoxAlarmLampRed.Size = new System.Drawing.Size(35, 39);
             this.pictureBoxAlarmLampRed.TabIndex = 7;
@@ -196,10 +196,10 @@ namespace IRApplication.UI
             this.panelToolButtonRight.Controls.Add(this.buttonAutoFocus);
             this.panelToolButtonRight.Controls.Add(this.button1OverFocus);
             this.panelToolButtonRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelToolButtonRight.Location = new System.Drawing.Point(615, 0);
+            this.panelToolButtonRight.Location = new System.Drawing.Point(617, 0);
             this.panelToolButtonRight.MinimumSize = new System.Drawing.Size(250, 60);
             this.panelToolButtonRight.Name = "panelToolButtonRight";
-            this.panelToolButtonRight.Size = new System.Drawing.Size(340, 68);
+            this.panelToolButtonRight.Size = new System.Drawing.Size(340, 70);
             this.panelToolButtonRight.TabIndex = 7;
             // 
             // buttonAutoFocus
@@ -211,7 +211,7 @@ namespace IRApplication.UI
             this.buttonAutoFocus.ForeColor = System.Drawing.Color.White;
             this.buttonAutoFocus.Location = new System.Drawing.Point(157, 5);
             this.buttonAutoFocus.Name = "buttonAutoFocus";
-            this.buttonAutoFocus.Size = new System.Drawing.Size(70, 58);
+            this.buttonAutoFocus.Size = new System.Drawing.Size(70, 60);
             this.buttonAutoFocus.TabIndex = 3;
             this.buttonAutoFocus.Text = "自动";
             this.buttonAutoFocus.UseVisualStyleBackColor = false;
@@ -245,7 +245,7 @@ namespace IRApplication.UI
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(615, 68);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(617, 70);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // buttonManualVideo
@@ -257,7 +257,7 @@ namespace IRApplication.UI
             this.buttonManualVideo.Image = global::IRApplication.Properties.Resources.StartRecording;
             this.buttonManualVideo.Location = new System.Drawing.Point(552, 3);
             this.buttonManualVideo.Name = "buttonManualVideo";
-            this.buttonManualVideo.Size = new System.Drawing.Size(60, 62);
+            this.buttonManualVideo.Size = new System.Drawing.Size(62, 64);
             this.buttonManualVideo.TabIndex = 2;
             this.buttonManualVideo.UseVisualStyleBackColor = false;
             this.buttonManualVideo.Visible = false;
@@ -270,7 +270,7 @@ namespace IRApplication.UI
             this.buttonArrow.Image = global::IRApplication.Properties.Resources.箭头;
             this.buttonArrow.Location = new System.Drawing.Point(3, 3);
             this.buttonArrow.Name = "buttonArrow";
-            this.buttonArrow.Size = new System.Drawing.Size(55, 62);
+            this.buttonArrow.Size = new System.Drawing.Size(55, 64);
             this.buttonArrow.TabIndex = 2;
             this.buttonArrow.UseVisualStyleBackColor = true;
             // 
@@ -282,7 +282,7 @@ namespace IRApplication.UI
             this.buttonPalette.Image = global::IRApplication.Properties.Resources.调色板;
             this.buttonPalette.Location = new System.Drawing.Point(491, 3);
             this.buttonPalette.Name = "buttonPalette";
-            this.buttonPalette.Size = new System.Drawing.Size(55, 62);
+            this.buttonPalette.Size = new System.Drawing.Size(55, 64);
             this.buttonPalette.TabIndex = 2;
             this.buttonPalette.UseVisualStyleBackColor = true;
             this.buttonPalette.Visible = false;
@@ -295,7 +295,7 @@ namespace IRApplication.UI
             this.buttonPoint.Image = global::IRApplication.Properties.Resources.点;
             this.buttonPoint.Location = new System.Drawing.Point(64, 3);
             this.buttonPoint.Name = "buttonPoint";
-            this.buttonPoint.Size = new System.Drawing.Size(55, 62);
+            this.buttonPoint.Size = new System.Drawing.Size(55, 64);
             this.buttonPoint.TabIndex = 2;
             this.buttonPoint.UseVisualStyleBackColor = true;
             // 
@@ -308,7 +308,7 @@ namespace IRApplication.UI
             this.buttonSaveBitmap.Image = global::IRApplication.Properties.Resources.抓拍;
             this.buttonSaveBitmap.Location = new System.Drawing.Point(430, 3);
             this.buttonSaveBitmap.Name = "buttonSaveBitmap";
-            this.buttonSaveBitmap.Size = new System.Drawing.Size(55, 62);
+            this.buttonSaveBitmap.Size = new System.Drawing.Size(55, 64);
             this.buttonSaveBitmap.TabIndex = 2;
             this.buttonSaveBitmap.UseVisualStyleBackColor = true;
             this.buttonSaveBitmap.Visible = false;
@@ -322,7 +322,7 @@ namespace IRApplication.UI
             this.buttonEllipse.Image = global::IRApplication.Properties.Resources.椭圆;
             this.buttonEllipse.Location = new System.Drawing.Point(125, 3);
             this.buttonEllipse.Name = "buttonEllipse";
-            this.buttonEllipse.Size = new System.Drawing.Size(55, 62);
+            this.buttonEllipse.Size = new System.Drawing.Size(55, 64);
             this.buttonEllipse.TabIndex = 2;
             this.buttonEllipse.UseVisualStyleBackColor = true;
             // 
@@ -335,7 +335,7 @@ namespace IRApplication.UI
             this.buttonLock.Image = global::IRApplication.Properties.Resources.锁定;
             this.buttonLock.Location = new System.Drawing.Point(369, 3);
             this.buttonLock.Name = "buttonLock";
-            this.buttonLock.Size = new System.Drawing.Size(55, 62);
+            this.buttonLock.Size = new System.Drawing.Size(55, 64);
             this.buttonLock.TabIndex = 2;
             this.buttonLock.UseVisualStyleBackColor = true;
             // 
@@ -348,7 +348,7 @@ namespace IRApplication.UI
             this.buttonRectangle.Image = global::IRApplication.Properties.Resources.矩形;
             this.buttonRectangle.Location = new System.Drawing.Point(186, 3);
             this.buttonRectangle.Name = "buttonRectangle";
-            this.buttonRectangle.Size = new System.Drawing.Size(55, 62);
+            this.buttonRectangle.Size = new System.Drawing.Size(55, 64);
             this.buttonRectangle.TabIndex = 2;
             this.buttonRectangle.UseVisualStyleBackColor = true;
             // 
@@ -361,7 +361,7 @@ namespace IRApplication.UI
             this.buttonDelete.Image = global::IRApplication.Properties.Resources.删除;
             this.buttonDelete.Location = new System.Drawing.Point(308, 3);
             this.buttonDelete.Name = "buttonDelete";
-            this.buttonDelete.Size = new System.Drawing.Size(55, 62);
+            this.buttonDelete.Size = new System.Drawing.Size(55, 64);
             this.buttonDelete.TabIndex = 2;
             this.buttonDelete.UseVisualStyleBackColor = true;
             // 
@@ -374,7 +374,7 @@ namespace IRApplication.UI
             this.buttonLine.Image = global::IRApplication.Properties.Resources.线;
             this.buttonLine.Location = new System.Drawing.Point(247, 3);
             this.buttonLine.Name = "buttonLine";
-            this.buttonLine.Size = new System.Drawing.Size(55, 62);
+            this.buttonLine.Size = new System.Drawing.Size(55, 64);
             this.buttonLine.TabIndex = 2;
             this.buttonLine.UseVisualStyleBackColor = true;
             // 
@@ -386,12 +386,11 @@ namespace IRApplication.UI
             this.panelToolButtonLeft.Location = new System.Drawing.Point(0, 0);
             this.panelToolButtonLeft.MinimumSize = new System.Drawing.Size(480, 50);
             this.panelToolButtonLeft.Name = "panelToolButtonLeft";
-            this.panelToolButtonLeft.Size = new System.Drawing.Size(615, 68);
+            this.panelToolButtonLeft.Size = new System.Drawing.Size(617, 70);
             this.panelToolButtonLeft.TabIndex = 4;
             // 
             // panelTop
             // 
-            this.panelTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelTop.Controls.Add(this.panelToolButtonLeft);
             this.panelTop.Controls.Add(this.panelToolButtonRight);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
@@ -400,33 +399,32 @@ namespace IRApplication.UI
             this.panelTop.Size = new System.Drawing.Size(957, 70);
             this.panelTop.TabIndex = 0;
             // 
-            // panelButton
+            // panelAlarmInfo
             // 
-            this.panelButton.BackColor = System.Drawing.SystemColors.Control;
-            this.panelButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelButton.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelButton.Location = new System.Drawing.Point(0, 0);
-            this.panelButton.Name = "panelButton";
-            this.panelButton.Size = new System.Drawing.Size(310, 70);
-            this.panelButton.TabIndex = 24;
+            this.panelAlarmInfo.BackColor = System.Drawing.SystemColors.Control;
+            this.panelAlarmInfo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelAlarmInfo.Location = new System.Drawing.Point(0, 0);
+            this.panelAlarmInfo.Name = "panelAlarmInfo";
+            this.panelAlarmInfo.Size = new System.Drawing.Size(310, 70);
+            this.panelAlarmInfo.TabIndex = 24;
             // 
             // panelRight
             // 
-            this.panelRight.Controls.Add(this.panelAlarmForm);
-            this.panelRight.Controls.Add(this.panelButton);
+            this.panelRight.Controls.Add(this.panelAlarmList);
+            this.panelRight.Controls.Add(this.panelAlarmInfo);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.panelRight.Location = new System.Drawing.Point(957, 0);
             this.panelRight.Name = "panelRight";
             this.panelRight.Size = new System.Drawing.Size(310, 773);
             this.panelRight.TabIndex = 27;
             // 
-            // panelAlarmForm
+            // panelAlarmList
             // 
-            this.panelAlarmForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelAlarmForm.Location = new System.Drawing.Point(0, 70);
-            this.panelAlarmForm.Name = "panelAlarmForm";
-            this.panelAlarmForm.Size = new System.Drawing.Size(310, 703);
-            this.panelAlarmForm.TabIndex = 25;
+            this.panelAlarmList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelAlarmList.Location = new System.Drawing.Point(0, 70);
+            this.panelAlarmList.Name = "panelAlarmList";
+            this.panelAlarmList.Size = new System.Drawing.Size(310, 703);
+            this.panelAlarmList.TabIndex = 25;
             // 
             // panelForm
             // 
@@ -800,9 +798,9 @@ namespace IRApplication.UI
         private System.Windows.Forms.Button buttonLine;
         private System.Windows.Forms.Panel panelToolButtonLeft;
         private System.Windows.Forms.Panel panelTop;
-        private System.Windows.Forms.Panel panelButton;
+        private System.Windows.Forms.Panel panelAlarmInfo;
         private System.Windows.Forms.Panel panelRight;
-        private System.Windows.Forms.Panel panelAlarmForm;
+        private System.Windows.Forms.Panel panelAlarmList;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Panel panelIRViewForm;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_2views;

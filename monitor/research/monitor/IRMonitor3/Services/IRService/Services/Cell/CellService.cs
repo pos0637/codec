@@ -56,7 +56,7 @@ namespace IRService.Services.Cell
             }
 
             onStartLiveStreaming = (args) => { StartLiveStreaming(args[0] as Dictionary<int, string>); };
-            // EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
+            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
 
             base.OnStart();
         }

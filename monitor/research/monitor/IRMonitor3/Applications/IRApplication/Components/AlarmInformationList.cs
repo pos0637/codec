@@ -12,13 +12,17 @@ namespace IRApplication.Components
         /// <summary>
         /// 定时器
         /// </summary>
-        private readonly System.Threading.Timer timer;
+        private System.Threading.Timer timer;
 
         public AlarmInformationList()
         {
             InitializeComponent();
+
             timer = new System.Threading.Timer((state) => {
-                var alarms = Repository.Repository.GetLastAlarms(10);
+                var end = DateTime.Now;
+                var start = new DateTime(end.Year, end.Month, end.Day);
+                var count = Repository.Repository.GetAlarmsCount(start, end);
+                var alarms = Repository.Repository.GetLastAlarms(start, end, 10);
                 if (IsHandleCreated && (alarms != null)) {
                     BeginInvoke((Action)(() => {
                         flowLayoutPanel1.Controls.Clear();
@@ -33,6 +37,8 @@ namespace IRApplication.Components
                             picture.pictureIrEdit.SizeMode = PictureBoxSizeMode.StretchImage;
                             flowLayoutPanel1.Controls.Add(picture);
                         }
+
+                        label_alarm_count.Text = count.ToString();
                     }));
                 }
             }, null, 0, 2000);
@@ -47,6 +53,16 @@ namespace IRApplication.Components
                 cp.ExStyle |= 0x02000000;
                 return cp;
             }
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            if (timer != null) {
+                timer.Dispose();
+                timer = null;
+            }
+
+            base.OnHandleDestroyed(e);
         }
     }
 }

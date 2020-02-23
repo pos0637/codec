@@ -10,24 +10,9 @@ namespace IRApplication.Components
     public partial class IrCameraDeviceForm : RenderableForm
     {
         /// <summary>
-        /// 温度矩阵
-        /// </summary>
-        private float[] temperature;
-
-        /// <summary>
-        /// 温度图像
-        /// </summary>
-        private byte[] temperatureImage;
-
-        /// <summary>
         /// 红外图像
         /// </summary>
         private PinnedBuffer<byte> irImage;
-
-        /// <summary>
-        /// 接收温度事件处理函数
-        /// </summary>
-        private readonly EventEmitter.EventHandler onReceiveTemperature;
 
         /// <summary>
         /// 接收红外图像事件处理函数
@@ -52,20 +37,6 @@ namespace IRApplication.Components
                 InitializeComponent(Width, Width, Height);
             }
 
-            // 声明事件处理函数
-            onReceiveTemperature = (args) => {
-                if ((args[0] == cell) && (args[1] == device)) {
-                    temperature = Arrays.Clone(args[2] as PinnedBuffer<float>, temperature, sizeof(float));
-                    if (IsHandleCreated) {
-                        BeginInvoke((Action)(() => {
-                            temperatureImage = ImageUtils.GetIrImage(temperature, temperatureImage);
-                            DrawYImage(temperatureImage, temperatureImage.Length);
-                            Render();
-                        }));
-                    }
-                }
-            };
-
             onReceiveIrImage = (args) => {
                 if ((args[0] == cell) && (args[1] == device)) {
                     irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage, sizeof(byte));
@@ -81,13 +52,11 @@ namespace IRApplication.Components
 
         private void IrCameraDeviceForm_Load(object sender, System.EventArgs e)
         {
-            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
             EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
         }
 
         private void IrCameraDeviceForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_TEMPERATURE, onReceiveTemperature);
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
         }
     }

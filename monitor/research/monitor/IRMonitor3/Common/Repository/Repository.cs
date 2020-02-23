@@ -328,13 +328,19 @@ namespace Repository
         /// <summary>
         /// 获取最新告警
         /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
         /// <param name="count">数量</param>
         /// <returns>告警列表</returns>
-        public static List<Alarm> GetLastAlarms(int count)
+        public static List<Alarm> GetLastAlarms(DateTime start, DateTime end, int count)
         {
             try {
                 using (var db = new RepositoyContext()) {
-                    return db.Set<Alarm>().OrderByDescending(alarm => alarm.startTime).Take(count).ToList();
+                    return db.Set<Alarm>()
+                        .Where(a => a.startTime >= start)
+                        .Where(a => a.startTime <= end)
+                        .OrderByDescending(alarm => alarm.startTime)
+                        .Take(count).ToList();
                 }
             }
             catch (Exception e) {

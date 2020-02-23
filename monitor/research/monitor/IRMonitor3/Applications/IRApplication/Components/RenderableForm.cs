@@ -68,11 +68,6 @@ namespace IRApplication.Components
         private GlControl glControl;
 
         /// <summary>
-        /// 设备上下文
-        /// </summary>
-        private DeviceContext deviceContext;
-
-        /// <summary>
         /// 纹理
         /// </summary>
         private uint texture;
@@ -103,12 +98,12 @@ namespace IRApplication.Components
                     MultisampleBits = ((uint)(0u)),
                     Name = "glControl",
                     StencilBits = ((uint)(0u)),
-                    TabIndex = 0
+                    TabIndex = 0,
+                    ContextSharingGroup = ""
                 };
                 glControl.ContextCreated += new EventHandler<GlControlEventArgs>(glControl_ContextCreated);
                 glControl.Render += new EventHandler<GlControlEventArgs>(glControl_Render);
                 Controls.Add(glControl);
-                deviceContext = DeviceContext.Create();
             }
             catch {
             }
@@ -165,6 +160,7 @@ namespace IRApplication.Components
             try {
                 Gl.BindTexture(TextureTarget.Texture2d, texture);
                 Gl.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, viewWidth, viewHeight, 0, PixelFormat.Bgra, PixelType.UnsignedByte, bgra.Data);
+                Gl.GenerateMipmap(TextureTarget.Texture2d);
             }
             catch {
             }
@@ -196,11 +192,6 @@ namespace IRApplication.Components
                 Gl.EnableClientState(EnableCap.TextureCoordArray);
 
                 texture = Gl.GenTexture();
-                Gl.BindTexture(TextureTarget.Texture2d, texture);
-                Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, Gl.LINEAR);
-                Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, Gl.LINEAR);
-                Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, Gl.CLAMP_TO_EDGE);
-                Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, Gl.CLAMP_TO_EDGE);
             }
             catch {
             }
@@ -217,6 +208,7 @@ namespace IRApplication.Components
                 var control = sender as Control;
                 Gl.Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height);
                 Gl.Clear(ClearBufferMask.ColorBufferBit);
+                Gl.BindTexture(TextureTarget.Texture2d, texture);
 
                 if (Gl.CurrentVersion >= Gl.Version_110) {
                     Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
