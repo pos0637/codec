@@ -20,6 +20,11 @@ namespace IRApplication.Components
         private readonly EventEmitter.EventHandler onReceiveImage;
 
         /// <summary>
+        /// 海康播放组件
+        /// </summary>
+        private readonly HIKPlayComponent hikPlayComponent = new HIKPlayComponent();
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="cell">设备单元服务</param>
@@ -27,6 +32,12 @@ namespace IRApplication.Components
         public CameraDeviceForm(CellService cell, IDevice device)
         {
             InitializeComponent();
+
+            if (HIKPlayComponent.UseHIKDevice) {
+                hikPlayComponent.Initialize();
+                hikPlayComponent.StartRealPlay(1, this.Handle);
+                return;
+            }
 
             // 初始化窗体
             if (device.Read(ReadMode.CameraParameters, null, out object outData, out _)) {
@@ -59,6 +70,9 @@ namespace IRApplication.Components
         private void CameraDeviceForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IMAGE, onReceiveImage);
+            if (HIKPlayComponent.UseHIKDevice) {
+                hikPlayComponent.StopRealPlay();
+            }
         }
     }
 }

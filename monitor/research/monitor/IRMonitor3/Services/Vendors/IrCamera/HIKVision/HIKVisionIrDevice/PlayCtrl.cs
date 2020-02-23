@@ -4,15 +4,15 @@ using System.Runtime.InteropServices;
 class PlayCtrl
 {
     public PlayCtrl()
-	{
-		//
-		// TODO: 在此处添加构造函数逻辑
-		//
-	}
+    {
+        //
+        // TODO: 在此处添加构造函数逻辑
+        //
+    }
 
     public const string PLAYM4_API = "extern \"C\"__declspec(dllexport)";
 
-   // public const string PLAYM4_API = "extern \"C\" __declspec(dllimport)";
+    // public const string PLAYM4_API = "extern \"C\" __declspec(dllimport)";
 
 
     //Max channel numbers
@@ -79,8 +79,8 @@ class PlayCtrl
     public const int BY_FRAMETIME = 2;
 
     //Source buffer
-    public const int SOURCE_BUF_MAX = 1024*100000;
-    public const int SOURCE_BUF_MIN	= 1024*50;
+    public const int SOURCE_BUF_MAX = 1024 * 100000;
+    public const int SOURCE_BUF_MIN = 1024 * 50;
 
     //Stream type
     public const int STREAME_REALTIME = 0;
@@ -155,7 +155,7 @@ class PlayCtrl
             wMilliseconds = 0;
         }
     }
-   
+
     public struct FRAME_POS
     {
         public int nFilePos;
@@ -188,90 +188,90 @@ class PlayCtrl
         public int nFrameRate;
         public uint dwFrameNum;
 
-         public void Init()
-         {
-             nWidth = 0;
-             nHeight = 0;
-             nStamp = 0;
-             nType = 0;
-             nFrameRate = 0;
-             dwFrameNum = 0;
-         }
+        public void Init()
+        {
+            nWidth = 0;
+            nHeight = 0;
+            nStamp = 0;
+            nType = 0;
+            nFrameRate = 0;
+            dwFrameNum = 0;
+        }
     }
 
     //Frame
-     public struct FRAME_TYPE
-     {
-         [MarshalAsAttribute(UnmanagedType.LPStr)]
-         public string pDataBuf;
-         public int nSize;
-         public int nFrameNum;
-         public bool bIsAudio;
-         public int nReserved;
+    public struct FRAME_TYPE
+    {
+        [MarshalAsAttribute(UnmanagedType.LPStr)]
+        public string pDataBuf;
+        public int nSize;
+        public int nFrameNum;
+        public bool bIsAudio;
+        public int nReserved;
 
-         public void Init()
-         {
-             pDataBuf = "";
-             nSize = 0;
-             nFrameNum = 0;
-             bIsAudio = false;
-             nReserved = 0;
-         }
-     }
+        public void Init()
+        {
+            pDataBuf = "";
+            nSize = 0;
+            nFrameNum = 0;
+            bIsAudio = false;
+            nReserved = 0;
+        }
+    }
 
     //Watermark Info	//add by gb 080119
-     public struct WATERMARK_INFO
-     {
-         [MarshalAsAttribute(UnmanagedType.LPStr)]
-         public string pDataBuf;
-         public int nSize;
-         public int nFrameNum;
-         public bool bRsaRight;
-         public int nReserved;
+    public struct WATERMARK_INFO
+    {
+        [MarshalAsAttribute(UnmanagedType.LPStr)]
+        public string pDataBuf;
+        public int nSize;
+        public int nFrameNum;
+        public bool bRsaRight;
+        public int nReserved;
 
-         public void Init()
-         {
-             pDataBuf = "";
-             nSize = 0;
-             nFrameNum = 0;
-             bRsaRight = false;
-             nReserved = 0;
-         }
-     }
+        public void Init()
+        {
+            pDataBuf = "";
+            nSize = 0;
+            nFrameNum = 0;
+            bRsaRight = false;
+            nReserved = 0;
+        }
+    }
 
-     // modified by gb 080425
-     public struct HIK_MEDIAINFO
-     {
-         public uint media_fourcc;// "HKMI": 0x484B4D49 Hikvision Media Information
-         public ushort media_version;// 版本号：指本信息结构版本号，目前为0x0101,即1.01版本，01：主版本号；01：子版本号。
-         public ushort device_id;// 设备ID，便于跟踪/分析	
+    // modified by gb 080425
+    public struct HIK_MEDIAINFO
+    {
+        public uint media_fourcc;// "HKMI": 0x484B4D49 Hikvision Media Information
+        public ushort media_version;// 版本号：指本信息结构版本号，目前为0x0101,即1.01版本，01：主版本号；01：子版本号。
+        public ushort device_id;// 设备ID，便于跟踪/分析	
 
-         public ushort system_format;// 系统封装层
-         public ushort video_format;// 视频编码类型
+        public ushort system_format;// 系统封装层
+        public ushort video_format;// 视频编码类型
 
-         public ushort audio_format;// 音频编码类型
-         public byte audio_channels;// 通道数  
-         public byte audio_bits_per_sample;// 样位率
-         public uint audio_samplesrate;// 采样率 
-         public uint audio_bitrate;// 压缩音频码率,单位：bit
-         [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 4, ArraySubType = UnmanagedType.U4)]
-         public uint[] reserved;// 保留
+        public ushort audio_format;// 音频编码类型
+        public byte audio_channels;// 通道数  
+        public byte audio_bits_per_sample;// 样位率
+        public uint audio_samplesrate;// 采样率 
+        public uint audio_bitrate;// 压缩音频码率,单位：bit
+        [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 4, ArraySubType = UnmanagedType.U4)]
+        public uint[] reserved;// 保留
 
-         public void Init()
-         {
-             media_fourcc = 0;
-             media_version = 0;
-             device_id = 0;
-             system_format = 0;
-             video_format = 0;
-             audio_format = 0;
-             audio_channels = 0;
-             audio_bits_per_sample = 0;
-             audio_samplesrate = 0;
-             audio_bitrate = 0;
-             reserved = new uint[4];
-         }
-     }
+        public void Init()
+        {
+            media_fourcc = 0;
+            media_version = 0;
+            device_id = 0;
+            system_format = 0;
+            video_format = 0;
+            audio_format = 0;
+            audio_channels = 0;
+            audio_bits_per_sample = 0;
+            audio_samplesrate = 0;
+            audio_bitrate = 0;
+            reserved = new uint[4];
+        }
+    }
 
     //自己定义的函数接口
     /*************************************************
@@ -283,12 +283,12 @@ class PlayCtrl
     *************************************************/
     public static DateTime ConverUiTimeToDateTime(uint uiTime)
     {
-        int iYear   = (int)((uiTime >> 26) + 2000);
-        int iMonth  = (int)((uiTime >> 22) & 15);
-        int iDay    = (int)((uiTime >> 17) & 31);
-        int iHour   = (int)((uiTime >> 12) & 31);
-        int iMinute = (int)((uiTime >> 6)  & 63);
-        int iSecond = (int)((uiTime >> 0)  & 63);
+        int iYear = (int)((uiTime >> 26) + 2000);
+        int iMonth = (int)((uiTime >> 22) & 15);
+        int iDay = (int)((uiTime >> 17) & 31);
+        int iHour = (int)((uiTime >> 12) & 31);
+        int iMinute = (int)((uiTime >> 6) & 63);
+        int iSecond = (int)((uiTime >> 0) & 63);
         DateTime dateTime = new DateTime(iYear, iMonth, iDay, iHour, iMinute, iSecond);
         return dateTime;
     }
@@ -310,7 +310,7 @@ class PlayCtrl
     //API
     //Initialize DirecDraw.Now invalid.
     [DllImport(@"PlayCtrl.dll")]
-     public static extern bool PlayM4_InitDDraw(IntPtr hWnd);
+    public static extern bool PlayM4_InitDDraw(IntPtr hWnd);
     //Release directDraw; Now invalid.
     [DllImport(@"PlayCtrl.dll")]
     public static extern bool PlayM4_RealeseDDraw();
@@ -373,7 +373,7 @@ class PlayCtrl
     public static extern uint PlayM4_GetFileTime(int nPort);
 
     [DllImport(@"PlayCtrl.dll")]
-    public static extern bool PlayM4_GetFileTimeEx(int nPort, ref uint pStart, ref uint pStop, ref uint pRev) ;
+    public static extern bool PlayM4_GetFileTimeEx(int nPort, ref uint pStart, ref uint pStop, ref uint pRev);
 
 
     [DllImport(@"PlayCtrl.dll")]
@@ -482,7 +482,7 @@ class PlayCtrl
     [DllImport(@"PlayCtrl.dll")]
     public static extern bool PlayM4_OneByOneBack(int nPort);
 
-   // PLAYM4_API BOOL __stdcall PlayM4_SetFileRefCallBack(LONG nPort, void (__stdcall *pFileRefDone)(DWORD nPort,DWORD nUser),DWORD nUser);
+    // PLAYM4_API BOOL __stdcall PlayM4_SetFileRefCallBack(LONG nPort, void (__stdcall *pFileRefDone)(DWORD nPort,DWORD nUser),DWORD nUser);
     public delegate void PFILEREFDONE(uint nPort, uint nUser);
 
     [DllImport(@"PlayCtrl.dll")]
@@ -699,6 +699,9 @@ class PlayCtrl
     public static extern bool PlayM4_SetDecCallBackMend(int nPort, DECCBFUN DecCBFun, int nUser);
 
     [DllImport(@"PlayCtrl.dll")]
+    public static extern bool PlayM4_SetDecCallBackExMend(int nPort, DECCBFUN DecCBFun, IntPtr pDest, int nDestSize, IntPtr nUser);
+
+    [DllImport(@"PlayCtrl.dll")]
     public static extern bool PlayM4_SetSecretKey(int nPort, int lKeyType, string pSecretKey, int lKeyLen);
 
     // add by gb 2007-12-23
@@ -730,6 +733,46 @@ class PlayCtrl
 
     [DllImport(@"PlayCtrl.dll")]
     public static extern bool PlayM4_SetOverlayPriInfoFlag(int nPort, int nIntelType, bool bTrue);
+
+    public const int SOFT_DECODE_ENGINE = 0; ///<软解码
+    public const int HARD_DECODE_ENGINE = 1; ///<硬解码
+
+    [DllImport(@"PlayCtrl.dll")]
+    public static extern bool PlayM4_SetDecodeEngineEx(int nPort, int nDecodeEngine);
+
+    [DllImport(@"PlayCtrl.dll")]
+    public static extern int PlayM4_GetDecodeEngine(int nPort);
+
+    public const int PLAYM4_SOURCE_MODULE = 0; // 数据源模块
+    public const int PLAYM4_DEMUX_MODULE = 1; // 解析模块
+    public const int PLAYM4_DECODE_MODULE = 2; // 解码模块
+    public const int PLAYM4_RENDER_MODULE = 3; // 渲染模块
+
+    public struct RunTimeInfo
+    {
+        public int nRunTimeModule;
+        public int nStrVersion;
+        public int nFrameTimeStamp;
+        public int nFrameNum;
+        public int nErrorCode;
+        [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 12, ArraySubType = UnmanagedType.U1)]
+        public byte[] reserved;// 保留
+
+        public void Init()
+        {
+            nRunTimeModule = 0;
+            nStrVersion = 0;
+            nFrameTimeStamp = 0;
+            nFrameNum = 0;
+            nErrorCode = 0;
+            reserved = new byte[12];
+        }
+    }
+
+    public delegate void RunTimeInfoCBFun(int nPort, ref RunTimeInfo pstRunTimeInfo, IntPtr pUser);
+
+    [DllImport(@"PlayCtrl.dll")]
+    public static extern bool PlayM4_SetRunTimeInfoCallBackEx(int nPort, int nModule, RunTimeInfoCBFun runTimeInfoCBFun, IntPtr pUser);
 
 }
 

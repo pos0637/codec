@@ -88,12 +88,15 @@
     <Compile Include="Components\CameraDeviceForm.Designer.cs">
       <DependentUpon>CameraDeviceForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Components\HIKDevice\CHCNetSDK.cs" />
+    <Compile Include="Components\HIKDevice\HIKPlayComponent.cs" />
     <Compile Include="Components\IrCameraDeviceForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Components\IrCameraDeviceForm.Designer.cs">
       <DependentUpon>IrCameraDeviceForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Components\HIKDevice\PlayCtrl.cs" />
     <Compile Include="Components\RenderableForm.cs">
       <SubType>Form</SubType>
     </Compile>
