@@ -169,7 +169,7 @@ namespace IRService.Services.Cell.Worker
         }
 
         /// <summary>
-        /// 设备事件处理函数
+        /// 告警事件处理函数
         /// </summary>
         /// <param name="arguments">参数</param>
         private void OnAlarm(params object[] arguments)
@@ -181,6 +181,20 @@ namespace IRService.Services.Cell.Worker
             Models.Alarm alarm;
             switch (type) {
                 case Alarm.Type.HumanHighTemperature: {
+                    alarm = new Models.Alarm() {
+                        type = type,
+                        temperatureType = Selections.TemperatureType.max,
+                        level = Alarm.Level.General,
+                        cellName = cell.cell.name,
+                        deviceName = device.Name,
+                        selectionName = null,
+                        startTime = DateTime.Now,
+                        area = rect,
+                        detail = detail
+                    };
+                    break;
+                }
+                case Alarm.Type.Manual: {
                     alarm = new Models.Alarm() {
                         type = type,
                         temperatureType = Selections.TemperatureType.max,

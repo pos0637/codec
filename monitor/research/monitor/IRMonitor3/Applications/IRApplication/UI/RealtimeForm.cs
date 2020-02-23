@@ -59,9 +59,9 @@ namespace IRApplication.UI
         private PaletteMode paletteMode;
 
         /// <summary>
-        /// 设备单元服务
+        /// 构造函数
         /// </summary>
-        /// <param name="cell"></param>
+        /// <param name="cell">设备单元服务</param>
         public RealtimeForm(CellService cell)
         {
             InitializeComponent();
@@ -160,12 +160,6 @@ namespace IRApplication.UI
             paletteMode = mode;
         }
 
-        private void buttonAutoFocus_Click(object sender, System.EventArgs e)
-        {
-            // TODO: delete it
-            EventEmitter.Instance.Publish("EVENT_SERVICE_ON_ALARM", cell, cell.devices[0], Repository.Entities.Alarm.Type.HumanHighTemperature, new RectangleF(), "test");
-        }
-
         private void buttonDisplayMode_Click(object sender, System.EventArgs e)
         {
             SetDisplayMode((DisplayMode)(((int)displayMode + 1) % (int)DisplayMode.Max));
@@ -174,6 +168,12 @@ namespace IRApplication.UI
         private void buttonPalette_Click(object sender, System.EventArgs e)
         {
             SetPaletteMode((PaletteMode)(((int)paletteMode + 1) % (int)PaletteMode.Max));
+        }
+
+        private void buttonSaveBitmap_Click(object sender, System.EventArgs e)
+        {
+            // TODO: delete it
+            EventEmitter.Instance.Publish(IRService.Common.Constants.EVENT_SERVICE_ON_ALARM, cell, cell.devices[0], Repository.Entities.Alarm.Type.Manual, new RectangleF(), "用户触发告警");
         }
     }
 }

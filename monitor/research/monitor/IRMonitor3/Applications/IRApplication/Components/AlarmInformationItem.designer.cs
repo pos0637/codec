@@ -46,7 +46,7 @@
             this.panel1.Controls.Add(this.tableLayoutPanel1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(214, 153);
             this.panel1.TabIndex = 0;
@@ -56,7 +56,7 @@
             this.panel2.Controls.Add(this.NameLabel1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(0, 110);
-            this.panel2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel2.Margin = new System.Windows.Forms.Padding(2);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(214, 43);
             this.panel2.TabIndex = 5;
@@ -99,19 +99,19 @@
             // pictureIrEdit
             // 
             this.pictureIrEdit.Location = new System.Drawing.Point(2, 2);
-            this.pictureIrEdit.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureIrEdit.Margin = new System.Windows.Forms.Padding(2);
             this.pictureIrEdit.Name = "pictureIrEdit";
             this.pictureIrEdit.Size = new System.Drawing.Size(98, 104);
             this.pictureIrEdit.TabIndex = 3;
             this.pictureIrEdit.TabStop = false;
             // 
-            // PictureControl
+            // AlarmInformationItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.panel1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.Name = "PictureControl";
+            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Name = "AlarmInformationItem";
             this.Size = new System.Drawing.Size(214, 153);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);

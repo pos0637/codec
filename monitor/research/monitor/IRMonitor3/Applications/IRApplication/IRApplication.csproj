@@ -70,11 +70,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Constants.cs" />
+    <Compile Include="Components\AlarmInformationItem1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\AlarmInformationItem1.designer.cs">
+      <DependentUpon>AlarmInformationItem1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Components\AlarmInformationItem.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Components\AlarmInformationItem.designer.cs">
       <DependentUpon>AlarmInformationItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Components\AlarmInformationList1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\AlarmInformationList1.Designer.cs">
+      <DependentUpon>AlarmInformationList1.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\AlarmInformationList.cs">
       <SubType>UserControl</SubType>
@@ -102,6 +114,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\ParameterSetConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ParameterSetConfigForm.designer.cs">
+      <DependentUpon>ParameterSetConfigForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SearchAlarmForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -138,14 +156,26 @@
     <Compile Include="UI\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\DataVisualizationForm1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\DataVisualizationForm1.designer.cs">
+      <DependentUpon>DataVisualizationForm1.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\WebViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\WebViewForm.Designer.cs">
       <DependentUpon>WebViewForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Components\AlarmInformationItem1.resx">
+      <DependentUpon>AlarmInformationItem1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Components\AlarmInformationItem.resx">
       <DependentUpon>AlarmInformationItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Components\AlarmInformationList1.resx">
+      <DependentUpon>AlarmInformationList1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Components\AlarmInformationList.resx">
       <DependentUpon>AlarmInformationList.cs</DependentUpon>
@@ -164,7 +194,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\ParameterSetConfigForm.resx">
+      <DependentUpon>ParameterSetConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\SearchAlarmForm.resx">
       <DependentUpon>SearchAlarmForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -182,6 +216,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\DataVisualizationForm1.resx">
+      <DependentUpon>DataVisualizationForm1.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -257,7 +294,25 @@
     <Content Include="Resources\SidebarShutdown.png" />
     <Content Include="Resources\StartRecording.png" />
     <Content Include="Resources\StopRecording.png" />
+    <None Include="Resources\u1.png" />
+    <None Include="Resources\u2.png" />
+    <None Include="Resources\u3.png" />
+    <None Include="Resources\u10.png" />
+    <None Include="Resources\u11.png" />
+    <None Include="Resources\u12.png" />
+    <None Include="Resources\u14.png" />
+    <None Include="Resources\u15.png" />
+    <None Include="Resources\u16.png" />
+    <None Include="Resources\u17.png" />
+    <None Include="Resources\u18.png" />
+    <None Include="Resources\u19.png" />
     <Content Include="Resources\u373.png" />
+    <None Include="Resources\u4.png" />
+    <None Include="Resources\u5.png" />
+    <None Include="Resources\u6.png" />
+    <None Include="Resources\u7.png" />
+    <None Include="Resources\u8.png" />
+    <None Include="Resources\u9.png" />
     <Content Include="Resources\u931.png" />
     <Content Include="Resources\下载图标.png" />
     <Content Include="Resources\保存路径.png" />

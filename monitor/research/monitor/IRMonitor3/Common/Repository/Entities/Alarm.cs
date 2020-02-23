@@ -31,7 +31,12 @@ namespace Repository.Entities
             /// <summary>
             /// 人体体温超温
             /// </summary>
-            HumanHighTemperature
+            HumanHighTemperature,
+
+            /// <summary>
+            /// 手动告警
+            /// </summary>
+            Manual
         }
 
         /// <summary>

@@ -16,6 +16,11 @@ namespace IRApplication.UI
         private RealtimeForm realtimeForm;
 
         /// <summary>
+        /// 数据可视化窗体
+        /// </summary>
+        private DataVisualizationForm1 dataVisualizationForm1;
+
+        /// <summary>
         /// 查询告警窗体
         /// </summary>
         private readonly SearchAlarmForm searchAlarmForm = new SearchAlarmForm();
@@ -25,28 +30,63 @@ namespace IRApplication.UI
         /// </summary>
         private readonly SettingsForm settingsForm = new SettingsForm();
 
+        /// <summary>
+        /// 参数设置界面
+        /// </summary>
+        private readonly ParameterSetConfigForm parameterSetConfigForm = new ParameterSetConfigForm();
+
         public HomeForm()
         {
             InitializeComponent();
+            settingsForm.ShowParameterSetConfigForm = ShowParameterSetConfigForm;
         }
 
         public void RefreshChildForm()
         {
         }
 
+        /// <summary>
+        /// 显示实时窗体
+        /// </summary>
         private void ShowRealtimeForm()
         {
             var configuartion = Repository.Repository.LoadConfiguation();
             if (configuartion.cells.Length == 0) {
+                MessageBox.Show("无可连接的设备!");
                 return;
             }
 
-            if (realtimeForm == null) {
-                var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
-                realtimeForm = new RealtimeForm(cell);
+            CloseRealPlayControl();
+            var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
+            realtimeForm = new RealtimeForm(cell);
+            ShowControl(realtimeForm, "实时");
+        }
+
+        /// <summary>
+        /// 显示数据可视化窗体
+        /// </summary>
+        private void ShowDataVisualizationForm()
+        {
+            var configuartion = Repository.Repository.LoadConfiguation();
+            if (configuartion.cells.Length == 0) {
+                MessageBox.Show("无可连接的设备!");
+                return;
             }
 
-            ShowControl(realtimeForm, "实时");
+            CloseRealPlayControl();
+            ShowNormalControl(tableLayoutPanelMain, "主界面");
+
+            var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
+            dataVisualizationForm1 = new DataVisualizationForm1(cell);
+            dataVisualizationForm1.Show();
+        }
+
+        /// <summary>
+        /// 显示参数设置界面
+        /// </summary>
+        private void ShowParameterSetConfigForm()
+        {
+            ShowNormalControl(parameterSetConfigForm, "参数设置");
         }
 
         /// <summary>
@@ -54,14 +94,20 @@ namespace IRApplication.UI
         /// </summary>
         /// <param name="control">控件</param>
         /// <param name="title">标题</param>
+        private void ShowNormalControl(Control control, string title)
+        {
+            // 关闭实时播放控件
+            CloseRealPlayControl();
+            ShowControl(control, title);
+        }
+
+        /// <summary>
+        /// 显示实时播放控件
+        /// </summary>
+        /// <param name="control">控件</param>
+        /// <param name="title">标题</param>
         private void ShowControl(Control control, string title)
         {
-            // 关闭实时预览窗体
-            if ((realtimeForm != null) && (realtimeForm != control)) {
-                realtimeForm.Close();
-                realtimeForm = null;
-            }
-
             panelMain.Controls.Clear();
             if (control is Form) {
                 (control as Form).TopLevel = false;
@@ -85,6 +131,22 @@ namespace IRApplication.UI
         {
             titleLabel.Text = title;
             titleLabel.Location = new Point(Width / 2 - titleLabel.Width / 2, titleLabel.Location.Y);
+        }
+
+        /// <summary>
+        /// 关闭实时播放控件
+        /// </summary>
+        private void CloseRealPlayControl()
+        {
+            if (realtimeForm != null) {
+                realtimeForm.Close();
+                realtimeForm = null;
+            }
+
+            if (dataVisualizationForm1 != null) {
+                dataVisualizationForm1.Close();
+                dataVisualizationForm1 = null;
+            }
         }
 
         #region 侧边栏
@@ -162,7 +224,7 @@ namespace IRApplication.UI
 
         private void buttonSidebarHome_Click(object sender, EventArgs e)
         {
-            ShowControl(tableLayoutPanelMain, "主界面");
+            ShowNormalControl(tableLayoutPanelMain, "主界面");
         }
 
         private void buttonRealtime_Click(object sender, EventArgs e)
@@ -175,19 +237,29 @@ namespace IRApplication.UI
             ShowRealtimeForm();
         }
 
+        private void buttonSecondaryAnalysis_Click(object sender, EventArgs e)
+        {
+            ShowDataVisualizationForm();
+        }
+
+        private void buttonSidebarSecondaryAnalysis_Click(object sender, EventArgs e)
+        {
+            ShowDataVisualizationForm();
+        }
+
         private void buttonSidebarAlarmSearch_Click(object sender, EventArgs e)
         {
-            ShowControl(searchAlarmForm, "告警查询");
+            ShowNormalControl(searchAlarmForm, "告警查询");
         }
 
         private void buttonConfig_Click(object sender, EventArgs e)
         {
-            ShowControl(settingsForm, "配置");
+            ShowNormalControl(settingsForm, "配置");
         }
 
         private void buttonSidebarConfig_Click(object sender, EventArgs e)
         {
-            ShowControl(settingsForm, "配置");
+            ShowNormalControl(settingsForm, "配置");
         }
 
         private void sidebarBtn_Click(object sender, EventArgs e)

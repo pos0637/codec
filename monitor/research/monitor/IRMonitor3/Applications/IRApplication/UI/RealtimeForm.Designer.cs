@@ -104,6 +104,7 @@ namespace IRApplication.UI
             // 
             this.buttonCloseFocus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.buttonCloseFocus.BackColor = System.Drawing.Color.DarkGray;
+            this.buttonCloseFocus.Enabled = false;
             this.buttonCloseFocus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonCloseFocus.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonCloseFocus.ForeColor = System.Drawing.Color.White;
@@ -118,6 +119,7 @@ namespace IRApplication.UI
             // 
             this.button1OverFocus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.button1OverFocus.BackColor = System.Drawing.Color.DarkGray;
+            this.button1OverFocus.Enabled = false;
             this.button1OverFocus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1OverFocus.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.button1OverFocus.ForeColor = System.Drawing.Color.White;
@@ -206,6 +208,7 @@ namespace IRApplication.UI
             // 
             this.buttonAutoFocus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.buttonAutoFocus.BackColor = System.Drawing.Color.DarkGray;
+            this.buttonAutoFocus.Enabled = false;
             this.buttonAutoFocus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonAutoFocus.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonAutoFocus.ForeColor = System.Drawing.Color.White;
@@ -215,7 +218,6 @@ namespace IRApplication.UI
             this.buttonAutoFocus.TabIndex = 3;
             this.buttonAutoFocus.Text = "自动";
             this.buttonAutoFocus.UseVisualStyleBackColor = false;
-            this.buttonAutoFocus.Click += new System.EventHandler(this.buttonAutoFocus_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -302,7 +304,6 @@ namespace IRApplication.UI
             // buttonSaveBitmap
             // 
             this.buttonSaveBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonSaveBitmap.Enabled = false;
             this.buttonSaveBitmap.FlatAppearance.BorderSize = 0;
             this.buttonSaveBitmap.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSaveBitmap.Image = global::IRApplication.Properties.Resources.抓拍;
@@ -311,6 +312,7 @@ namespace IRApplication.UI
             this.buttonSaveBitmap.Size = new System.Drawing.Size(55, 64);
             this.buttonSaveBitmap.TabIndex = 2;
             this.buttonSaveBitmap.UseVisualStyleBackColor = true;
+            this.buttonSaveBitmap.Click += new System.EventHandler(this.buttonSaveBitmap_Click);
             // 
             // buttonEllipse
             // 

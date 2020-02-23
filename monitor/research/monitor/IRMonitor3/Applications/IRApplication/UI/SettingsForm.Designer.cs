@@ -168,6 +168,7 @@
             this.button_parameter.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.button_parameter.UseCompatibleTextRendering = true;
             this.button_parameter.UseVisualStyleBackColor = false;
+            this.button_parameter.Click += new System.EventHandler(this.button_parameter_Click);
             // 
             // button_Reset
             // 

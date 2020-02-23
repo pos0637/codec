@@ -222,9 +222,10 @@
             this.buttonSidebarSecondaryAnalysis.Name = "buttonSidebarSecondaryAnalysis";
             this.buttonSidebarSecondaryAnalysis.Size = new System.Drawing.Size(217, 48);
             this.buttonSidebarSecondaryAnalysis.TabIndex = 0;
-            this.buttonSidebarSecondaryAnalysis.Text = "    二次分析";
+            this.buttonSidebarSecondaryAnalysis.Text = "    数据展示";
             this.buttonSidebarSecondaryAnalysis.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonSidebarSecondaryAnalysis.UseVisualStyleBackColor = true;
+            this.buttonSidebarSecondaryAnalysis.Click += new System.EventHandler(this.buttonSidebarSecondaryAnalysis_Click);
             // 
             // buttonSidebarPlaybackVideo
             // 
@@ -331,7 +332,6 @@
             this.buttonSecondaryAnalysis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(138)))), ((int)(((byte)(137)))));
             this.buttonSecondaryAnalysis.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.buttonSecondaryAnalysis.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonSecondaryAnalysis.Enabled = false;
             this.buttonSecondaryAnalysis.Font = new System.Drawing.Font("宋体", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonSecondaryAnalysis.ForeColor = System.Drawing.Color.White;
             this.buttonSecondaryAnalysis.Image = global::IRApplication.Properties.Resources.HomeFormSecondaryAnalysis;
@@ -339,9 +339,10 @@
             this.buttonSecondaryAnalysis.Name = "buttonSecondaryAnalysis";
             this.buttonSecondaryAnalysis.Size = new System.Drawing.Size(304, 256);
             this.buttonSecondaryAnalysis.TabIndex = 2;
-            this.buttonSecondaryAnalysis.Text = "二次分析";
+            this.buttonSecondaryAnalysis.Text = "数据展示";
             this.buttonSecondaryAnalysis.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.buttonSecondaryAnalysis.UseVisualStyleBackColor = false;
+            this.buttonSecondaryAnalysis.Click += new System.EventHandler(this.buttonSecondaryAnalysis_Click);
             // 
             // buttonConfig
             // 
