@@ -1,5 +1,4 @@
-﻿using IRApplication.Common;
-using IRApplication.Components;
+﻿using IRApplication.Components;
 using IRService.Services.Cell;
 using Miscs;
 using System.Drawing;
@@ -10,14 +9,26 @@ namespace IRApplication.UI
     public partial class RealtimeForm : Form
     {
         /// <summary>
+        /// 视图模式
+        /// </summary>
+        private enum DisplayMode
+        {
+            OneViews = 0,
+            TwoViews,
+            FourViews,
+            SixteenViews,
+            Max
+        }
+
+        /// <summary>
         /// 设备单元服务
         /// </summary>
         private readonly CellService cell;
 
         /// <summary>
-        /// 告警列表
+        /// 视图模式
         /// </summary>
-        private readonly AlarmInformationList alarmInformationList;
+        private DisplayMode displayMode = DisplayMode.TwoViews;
 
         /// <summary>
         /// 设备单元服务
@@ -28,30 +39,99 @@ namespace IRApplication.UI
             InitializeComponent();
 
             this.cell = cell;
-            alarmInformationList = new AlarmInformationList {
-                Dock = DockStyle.Fill
-            };
-            panelAlarmForm.Controls.Add(alarmInformationList);
-
-            ShowForm(new CameraDeviceForm(cell, cell.devices[0]));
+            SetDisplayMode(DisplayMode.TwoViews);
+            panelAlarmForm.Controls.Add(new AlarmInformationList { Dock = DockStyle.Fill });
         }
 
         /// <summary>
-        /// 显示窗口
+        /// 显示控件
         /// </summary>
-        /// <param name="form">窗口</param>
-        private void ShowForm(Form form)
+        /// <param name="parent">父控件</param>
+        /// <param name="id">控件索引</param>
+        /// <param name="control">控件</param>
+        private void ShowControl(Control parent, int id, Control control)
         {
-            panelIRViewForm.Controls.Clear();
-            form.TopLevel = false;
-            form.Dock = DockStyle.Fill;
-            panelIRViewForm.Controls.Add(form);
-            form.Show();
+            foreach (Control container in parent.Controls) {
+                if (int.Parse(container.Tag.ToString()) == id) {
+                    if (control is Form) {
+                        (control as Form).TopLevel = false;
+                    }
+                    control.Dock = DockStyle.Fill;
+                    container.Controls.Add(control);
+                    control.Show();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 清理子控件
+        /// </summary>
+        /// <param name="parent">父控件</param>
+        private void ClearControl(Control parent)
+        {
+            foreach (Control control in parent.Controls) {
+                foreach (Form form in control.Controls) {
+                    form.Close();
+                    form.Dispose();
+                }
+                control.Controls.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 设置显示模式
+        /// </summary>
+        /// <param name="mode">显示模式</param>
+        private void SetDisplayMode(DisplayMode mode)
+        {
+            tableLayoutPanel_1view.Visible = false;
+            ClearControl(tableLayoutPanel_1view);
+            tableLayoutPanel_2views.Visible = false;
+            ClearControl(tableLayoutPanel_2views);
+            tableLayoutPanel_4views.Visible = false;
+            ClearControl(tableLayoutPanel_4views);
+            tableLayoutPanel_16views.Visible = false;
+            ClearControl(tableLayoutPanel_16views);
+
+            switch (mode) {
+                case DisplayMode.OneViews:
+                    tableLayoutPanel_1view.Visible = true;
+                    ShowControl(tableLayoutPanel_1view, 1, new CameraDeviceForm(cell, cell.devices[0]));
+                    buttonDisplayMode.Text = "单视图";
+                    break;
+                case DisplayMode.TwoViews:
+                    tableLayoutPanel_2views.Visible = true;
+                    ShowControl(tableLayoutPanel_2views, 1, new CameraDeviceForm(cell, cell.devices[0]));
+                    ShowControl(tableLayoutPanel_2views, 2, new IrCameraDeviceForm(cell, cell.devices[0]));
+                    buttonDisplayMode.Text = "双视图";
+                    break;
+                case DisplayMode.FourViews:
+                    tableLayoutPanel_4views.Visible = true;
+                    ShowControl(tableLayoutPanel_4views, 1, new CameraDeviceForm(cell, cell.devices[0]));
+                    ShowControl(tableLayoutPanel_4views, 2, new IrCameraDeviceForm(cell, cell.devices[0]));
+                    buttonDisplayMode.Text = "4视图";
+                    break;
+                case DisplayMode.SixteenViews:
+                    tableLayoutPanel_16views.Visible = true;
+                    ShowControl(tableLayoutPanel_16views, 1, new CameraDeviceForm(cell, cell.devices[0]));
+                    ShowControl(tableLayoutPanel_16views, 2, new IrCameraDeviceForm(cell, cell.devices[0]));
+                    buttonDisplayMode.Text = "16视图";
+                    break;
+                default:
+                    return;
+            }
+
+            displayMode = mode;
         }
 
         private void buttonAutoFocus_Click(object sender, System.EventArgs e)
         {
             EventEmitter.Instance.Publish("EVENT_SERVICE_ON_ALARM", cell, cell.devices[0], Repository.Entities.Alarm.Type.HumanHighTemperature, new RectangleF(), "test");
+        }
+
+        private void buttonDisplayMode_Click(object sender, System.EventArgs e)
+        {
+            SetDisplayMode((DisplayMode)(((int)displayMode + 1) % (int)DisplayMode.Max));
         }
     }
 }

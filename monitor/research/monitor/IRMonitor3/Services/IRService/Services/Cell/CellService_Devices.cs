@@ -6,6 +6,7 @@ using Miscs;
 using Repository.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using static IRService.Miscs.MethodUtils;
 
 namespace IRService.Services.Cell
@@ -29,6 +30,11 @@ namespace IRService.Services.Cell
         /// 直播推流工作线程列表
         /// </summary>
         public readonly List<BaseWorker> liveStreamingWorkers = new List<BaseWorker>();
+
+        /// <summary>
+        /// 录像工作线程列表
+        /// </summary>
+        public readonly List<BaseWorker> recordingWorkers = new List<BaseWorker>();
 
         /// <summary>
         /// 接收图像事件处理函数
@@ -202,17 +208,14 @@ namespace IRService.Services.Cell
         /// <summary>
         /// 开启直播推流
         /// </summary>
-        private bool StartLiveStreaming(Dictionary<string, string> streams)
+        /// <param name="streams">推流资源地址列表</param>
+        /// <returns>是否成功</returns>
+        private bool StartLiveStreaming(Dictionary<int, string> streams)
         {
             StopLiveStreaming();
 
             foreach (var device in devices) {
                 try {
-                    int width;
-                    int height;
-                    int frameRate;
-                    string eventName;
-
                     var category = Enum.Parse(typeof(DeviceCategory), device.Category);
                     switch (category) {
                         case DeviceCategory.Camera: {
@@ -221,23 +224,32 @@ namespace IRService.Services.Cell
                             }
 
                             var cameraParameters = outData as Configuration.CameraParameters;
-                            width = cameraParameters.width;
-                            height = cameraParameters.height;
-                            frameRate = cameraParameters.videoFrameRate;
-                            eventName = Constants.EVENT_SERVICE_RECEIVE_IMAGE;
+                            if (!CreateLiveStreamingWorker(device, streams[cameraParameters.channel], cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                                return false;
+                            }
+
                             break;
                         }
 
                         case DeviceCategory.IrCamera: {
-                            if (!device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
+                            if (!device.Read(ReadMode.CameraParameters, null, out object outData, out _)) {
+                                return false;
+                            }
+
+                            var cameraParameters = outData as Configuration.CameraParameters;
+                            if (!CreateLiveStreamingWorker(device, streams[cameraParameters.channel], cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                                return false;
+                            }
+
+                            if (!device.Read(ReadMode.IrCameraParameters, null, out outData, out _)) {
                                 return false;
                             }
 
                             var irCameraParameters = outData as Configuration.IrCameraParameters;
-                            width = irCameraParameters.width;
-                            height = irCameraParameters.height;
-                            frameRate = irCameraParameters.videoFrameRate;
-                            eventName = Constants.EVENT_SERVICE_RECEIVE_IMAGE;
+                            if (!CreateLiveStreamingWorker(device, streams[irCameraParameters.channel], irCameraParameters.width, irCameraParameters.height, irCameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IRIMAGE)) {
+                                return false;
+                            }
+
                             break;
                         }
 
@@ -246,28 +258,6 @@ namespace IRService.Services.Cell
                             return false;
                         }
                     }
-
-                    var worker = new LiveStreamingWorker();
-                    if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() {
-                        { "cell", this },
-                        { "device", device },
-                        { "uri", streams[device.Name] },
-                        { "width", width },
-                        { "height", height },
-                        { "frameRate", frameRate },
-                        { "eventName", eventName },
-                    }))) {
-                        Tracker.LogE($"LiveStreamingWorker initialize fail: {device.Model}");
-                        return false;
-                    }
-
-                    if (ARESULT.AFAILED(worker.Start())) {
-                        Tracker.LogE($"LiveStreamingWorker start fail: {device.Model}");
-                        return false;
-                    }
-
-                    liveStreamingWorkers.Add(worker);
-                    Tracker.LogE($"StartLiveStreaming succeed: {device.Model}");
                 }
                 catch (Exception e) {
                     Tracker.LogE($"StartLiveStreaming fail: {device.Model}", e);
@@ -283,9 +273,173 @@ namespace IRService.Services.Cell
         /// </summary>
         private void StopLiveStreaming()
         {
-            // 提高停止直播流速度,不等待推流线程结束
+            // 提高停止直播推流速度,不等待推流线程结束
             liveStreamingWorkers.ForEach(worker => worker.Discard());
             liveStreamingWorkers.Clear();
+        }
+
+        /// <summary>
+        /// 创建直播推流工作线程
+        /// </summary>
+        /// <param name="device">设备</param>
+        /// <param name="uri">资源地址</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="frameRate">帧率</param>
+        /// <param name="eventName">事件名称</param>
+        /// <returns>是否成功</returns>
+        private bool CreateLiveStreamingWorker(IDevice device, string uri, int width, int height, int frameRate, string eventName)
+        {
+            var worker = new LiveStreamingWorker();
+            if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() {
+                { "cell", this },
+                { "device", device },
+                { "uri", uri },
+                { "width", width },
+                { "height", height },
+                { "frameRate", frameRate },
+                { "eventName", eventName },
+            }))) {
+                Tracker.LogE($"LiveStreamingWorker initialize fail: {device.Model}");
+                return false;
+            }
+
+            if (ARESULT.AFAILED(worker.Start())) {
+                Tracker.LogE($"LiveStreamingWorker start fail: {device.Model}");
+                return false;
+            }
+
+            liveStreamingWorkers.Add(worker);
+            Tracker.LogE($"StartLiveStreaming succeed: {device.Model}");
+
+            return true;
+        }
+
+        /// <summary>
+        /// 开启录像
+        /// </summary>
+        /// <returns>是否成功</returns>
+        private bool StartRecording()
+        {
+            StopRecording();
+
+            foreach (var device in devices) {
+                try {
+                    var category = Enum.Parse(typeof(DeviceCategory), device.Category);
+                    switch (category) {
+                        case DeviceCategory.Camera: {
+                            if (!device.Read(ReadMode.CameraParameters, null, out object outData, out _)) {
+                                return false;
+                            }
+
+                            var cameraParameters = outData as Configuration.CameraParameters;
+                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{cameraParameters.channel}"), cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                                return false;
+                            }
+
+                            break;
+                        }
+
+                        case DeviceCategory.IrCamera: {
+                            if (!device.Read(ReadMode.CameraParameters, null, out object outData, out _)) {
+                                return false;
+                            }
+
+                            var cameraParameters = outData as Configuration.CameraParameters;
+                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{cameraParameters.channel}"), cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                                return false;
+                            }
+
+                            if (!device.Read(ReadMode.IrCameraParameters, null, out outData, out _)) {
+                                return false;
+                            }
+
+                            var irCameraParameters = outData as Configuration.IrCameraParameters;
+                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{irCameraParameters.channel}"), irCameraParameters.width, irCameraParameters.height, irCameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IRIMAGE)) {
+                                return false;
+                            }
+
+                            break;
+                        }
+
+                        default: {
+                            Tracker.LogE($"StartLiveStreaming fail: {device.Model}");
+                            return false;
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    Tracker.LogE($"StartLiveStreaming fail: {device.Model}", e);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 停止录像
+        /// </summary>
+        private void StopRecording()
+        {
+            // 提高停止录像速度,不等待录像线程结束
+            recordingWorkers.ForEach(worker => worker.Discard());
+            recordingWorkers.Clear();
+        }
+
+        /// <summary>
+        /// 生成录像文件名
+        /// </summary>
+        /// <param name="tag">标签</param>
+        /// <returns>录像文件名</returns>
+        private string GenerateRecordingFilename(string tag)
+        {
+            var configuation = Repository.Repository.LoadConfiguation();
+            var now = DateTime.Now;
+            var folder = $"{configuation.information.saveVideoPath}/{now.Year}-{now.Month}-{now.Day}";
+            var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}-{tag}.mp4";
+            if (!Directory.Exists(folder)) {
+                Directory.CreateDirectory(folder);
+            }
+
+            return filename;
+        }
+
+        /// <summary>
+        /// 创建录像工作线程
+        /// </summary>
+        /// <param name="device">设备</param>
+        /// <param name="uri">资源地址</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="frameRate">帧率</param>
+        /// <param name="eventName">事件名称</param>
+        /// <returns>是否成功</returns>
+        private bool CreateRecordingWorker(IDevice device, string uri, int width, int height, int frameRate, string eventName)
+        {
+            var worker = new RecordingWorker();
+            if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() {
+                { "cell", this },
+                { "device", device },
+                { "uri", uri },
+                { "width", width },
+                { "height", height },
+                { "frameRate", frameRate },
+                { "eventName", eventName },
+            }))) {
+                Tracker.LogE($"RecordingWorker initialize fail: {device.Model}");
+                return false;
+            }
+
+            if (ARESULT.AFAILED(worker.Start())) {
+                Tracker.LogE($"RecordingWorker start fail: {device.Model}");
+                return false;
+            }
+
+            liveStreamingWorkers.Add(worker);
+            Tracker.LogE($"StartRecording succeed: {device.Model}");
+
+            return true;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Devices
         /// <summary>
         /// 设备索引
         /// </summary>
-        public long Id { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// 设备类型

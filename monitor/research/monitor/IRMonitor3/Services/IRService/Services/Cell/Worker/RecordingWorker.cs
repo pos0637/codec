@@ -1,219 +1,143 @@
-﻿using Common;
-using IRService.Common;
-using IRService.Miscs;
-using Newtonsoft.Json;
+﻿using Codec;
+using Common;
+using Devices;
+using Miscs;
 using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace IRService.Services.Cell.Worker
 {
+    /// <summary>
+    /// 录像工作线程
+    /// </summary>
     public class RecordingWorker : BaseWorker
     {
-        /// <summary>
-        /// 用户数据
-        /// </summary>
-        private struct UserData
-        {
-            /// <summary>
-            /// 温度数据
-            /// </summary>
-            public string temperature;
-
-            /// <summary>
-            /// 选区
-            /// </summary>
-            public string selections;
-
-            /// <summary>
-            /// 组选区
-            /// </summary>
-            public string groupSelections;
-        }
-
-        /// <summary>
-        /// 添加录像文件记录事件
-        /// </summary>
-        public event Delegates.DgOnAddRecordInfo OnAddRecord;
-
         /// <summary>
         /// 设备单元服务
         /// </summary>
         private CellService cell;
 
         /// <summary>
-        /// 视频数据
+        /// 设备
         /// </summary>
-        private byte[] image;
+        private IDevice device;
 
         /// <summary>
-        /// 视频数据大小
+        /// 服务器资源地址
         /// </summary>
-        private int imageSize;
+        private string uri;
 
         /// <summary>
-        /// GCHandle
+        /// 宽度
         /// </summary>
-        private GCHandle imageGCHandle;
+        private int width;
 
         /// <summary>
-        /// 温度数据
+        /// 高度
         /// </summary>
-        private byte[] temperature;
+        private int height;
+
+        /// <summary>
+        /// 帧率
+        /// </summary>
+        private int frameRate;
+
+        /// <summary>
+        /// 事件名称
+        /// </summary>
+        private string eventName;
+
+        /// <summary>
+        /// 图像缓存
+        /// </summary>
+        private PinnedBuffer<byte> image;
+
+        /// <summary>
+        /// 推送间隔
+        /// </summary>
+        private int duration;
+
+        /// <summary>
+        /// 接收图像事件处理函数
+        /// </summary>
+        private EventEmitter.EventHandler onReceiveImage;
 
         /// <summary>
         /// 编码器
         /// </summary>
-        private Codec.Encoder encoder = new Codec.Encoder();
+        private RTMPEncoder encoder;
 
-        /// <summary>
-        /// 引用计数
-        /// </summary>
-        private RefBase refbase;
-
-        ~RecordingWorker()
+        public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
-            if (cell != null) {
-                cell.OnImageCallback -= OnImageCallback;
-                cell.OnTempertureCallback -= OnTemperatureCallback;
-            }
+            cell = arguments["cell"] as CellService;
+            device = arguments["device"] as IDevice;
+            uri = arguments["uri"] as string;
+            width = (int)arguments["width"];
+            height = (int)arguments["height"];
+            frameRate = (int)arguments["frameRate"];
+            eventName = arguments["eventName"] as string;
+            duration = 1000 / frameRate;
 
-            if (imageGCHandle.IsAllocated) {
-                imageGCHandle.Free();
-            }
+            onReceiveImage = (args) => {
+                if ((args[0] == cell) && (args[1] == device)) {
+                    image = Arrays.Clone(args[2] as PinnedBuffer<byte>, image, sizeof(byte));
+                }
+            };
+
+            return base.Initialize(arguments);
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Initialize(CellService cell)
-        {
-            this.cell = cell;
-            cell.OnImageCallback += OnImageCallback;
-            cell.OnTempertureCallback += OnTemperatureCallback;
-            refbase = new RefBase(() => { base.Discard(); base.Join(); });
-
-            CreateImageBuffer(cell.mCell.mIRCameraWidth * cell.mCell.mIRCameraHeight);
-            encoder.Initialize(cell.mCell.mIRCameraWidth, cell.mCell.mIRCameraHeight, cell.mCell.mIRCameraVideoFrameRate);
-        }
-
-        /// <summary>
-        /// 启动录像
-        /// </summary>
-        /// <returns>启动结果</returns>
         public override ARESULT Start()
         {
-            var result = base.Start();
-            if ((result == ARESULT.S_OK) || (result == ARESULT.E_ALREADY_EXISTS)) {
-                refbase.AddRef();
-                return ARESULT.S_OK;
+            try {
+                encoder = new RTMPEncoder();
+                encoder.Initialize(width, height, frameRate);
+                encoder.Start(uri);
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return ARESULT.E_FAIL;
             }
 
-            return result;
+            EventEmitter.Instance.Subscribe(eventName, onReceiveImage);
+            return base.Start();
         }
 
-        /// <summary>
-        /// 停止录像
-        /// </summary>
-        public void Stop()
+        public override void Discard()
         {
-            refbase.Release();
+            encoder?.Stop();
+            encoder?.Dispose();
+            encoder = null;
+
+            EventEmitter.Instance.Unsubscribe(eventName, onReceiveImage);
+            base.Discard();
         }
 
         protected override void Run()
         {
-            try {
-                // 创建目录
-                var now = DateTime.Now;
-                var folder = $"{Global.gRecordingsFolder}/{now.Year}-{now.Month}-{now.Day}";
-                var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}.h264";
-                if (!Directory.Exists(folder)) {
-                    Directory.CreateDirectory(folder);
-                }
-
-                encoder.Stop();
-                encoder.Start(filename);
-                OnAddRecord?.Invoke(filename);
-            }
-            catch (Exception e) {
-                Tracker.LogE(e);
-                return;
-            }
+            PinnedBuffer<byte> image = null;
+            int size = width * height;
 
             while (!IsTerminated()) {
+                // 克隆数据
+                var temp = this.image;
+                if (temp == null) {
+                    Thread.Sleep(duration);
+                    continue;
+                }
+
                 try {
-                    IntPtr addr = imageGCHandle.AddrOfPinnedObject();
-                    encoder.Encode(addr, addr + imageSize, addr + imageSize + imageSize / 4);
+                    // 编码
+                    image = Arrays.Clone(temp, image, sizeof(byte));
+                    encoder.Encode(image.ptr, image.ptr + size, image.ptr + size + size / 4);
                 }
                 catch (Exception e) {
                     Tracker.LogE(e);
-                    encoder.Stop();
-                    return;
                 }
 
-                Thread.Sleep(1000 / cell.mCell.mIRCameraVideoFrameRate);
+                Thread.Sleep(duration);
             }
-
-            try {
-                encoder.Encode(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
-                encoder.Stop();
-            }
-            catch (Exception e) {
-                Tracker.LogE(e);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnImageCallback(byte[] data)
-        {
-            if ((image == null) || (image.Length != data.Length * 3 / 2)) {
-                CreateImageBuffer(data.Length);
-            }
-
-            data.CopyTo(image, 0);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void OnTemperatureCallback(float[] data)
-        {
-            if ((temperature == null) || (temperature.Length != data.Length)) {
-                temperature = new byte[data.Length * 4];
-            }
-
-            Buffer.BlockCopy(data, 0, temperature, 0, temperature.Length);
-
-            var userData = new UserData() {
-                temperature = Convert.ToBase64String(temperature),
-                selections = cell.GetAllSelectionInfo(),
-                groupSelections = cell.GetAllSelectionGroupInfo()
-            };
-            var content = CompressUtils.Compress(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userData)));
-            var header = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
-            var length = BitConverter.GetBytes(content.Length);
-
-            var sei = new byte[header.Length + length.Length + content.Length];
-            Buffer.BlockCopy(header, 0, sei, 0, header.Length);
-            Buffer.BlockCopy(length, 0, sei, header.Length, length.Length);
-            Buffer.BlockCopy(content, 0, sei, header.Length + length.Length, content.Length);
-            encoder.EncodeSEI(sei);
-        }
-
-        /// <summary>
-        /// 创建视频数据
-        /// </summary>
-        /// <param name="size">原始数据大小</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void CreateImageBuffer(int size)
-        {
-            if (imageGCHandle.IsAllocated) {
-                imageGCHandle.Free();
-            }
-
-            // 分配YUV视频数据空间
-            imageSize = size;
-            image = new byte[imageSize * 3 / 2];
-            imageGCHandle = GCHandle.Alloc(image, GCHandleType.Pinned);
         }
     }
 }

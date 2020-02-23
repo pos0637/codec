@@ -37,7 +37,7 @@ namespace Devices
         /// <param name="model">型号</param>
         /// <param name="name">名称</param>
         /// <returns>设备对象</returns>
-        public IDevice GetDevice(long id, string category, string model, string name)
+        public IDevice GetDevice(string id, string category, string model, string name)
         {
             Type deviceType;
             lock (deviceTypeList) {

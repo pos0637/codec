@@ -56,6 +56,7 @@
     <Compile Include="Services\Cell\CellService_Devices.cs" />
     <Compile Include="Services\Cell\CellService_Selections.cs" />
     <Compile Include="Services\Cell\Worker\CaptureVideoWorker.cs" />
+    <Compile Include="Services\Cell\Worker\RecordingWorker.cs" />
     <Compile Include="Services\Web\WebServiceManager.cs" />
     <Compile Include="Services\Web\WebService.cs" />
     <None Include="app.config" />
@@ -65,7 +66,7 @@
     <Compile Include="Services\Cell\Worker\ProcessDataWorker.cs" />
     <None Include="Services\Cell\Worker\ProcessingWorker.cs" />
     <None Include="Services\Cell\Worker\RealtimeNoticeWorker.cs" />
-    <None Include="Services\Cell\Worker\RecordingWorker.cs" />
+    <None Include="Services\Cell\Worker\RecordingWorker1.cs" />
     <None Include="Services\Cell\Worker\SmsServiceWorker.cs" />
     <Compile Include="Services\Service.cs" />
     <Compile Include="Services\ServiceManager.cs" />

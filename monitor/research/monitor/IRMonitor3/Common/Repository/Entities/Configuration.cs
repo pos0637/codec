@@ -154,6 +154,11 @@
         public class IrCameraParameters
         {
             /// <summary>
+            /// 通道号
+            /// </summary>
+            public int channel;
+
+            /// <summary>
             /// 资源地址
             /// </summary>
             public string uri;
@@ -239,6 +244,11 @@
         /// </summary>
         public class CameraParameters
         {
+            /// <summary>
+            /// 通道号
+            /// </summary>
+            public int channel;
+
             /// <summary>
             /// 资源地址
             /// </summary>

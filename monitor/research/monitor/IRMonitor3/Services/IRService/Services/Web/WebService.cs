@@ -66,9 +66,9 @@ namespace IRService.Services.Web
                 // 获取并检查设备信息
                 if (!info.Equals(device)) {
                     device = info;
-                    EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_START_STREAMING, new Dictionary<string, string>() {
-                        { "0001", device.pushUrl },
-                        { "0002", device.irPushUrl }
+                    EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_START_STREAMING, new Dictionary<int, string>() {
+                        { 1, device.pushUrl },
+                        { 2, device.irPushUrl }
                     });
                 }
 

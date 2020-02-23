@@ -56,7 +56,31 @@ namespace IRApplication.UI
             this.panelAlarmForm = new System.Windows.Forms.Panel();
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelIRViewForm = new System.Windows.Forms.Panel();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel_16views = new System.Windows.Forms.TableLayoutPanel();
+            this.panel8 = new System.Windows.Forms.Panel();
+            this.panel9 = new System.Windows.Forms.Panel();
+            this.panel10 = new System.Windows.Forms.Panel();
+            this.panel11 = new System.Windows.Forms.Panel();
+            this.panel12 = new System.Windows.Forms.Panel();
+            this.panel13 = new System.Windows.Forms.Panel();
+            this.panel14 = new System.Windows.Forms.Panel();
+            this.panel15 = new System.Windows.Forms.Panel();
+            this.panel16 = new System.Windows.Forms.Panel();
+            this.panel17 = new System.Windows.Forms.Panel();
+            this.panel18 = new System.Windows.Forms.Panel();
+            this.panel19 = new System.Windows.Forms.Panel();
+            this.panel20 = new System.Windows.Forms.Panel();
+            this.panel21 = new System.Windows.Forms.Panel();
+            this.panel22 = new System.Windows.Forms.Panel();
+            this.panel23 = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel_4views = new System.Windows.Forms.TableLayoutPanel();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel_1view = new System.Windows.Forms.TableLayoutPanel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel_2views = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panelAlarmLamp.SuspendLayout();
@@ -70,7 +94,10 @@ namespace IRApplication.UI
             this.panelRight.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.panelIRViewForm.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel_16views.SuspendLayout();
+            this.tableLayoutPanel_4views.SuspendLayout();
+            this.tableLayoutPanel_1view.SuspendLayout();
+            this.tableLayoutPanel_2views.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCloseFocus
@@ -112,8 +139,9 @@ namespace IRApplication.UI
             this.buttonDisplayMode.Name = "buttonDisplayMode";
             this.buttonDisplayMode.Size = new System.Drawing.Size(80, 58);
             this.buttonDisplayMode.TabIndex = 1;
-            this.buttonDisplayMode.Text = "温度+名称";
+            this.buttonDisplayMode.Text = "单视图";
             this.buttonDisplayMode.UseVisualStyleBackColor = false;
+            this.buttonDisplayMode.Click += new System.EventHandler(this.buttonDisplayMode_Click);
             // 
             // panelAlarmLamp
             // 
@@ -161,6 +189,7 @@ namespace IRApplication.UI
             // 
             // panelToolButtonRight
             // 
+            this.panelToolButtonRight.BackColor = System.Drawing.SystemColors.Control;
             this.panelToolButtonRight.Controls.Add(this.buttonDisplayMode);
             this.panelToolButtonRight.Controls.Add(this.panelAlarmLamp);
             this.panelToolButtonRight.Controls.Add(this.buttonCloseFocus);
@@ -412,29 +441,292 @@ namespace IRApplication.UI
             // 
             // panelIRViewForm
             // 
-            this.panelIRViewForm.Controls.Add(this.tableLayoutPanel2);
+            this.panelIRViewForm.Controls.Add(this.tableLayoutPanel_16views);
+            this.panelIRViewForm.Controls.Add(this.tableLayoutPanel_4views);
+            this.panelIRViewForm.Controls.Add(this.tableLayoutPanel_1view);
+            this.panelIRViewForm.Controls.Add(this.tableLayoutPanel_2views);
             this.panelIRViewForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelIRViewForm.Location = new System.Drawing.Point(0, 70);
             this.panelIRViewForm.Name = "panelIRViewForm";
             this.panelIRViewForm.Size = new System.Drawing.Size(957, 703);
             this.panelIRViewForm.TabIndex = 28;
             // 
-            // tableLayoutPanel2
+            // tableLayoutPanel_16views
             // 
-            this.tableLayoutPanel2.ColumnCount = 2;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Controls.Add(this.panel1, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.panel2, 1, 1);
-            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 3;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(957, 703);
-            this.tableLayoutPanel2.TabIndex = 0;
+            this.tableLayoutPanel_16views.ColumnCount = 4;
+            this.tableLayoutPanel_16views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.Controls.Add(this.panel8, 0, 0);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel9, 1, 0);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel10, 2, 0);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel11, 3, 0);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel12, 0, 1);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel13, 1, 1);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel14, 2, 1);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel15, 3, 1);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel16, 0, 2);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel17, 1, 2);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel18, 2, 2);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel19, 3, 2);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel20, 0, 3);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel21, 1, 3);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel22, 2, 3);
+            this.tableLayoutPanel_16views.Controls.Add(this.panel23, 3, 3);
+            this.tableLayoutPanel_16views.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_16views.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_16views.Name = "tableLayoutPanel_16views";
+            this.tableLayoutPanel_16views.RowCount = 4;
+            this.tableLayoutPanel_16views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel_16views.Size = new System.Drawing.Size(957, 703);
+            this.tableLayoutPanel_16views.TabIndex = 4;
+            this.tableLayoutPanel_16views.Visible = false;
+            // 
+            // panel8
+            // 
+            this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel8.Location = new System.Drawing.Point(3, 3);
+            this.panel8.Name = "panel8";
+            this.panel8.Size = new System.Drawing.Size(233, 169);
+            this.panel8.TabIndex = 0;
+            this.panel8.Tag = "1";
+            // 
+            // panel9
+            // 
+            this.panel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel9.Location = new System.Drawing.Point(242, 3);
+            this.panel9.Name = "panel9";
+            this.panel9.Size = new System.Drawing.Size(233, 169);
+            this.panel9.TabIndex = 1;
+            this.panel9.Tag = "2";
+            // 
+            // panel10
+            // 
+            this.panel10.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel10.Location = new System.Drawing.Point(481, 3);
+            this.panel10.Name = "panel10";
+            this.panel10.Size = new System.Drawing.Size(233, 169);
+            this.panel10.TabIndex = 2;
+            this.panel10.Tag = "3";
+            // 
+            // panel11
+            // 
+            this.panel11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel11.Location = new System.Drawing.Point(720, 3);
+            this.panel11.Name = "panel11";
+            this.panel11.Size = new System.Drawing.Size(234, 169);
+            this.panel11.TabIndex = 3;
+            this.panel11.Tag = "4";
+            // 
+            // panel12
+            // 
+            this.panel12.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel12.Location = new System.Drawing.Point(3, 178);
+            this.panel12.Name = "panel12";
+            this.panel12.Size = new System.Drawing.Size(233, 169);
+            this.panel12.TabIndex = 4;
+            this.panel12.Tag = "5";
+            // 
+            // panel13
+            // 
+            this.panel13.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel13.Location = new System.Drawing.Point(242, 178);
+            this.panel13.Name = "panel13";
+            this.panel13.Size = new System.Drawing.Size(233, 169);
+            this.panel13.TabIndex = 5;
+            this.panel13.Tag = "6";
+            // 
+            // panel14
+            // 
+            this.panel14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel14.Location = new System.Drawing.Point(481, 178);
+            this.panel14.Name = "panel14";
+            this.panel14.Size = new System.Drawing.Size(233, 169);
+            this.panel14.TabIndex = 6;
+            this.panel14.Tag = "7";
+            // 
+            // panel15
+            // 
+            this.panel15.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel15.Location = new System.Drawing.Point(720, 178);
+            this.panel15.Name = "panel15";
+            this.panel15.Size = new System.Drawing.Size(234, 169);
+            this.panel15.TabIndex = 7;
+            this.panel15.Tag = "8";
+            // 
+            // panel16
+            // 
+            this.panel16.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel16.Location = new System.Drawing.Point(3, 353);
+            this.panel16.Name = "panel16";
+            this.panel16.Size = new System.Drawing.Size(233, 169);
+            this.panel16.TabIndex = 8;
+            this.panel16.Tag = "9";
+            // 
+            // panel17
+            // 
+            this.panel17.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel17.Location = new System.Drawing.Point(242, 353);
+            this.panel17.Name = "panel17";
+            this.panel17.Size = new System.Drawing.Size(233, 169);
+            this.panel17.TabIndex = 9;
+            this.panel17.Tag = "10";
+            // 
+            // panel18
+            // 
+            this.panel18.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel18.Location = new System.Drawing.Point(481, 353);
+            this.panel18.Name = "panel18";
+            this.panel18.Size = new System.Drawing.Size(233, 169);
+            this.panel18.TabIndex = 10;
+            this.panel18.Tag = "11";
+            // 
+            // panel19
+            // 
+            this.panel19.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel19.Location = new System.Drawing.Point(720, 353);
+            this.panel19.Name = "panel19";
+            this.panel19.Size = new System.Drawing.Size(234, 169);
+            this.panel19.TabIndex = 11;
+            this.panel19.Tag = "12";
+            // 
+            // panel20
+            // 
+            this.panel20.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel20.Location = new System.Drawing.Point(3, 528);
+            this.panel20.Name = "panel20";
+            this.panel20.Size = new System.Drawing.Size(233, 172);
+            this.panel20.TabIndex = 12;
+            this.panel20.Tag = "13";
+            // 
+            // panel21
+            // 
+            this.panel21.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel21.Location = new System.Drawing.Point(242, 528);
+            this.panel21.Name = "panel21";
+            this.panel21.Size = new System.Drawing.Size(233, 172);
+            this.panel21.TabIndex = 13;
+            this.panel21.Tag = "14";
+            // 
+            // panel22
+            // 
+            this.panel22.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel22.Location = new System.Drawing.Point(481, 528);
+            this.panel22.Name = "panel22";
+            this.panel22.Size = new System.Drawing.Size(233, 172);
+            this.panel22.TabIndex = 14;
+            this.panel22.Tag = "15";
+            // 
+            // panel23
+            // 
+            this.panel23.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel23.Location = new System.Drawing.Point(720, 528);
+            this.panel23.Name = "panel23";
+            this.panel23.Size = new System.Drawing.Size(234, 172);
+            this.panel23.TabIndex = 15;
+            this.panel23.Tag = "16";
+            // 
+            // tableLayoutPanel_4views
+            // 
+            this.tableLayoutPanel_4views.ColumnCount = 2;
+            this.tableLayoutPanel_4views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_4views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_4views.Controls.Add(this.panel4, 0, 0);
+            this.tableLayoutPanel_4views.Controls.Add(this.panel5, 1, 0);
+            this.tableLayoutPanel_4views.Controls.Add(this.panel6, 0, 1);
+            this.tableLayoutPanel_4views.Controls.Add(this.panel7, 1, 1);
+            this.tableLayoutPanel_4views.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_4views.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_4views.Name = "tableLayoutPanel_4views";
+            this.tableLayoutPanel_4views.RowCount = 3;
+            this.tableLayoutPanel_4views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_4views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_4views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel_4views.Size = new System.Drawing.Size(957, 703);
+            this.tableLayoutPanel_4views.TabIndex = 3;
+            this.tableLayoutPanel_4views.Visible = false;
+            // 
+            // panel4
+            // 
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Location = new System.Drawing.Point(3, 3);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(472, 335);
+            this.panel4.TabIndex = 0;
+            this.panel4.Tag = "1";
+            // 
+            // panel5
+            // 
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel5.Location = new System.Drawing.Point(481, 3);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(473, 335);
+            this.panel5.TabIndex = 1;
+            this.panel5.Tag = "2";
+            // 
+            // panel6
+            // 
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel6.Location = new System.Drawing.Point(3, 344);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(472, 335);
+            this.panel6.TabIndex = 2;
+            this.panel6.Tag = "3";
+            // 
+            // panel7
+            // 
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel7.Location = new System.Drawing.Point(481, 344);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(473, 335);
+            this.panel7.TabIndex = 3;
+            this.panel7.Tag = "4";
+            // 
+            // tableLayoutPanel_1view
+            // 
+            this.tableLayoutPanel_1view.ColumnCount = 1;
+            this.tableLayoutPanel_1view.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_1view.Controls.Add(this.panel3, 0, 0);
+            this.tableLayoutPanel_1view.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_1view.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_1view.Name = "tableLayoutPanel_1view";
+            this.tableLayoutPanel_1view.RowCount = 1;
+            this.tableLayoutPanel_1view.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_1view.Size = new System.Drawing.Size(957, 703);
+            this.tableLayoutPanel_1view.TabIndex = 2;
+            this.tableLayoutPanel_1view.Visible = false;
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.White;
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(3, 3);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(951, 697);
+            this.panel3.TabIndex = 2;
+            this.panel3.Tag = "1";
+            // 
+            // tableLayoutPanel_2views
+            // 
+            this.tableLayoutPanel_2views.ColumnCount = 2;
+            this.tableLayoutPanel_2views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_2views.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel_2views.Controls.Add(this.panel1, 0, 1);
+            this.tableLayoutPanel_2views.Controls.Add(this.panel2, 1, 1);
+            this.tableLayoutPanel_2views.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_2views.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_2views.Name = "tableLayoutPanel_2views";
+            this.tableLayoutPanel_2views.RowCount = 3;
+            this.tableLayoutPanel_2views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel_2views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tableLayoutPanel_2views.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel_2views.Size = new System.Drawing.Size(957, 703);
+            this.tableLayoutPanel_2views.TabIndex = 0;
+            this.tableLayoutPanel_2views.Visible = false;
             // 
             // panel1
             // 
@@ -443,6 +735,7 @@ namespace IRApplication.UI
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(472, 415);
             this.panel1.TabIndex = 0;
+            this.panel1.Tag = "1";
             // 
             // panel2
             // 
@@ -451,6 +744,7 @@ namespace IRApplication.UI
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(473, 415);
             this.panel2.TabIndex = 1;
+            this.panel2.Tag = "2";
             // 
             // RealtimeForm
             // 
@@ -474,7 +768,10 @@ namespace IRApplication.UI
             this.panelRight.ResumeLayout(false);
             this.panelForm.ResumeLayout(false);
             this.panelIRViewForm.ResumeLayout(false);
-            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel_16views.ResumeLayout(false);
+            this.tableLayoutPanel_4views.ResumeLayout(false);
+            this.tableLayoutPanel_1view.ResumeLayout(false);
+            this.tableLayoutPanel_2views.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -508,8 +805,32 @@ namespace IRApplication.UI
         private System.Windows.Forms.Panel panelAlarmForm;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Panel panelIRViewForm;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_2views;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_1view;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_4views;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Panel panel7;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_16views;
+        private System.Windows.Forms.Panel panel8;
+        private System.Windows.Forms.Panel panel9;
+        private System.Windows.Forms.Panel panel10;
+        private System.Windows.Forms.Panel panel11;
+        private System.Windows.Forms.Panel panel12;
+        private System.Windows.Forms.Panel panel13;
+        private System.Windows.Forms.Panel panel14;
+        private System.Windows.Forms.Panel panel15;
+        private System.Windows.Forms.Panel panel16;
+        private System.Windows.Forms.Panel panel17;
+        private System.Windows.Forms.Panel panel18;
+        private System.Windows.Forms.Panel panel19;
+        private System.Windows.Forms.Panel panel20;
+        private System.Windows.Forms.Panel panel21;
+        private System.Windows.Forms.Panel panel22;
+        private System.Windows.Forms.Panel panel23;
     }
 }

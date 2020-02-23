@@ -68,13 +68,19 @@ namespace IRApplication.Components
         private GlControl glControl;
 
         /// <summary>
-        /// 纹理列表
+        /// 设备上下文
         /// </summary>
-        private uint[] textures = new uint[4];
+        private DeviceContext deviceContext;
+
+        /// <summary>
+        /// 纹理
+        /// </summary>
+        private uint texture;
 
         /// <summary>
         /// 初始化控件
         /// </summary>
+        /// <param name="displayId">显示索引</param>
         /// <param name="width">视图宽度</param>
         /// <param name="stride">视图对齐宽度</param>
         /// <param name="height">视图高度</param>
@@ -102,6 +108,7 @@ namespace IRApplication.Components
                 glControl.ContextCreated += new EventHandler<GlControlEventArgs>(glControl_ContextCreated);
                 glControl.Render += new EventHandler<GlControlEventArgs>(glControl_Render);
                 Controls.Add(glControl);
+                deviceContext = DeviceContext.Create();
             }
             catch {
             }
@@ -156,8 +163,7 @@ namespace IRApplication.Components
         protected unsafe void Render()
         {
             try {
-                Gl.ActiveTexture(TextureUnit.Texture3);
-                Gl.BindTexture(TextureTarget.Texture2d, textures[3]);
+                Gl.BindTexture(TextureTarget.Texture2d, texture);
                 Gl.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, viewWidth, viewHeight, 0, PixelFormat.Bgra, PixelType.UnsignedByte, bgra.Data);
             }
             catch {
@@ -174,27 +180,29 @@ namespace IRApplication.Components
 
         private void glControl_ContextCreated(object sender, GlControlEventArgs e)
         {
-            Gl.MatrixMode(MatrixMode.Projection);
-            Gl.LoadIdentity();
-            Gl.Ortho(0.0, 1.0f, 0.0, 1.0, 0.0, 1.0);
+            try {
+                Gl.MatrixMode(MatrixMode.Projection);
+                Gl.LoadIdentity();
+                Gl.Ortho(0.0, 1.0f, 0.0, 1.0, 0.0, 1.0);
 
-            Gl.MatrixMode(MatrixMode.Modelview);
-            Gl.LoadIdentity();
+                Gl.MatrixMode(MatrixMode.Modelview);
+                Gl.LoadIdentity();
 
-            Gl.Enable(EnableCap.Texture2d);
+                Gl.Enable(EnableCap.Texture2d);
 
-            Gl.VertexPointer(2, VertexPointerType.Float, 0, ArrayPosition);
-            Gl.EnableClientState(EnableCap.VertexArray);
-            Gl.TexCoordPointer(2, TexCoordPointerType.Float, 0, ArrayTexCoord);
-            Gl.EnableClientState(EnableCap.TextureCoordArray);
+                Gl.VertexPointer(2, VertexPointerType.Float, 0, ArrayPosition);
+                Gl.EnableClientState(EnableCap.VertexArray);
+                Gl.TexCoordPointer(2, TexCoordPointerType.Float, 0, ArrayTexCoord);
+                Gl.EnableClientState(EnableCap.TextureCoordArray);
 
-            Gl.GenTextures(textures);
-            for (var i = 0; i < textures.Length; i++) {
-                Gl.BindTexture(TextureTarget.Texture2d, textures[i]);
+                texture = Gl.GenTexture();
+                Gl.BindTexture(TextureTarget.Texture2d, texture);
                 Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, Gl.LINEAR);
                 Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, Gl.LINEAR);
                 Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, Gl.CLAMP_TO_EDGE);
                 Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, Gl.CLAMP_TO_EDGE);
+            }
+            catch {
             }
         }
 

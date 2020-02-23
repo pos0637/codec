@@ -19,7 +19,7 @@ namespace IRApplication.Components
             InitializeComponent();
             timer = new System.Threading.Timer((state) => {
                 var alarms = Repository.Repository.GetLastAlarms(10);
-                if ((IsHandleCreated) && (alarms != null)) {
+                if (IsHandleCreated && (alarms != null)) {
                     BeginInvoke((Action)(() => {
                         flowLayoutPanel1.Controls.Clear();
                         foreach (var alarm in alarms) {

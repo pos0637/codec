@@ -212,6 +212,8 @@ namespace IRService.Services.Cell.Worker
         /// <param name="alarm">告警</param>
         private void AddAlarm(Models.Selections.Selection selection, Models.Alarm alarm)
         {
+            // TODO: 触发告警录像
+
             var data = new Alarm() {
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
