@@ -252,6 +252,7 @@ namespace IRApplication.UI
             // 
             this.buttonManualVideo.BackColor = System.Drawing.Color.Transparent;
             this.buttonManualVideo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.buttonManualVideo.Enabled = false;
             this.buttonManualVideo.FlatAppearance.BorderSize = 0;
             this.buttonManualVideo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonManualVideo.Image = global::IRApplication.Properties.Resources.StartRecording;
@@ -260,7 +261,6 @@ namespace IRApplication.UI
             this.buttonManualVideo.Size = new System.Drawing.Size(62, 64);
             this.buttonManualVideo.TabIndex = 2;
             this.buttonManualVideo.UseVisualStyleBackColor = false;
-            this.buttonManualVideo.Visible = false;
             // 
             // buttonArrow
             // 
@@ -285,7 +285,7 @@ namespace IRApplication.UI
             this.buttonPalette.Size = new System.Drawing.Size(55, 64);
             this.buttonPalette.TabIndex = 2;
             this.buttonPalette.UseVisualStyleBackColor = true;
-            this.buttonPalette.Visible = false;
+            this.buttonPalette.Click += new System.EventHandler(this.buttonPalette_Click);
             // 
             // buttonPoint
             // 
@@ -311,7 +311,6 @@ namespace IRApplication.UI
             this.buttonSaveBitmap.Size = new System.Drawing.Size(55, 64);
             this.buttonSaveBitmap.TabIndex = 2;
             this.buttonSaveBitmap.UseVisualStyleBackColor = true;
-            this.buttonSaveBitmap.Visible = false;
             // 
             // buttonEllipse
             // 

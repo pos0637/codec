@@ -341,6 +341,11 @@ namespace HIKVisionIrDevice
                     return true;
                 }
 
+                case ReadMode.PaletteMode: {
+                    outData = GetPaletteMode(irCameraChannel);
+                    return true;
+                }
+
                 default:
                     break;
             }
@@ -394,6 +399,10 @@ namespace HIKVisionIrDevice
                     cameraParameters = data as Repository.Entities.Configuration.CameraParameters;
                     cameraChannel = int.Parse(cameraParameters.uri.ParseQueryString()["channel"]);
                     return true;
+                }
+
+                case WriteMode.PaletteMode: {
+                    return SetPaletteMode(irCameraChannel, byte.Parse(data.ToString()));
                 }
 
                 default:
@@ -478,6 +487,81 @@ namespace HIKVisionIrDevice
             Tracker.LogD($"get pixelToPixelParam: {configuration}");
 
             return true;
+        }
+
+        /// <summary>
+        /// 获取调色板模式
+        /// </summary>
+        /// <param name="channel">通道</param>
+        /// <returns>调色板模式</returns>
+        private int? GetPaletteMode(int channel)
+        {
+            IntPtr ptrCfg = IntPtr.Zero;
+
+            try {
+                var cameraParamCFGEX = new CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX();
+                int nSize = Marshal.SizeOf(cameraParamCFGEX);
+                ptrCfg = Marshal.AllocHGlobal(nSize);
+                Marshal.StructureToPtr(cameraParamCFGEX, ptrCfg, false);
+
+                uint dwReturn = 0;
+                if (!CHCNetSDK.NET_DVR_GetDVRConfig(userId, CHCNetSDK.NET_DVR_GET_CCDPARAMCFG_EX, channel, ptrCfg, (uint)nSize, ref dwReturn)) {
+                    return null;
+                }
+
+                cameraParamCFGEX = (CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX)Marshal.PtrToStructure(ptrCfg, typeof(CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX));
+                return cameraParamCFGEX.byPaletteMode;
+            }
+            finally {
+                if (ptrCfg != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(ptrCfg);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置调色板模式
+        /// </summary>
+        /// <param name="channel">通道</param>
+        /// <param name="mode">调色板模式</param>
+        /// <returns>是否成功</returns>
+        private bool SetPaletteMode(int channel, byte mode)
+        {
+            IntPtr ptrCfg1 = IntPtr.Zero;
+            IntPtr ptrCfg2 = IntPtr.Zero;
+
+            try {
+                var cameraParamCFGEX = new CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX();
+                int nSize = Marshal.SizeOf(cameraParamCFGEX);
+                ptrCfg1 = Marshal.AllocHGlobal(nSize);
+                Marshal.StructureToPtr(cameraParamCFGEX, ptrCfg1, false);
+
+                uint dwReturn = 0;
+                if (!CHCNetSDK.NET_DVR_GetDVRConfig(userId, CHCNetSDK.NET_DVR_GET_CCDPARAMCFG_EX, channel, ptrCfg1, (uint)nSize, ref dwReturn)) {
+                    return false;
+                }
+
+                cameraParamCFGEX = (CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX)Marshal.PtrToStructure(ptrCfg1, typeof(CHCNetSDK.NET_DVR_CAMERAPARAMCFG_EX));
+                cameraParamCFGEX.byPaletteMode = mode;
+
+                ptrCfg2 = Marshal.AllocHGlobal(nSize);
+                Marshal.StructureToPtr(cameraParamCFGEX, ptrCfg2, false);
+
+                if (!CHCNetSDK.NET_DVR_SetDVRConfig(userId, CHCNetSDK.NET_DVR_SET_CCDPARAMCFG_EX, channel, ptrCfg2, (uint)nSize)) {
+                    return false;
+                }
+
+                return true;
+            }
+            finally {
+                if (ptrCfg1 != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(ptrCfg1);
+                }
+
+                if (ptrCfg2 != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(ptrCfg2);
+                }
+            }
         }
 
         /// <summary>

@@ -24,6 +24,7 @@ namespace Devices
         ObjectDistance, // 距离
         Emissivity, // 辐射率
         Transmission, // 透过率
+        PaletteMode, // 调色板
         IrCameraParameters, // 红外摄像机参数
         CameraParameters // 可见光摄像机参数
     };
@@ -43,6 +44,7 @@ namespace Devices
         ObjectDistance, // 距离
         Emissivity, // 辐射率
         Transmission, // 透过率
+        PaletteMode, // 调色板
         IrCameraParameters, // 红外摄像机参数
         CameraParameters // 可见光摄像机参数
     };

@@ -15440,7 +15440,9 @@ namespace HIKVisionIrDevice
         }
 
         public const int NET_DVR_GET_CCDPARAMCFG = 1067;       //IPC获取CCD参数配置
+        public const int NET_DVR_GET_CCDPARAMCFG_EX = 3368;       //IPC获取CCD参数配置
         public const int NET_DVR_SET_CCDPARAMCFG = 1068;      //IPC设置CCD参数配置
+        public const int NET_DVR_SET_CCDPARAMCFG_EX = 3369;      //IPC设置CCD参数配置
 
         //图像增强仪
         //图像增强去燥区域配置

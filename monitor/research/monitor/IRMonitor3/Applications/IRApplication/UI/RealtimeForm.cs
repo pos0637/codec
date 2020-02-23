@@ -21,6 +21,29 @@ namespace IRApplication.UI
         }
 
         /// <summary>
+        /// 调色板模式
+        /// </summary>
+        private enum PaletteMode
+        {
+            白热 = 0,
+            黑热,
+            融合1,
+            彩虹,
+            融合2,
+            铁红1,
+            铁红2,
+            深褐色,
+            色彩1,
+            色彩2,
+            冰火,
+            雨,
+            红热,
+            绿热,
+            深蓝,
+            Max
+        }
+
+        /// <summary>
         /// 设备单元服务
         /// </summary>
         private readonly CellService cell;
@@ -28,7 +51,12 @@ namespace IRApplication.UI
         /// <summary>
         /// 视图模式
         /// </summary>
-        private DisplayMode displayMode = DisplayMode.TwoViews;
+        private DisplayMode displayMode;
+
+        /// <summary>
+        /// 调色板模式
+        /// </summary>
+        private PaletteMode paletteMode;
 
         /// <summary>
         /// 设备单元服务
@@ -39,6 +67,7 @@ namespace IRApplication.UI
             InitializeComponent();
 
             this.cell = cell;
+            SetPaletteMode(PaletteMode.铁红1);
             SetDisplayMode(DisplayMode.TwoViews);
             panelAlarmList.Controls.Add(new AlarmInformationList { Dock = DockStyle.Fill });
         }
@@ -124,6 +153,13 @@ namespace IRApplication.UI
             displayMode = mode;
         }
 
+        private void SetPaletteMode(PaletteMode mode)
+        {
+            // TODO: delete it
+            cell.SetPaletteMode(null, (int)mode);
+            paletteMode = mode;
+        }
+
         private void buttonAutoFocus_Click(object sender, System.EventArgs e)
         {
             // TODO: delete it
@@ -133,6 +169,11 @@ namespace IRApplication.UI
         private void buttonDisplayMode_Click(object sender, System.EventArgs e)
         {
             SetDisplayMode((DisplayMode)(((int)displayMode + 1) % (int)DisplayMode.Max));
+        }
+
+        private void buttonPalette_Click(object sender, System.EventArgs e)
+        {
+            SetPaletteMode((PaletteMode)(((int)paletteMode + 1) % (int)PaletteMode.Max));
         }
     }
 }
