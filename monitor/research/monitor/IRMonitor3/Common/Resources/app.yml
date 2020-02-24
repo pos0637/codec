@@ -24,6 +24,7 @@ cells:
     serialNumber: 0001
     uri: 'ip=192.168.8.64&port=8000&username=admin&password=abcd1234'
     cameraParameters:
+      channel: 1
       uri: 'channel=1'
       width: 1280
       stride: 1280
@@ -35,7 +36,7 @@ cells:
     model: HIKVisionIrDevice
     version: 1.0
     serialNumber: 
-    uri: 'ip=192.168.8.64&port=8000&username=admin&password=abcd1234'
+    uri: 'ip=192.168.1.64&port=8000&username=admin&password=abcd1234'
     irCameraParameters:
       channel: 2
       uri: 'channel=2'
