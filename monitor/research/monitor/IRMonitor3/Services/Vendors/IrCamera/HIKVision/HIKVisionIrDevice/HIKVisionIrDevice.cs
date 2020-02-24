@@ -195,9 +195,6 @@ namespace HIKVisionIrDevice
                 return false;
             }
 
-            var param = GetBodyTemperatureCompensation();
-            SetBodyTemperatureCompensation(param);
-
             if (!Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature)) {
                 Logout();
                 return false;
@@ -785,6 +782,88 @@ namespace HIKVisionIrDevice
                     element1.Value = arguments["environmentalTemperatureMode"].ToString().ToLower();
                 }
 
+                var response = SetConfiguration(url, doc.ToString());
+                doc = XDocument.Parse(response);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取黑体配置
+        /// </summary>
+        /// <returns>黑体配置</returns>
+        public Dictionary<string, object> GetBlackBody()
+        {
+            try {
+                var result = new Dictionary<string, object>();
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/blackBody";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("enabled"));
+                result["enabled"] = bool.Parse(element.Value);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("emissivity"));
+                result["emissivity"] = float.Parse(element.Value);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("distance"));
+                result["distance"] = float.Parse(element.Value);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("temperature"));
+                result["temperature"] = float.Parse(element.Value);
+
+                var point = new Point();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("CentrePoint"));
+                element = element.Elements().First(e => e.Name.LocalName.Equals("CalibratingCoordinates"));
+                var element1 = element.Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                point.X = int.Parse(element1.Value);
+                element1 = element.Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                point.Y = int.Parse(element1.Value);
+
+                // 转向屏幕坐标系,归一化高度默认为1000
+                point.Y = 1000 - point.Y;
+                result["point"] = point;
+                return result;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置黑体配置
+        /// </summary>
+        /// <param name="arguments"黑体配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetBlackBody(Dictionary<string, object> arguments)
+        {
+            try {
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/blackBody";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("enabled"));
+                element.Value = arguments["enabled"].ToString().ToLower();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("emissivity"));
+                element.Value = arguments["emissivity"].ToString().ToLower();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("distance"));
+                element.Value = arguments["distance"].ToString().ToLower();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("temperature"));
+                element.Value = arguments["temperature"].ToString().ToLower();
+
+                // 转向笛卡尔坐标系,归一化高度默认为1000
+                var point = (Point)arguments["point"];
+                point.Y = 1000 - point.Y;
+
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("CentrePoint"));
+                element = element.Elements().First(e => e.Name.LocalName.Equals("CalibratingCoordinates"));
+                var element1 = element.Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                element1.Value = point.X.ToString().ToLower();
+                element1 = element.Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                element1.Value = point.Y.ToString().ToLower();
+
+                // 转向屏幕坐标系,归一化高度默认为1000
                 var response = SetConfiguration(url, doc.ToString());
                 doc = XDocument.Parse(response);
                 element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
