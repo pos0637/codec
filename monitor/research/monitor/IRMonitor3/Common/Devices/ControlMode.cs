@@ -8,7 +8,8 @@ namespace Devices
     {
         AutoFocus, // 红外热像仪专用
         FocusFar, // 调远焦
-        FocusNear // 调近焦
+        FocusNear, // 调近焦
+        SetFaceThermometryEnabled // 启用人脸测温
     };
 
     /// <summary>

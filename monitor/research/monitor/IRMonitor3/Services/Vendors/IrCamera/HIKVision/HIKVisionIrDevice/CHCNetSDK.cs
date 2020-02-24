@@ -13834,7 +13834,6 @@ namespace HIKVisionIrDevice
             public byte[] byRes;
         }
 
-
         [StructLayoutAttribute(LayoutKind.Sequential)]
         public struct NET_DVR_STD_CONFIG
         {

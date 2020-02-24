@@ -136,7 +136,7 @@ namespace HIKVisionDevice
             return true;
         }
 
-        public override bool Control(ControlMode mode)
+        public override bool Control(ControlMode mode, object data)
         {
             return false;
         }
@@ -258,7 +258,7 @@ namespace HIKVisionDevice
             var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
                 hPlayWnd = IntPtr.Zero, // 预览窗口
                 lChannel = cameraChannel, // 预览的设备通道
-                dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                dwStreamType = 1, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
                 dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
                 bBlocked = true, // 0- 非阻塞取流，1- 阻塞取流
                 dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
@@ -475,14 +475,7 @@ namespace HIKVisionDevice
                     }
 
                     // 送入其他数据
-                    for (var i = 0; i < 999; i++) {
-                        if (!PlayCtrl.PlayM4_InputData(port, pBuffer, dwBufSize)) {
-                            Thread.Sleep(2);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    PlayCtrl.PlayM4_InputData(port, pBuffer, dwBufSize);
 
                     break;
                 }

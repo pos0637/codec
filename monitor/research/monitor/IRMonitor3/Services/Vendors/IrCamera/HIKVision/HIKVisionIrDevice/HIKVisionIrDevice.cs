@@ -2,9 +2,13 @@
 using Devices;
 using Miscs;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace HIKVisionIrDevice
 {
@@ -191,6 +195,9 @@ namespace HIKVisionIrDevice
                 return false;
             }
 
+            var param = GetBodyTemperatureCompensation();
+            SetBodyTemperatureCompensation(param);
+
             if (!Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature)) {
                 Logout();
                 return false;
@@ -226,22 +233,28 @@ namespace HIKVisionIrDevice
             return true;
         }
 
-        public override bool Control(ControlMode mode)
+        public override bool Control(ControlMode mode, object data)
         {
             switch (mode) {
-                case ControlMode.FocusFar:
+                case ControlMode.FocusFar: {
                     if (!CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
                     return CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_FAR, 1);
+                }
 
-                case ControlMode.FocusNear:
+                case ControlMode.FocusNear: {
                     if (!CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 0))
                         return false;
 
                     Thread.Sleep(1000);
                     return CHCNetSDK.NET_DVR_PTZControl_Other(userId, irCameraChannel, CHCNetSDK.FOCUS_NEAR, 1);
+                }
+
+                case ControlMode.SetFaceThermometryEnabled: {
+                    return SetFaceThermometryEnabled((bool)data);
+                }
 
                 default:
                     return false;
@@ -490,6 +503,300 @@ namespace HIKVisionIrDevice
         }
 
         /// <summary>
+        /// 启用人脸检测 
+        /// </summary>
+        /// <param name="enabled">是否启用</param>
+        /// <returns>是否成功</returns>
+        public bool SetFaceThermometryEnabled(bool enabled)
+        {
+            try {
+                var url = $"/ISAPI/Thermal/channels/{cameraChannel}/faceThermometry";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("faceThermometryEnabled"));
+                element.Value = enabled.ToString().ToLower();
+
+                var response = SetConfiguration(url, doc.ToString());
+                doc = XDocument.Parse(response);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取人脸测温配置规则
+        /// </summary>
+        /// <returns>人脸测温配置规则</returns>
+        public Dictionary<string, object> GetFaceThermometryRegion()
+        {
+            try {
+                var result = new Dictionary<string, object>();
+
+                // 第一区域始终存在
+                var region = 1;
+                var url = $"/ISAPI/Thermal/channels/{cameraChannel}/faceThermometry/regions/{region}";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("sensitivity"));
+                result["sensitivity"] = int.Parse(element.Value);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("targetSpeed"));
+                result["targetSpeed"] = int.Parse(element.Value);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("alarmTemperature"));
+                result["alarmTemperature"] = float.Parse(element.Value);
+
+                var rectangle = new Rectangle();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("Region"));
+                element = element.Elements().First(e => e.Name.LocalName.Equals("RegionCoordinatesList"));
+                var elements = element.Elements().Where(e => e.Name.LocalName.Equals("RegionCoordinates")).ToList();
+
+                element = elements[3].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                rectangle.X = int.Parse(element.Value);
+                element = elements[3].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                rectangle.Y = int.Parse(element.Value);
+
+                element = elements[1].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                rectangle.Width = int.Parse(element.Value) - rectangle.X;
+                element = elements[1].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                rectangle.Height = int.Parse(element.Value) - rectangle.Y;
+
+                // 转向屏幕坐标系,归一化高度默认为1000
+                rectangle.Y = 1000 - rectangle.Y;
+                rectangle.Height = -rectangle.Height;
+                result["rectangle"] = rectangle;
+
+                return result;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置人脸测温配置规则
+        /// </summary>
+        /// <param name="arguments">人脸测温配置规则</param>
+        /// <returns>是否成功</returns>
+        public bool SetFaceThermometryRegion(Dictionary<string, object> arguments)
+        {
+            try {
+                // 第一区域始终存在
+                var region = 1;
+                var url = $"/ISAPI/Thermal/channels/{cameraChannel}/faceThermometry/regions/{region}";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("sensitivity"));
+                element.Value = arguments["sensitivity"].ToString().ToLower();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("targetSpeed"));
+                element.Value = arguments["targetSpeed"].ToString().ToLower();
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("alarmTemperature"));
+                element.Value = arguments["alarmTemperature"].ToString().ToLower();
+
+                // 转向笛卡尔坐标系,归一化高度默认为1000
+                var rectangle = (Rectangle)arguments["rectangle"];
+                rectangle.Y = 1000 - rectangle.Y;
+                rectangle.Height = -rectangle.Height;
+
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("Region"));
+                element = element.Elements().First(e => e.Name.LocalName.Equals("RegionCoordinatesList"));
+                var elements = element.Elements().Where(e => e.Name.LocalName.Equals("RegionCoordinates")).ToList();
+
+                element = elements[0].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                element.Value = rectangle.Left.ToString();
+                element = elements[0].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                element.Value = rectangle.Bottom.ToString();
+
+                element = elements[1].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                element.Value = rectangle.Right.ToString();
+                element = elements[1].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                element.Value = rectangle.Bottom.ToString();
+
+                element = elements[2].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                element.Value = rectangle.Right.ToString();
+                element = elements[2].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                element.Value = rectangle.Top.ToString();
+
+                element = elements[3].Elements().First(e => e.Name.LocalName.Equals("positionX"));
+                element.Value = rectangle.Left.ToString();
+                element = elements[3].Elements().First(e => e.Name.LocalName.Equals("positionY"));
+                element.Value = rectangle.Top.ToString();
+
+                var response = SetConfiguration(url, doc.ToString());
+                doc = XDocument.Parse(response);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取人脸测温基本参数配置
+        /// </summary>
+        /// <returns>人脸测温基本参数配置</returns>
+        public Dictionary<string, object> GetFaceThermometryBasicParameter()
+        {
+            try {
+                var result = new Dictionary<string, object>();
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/thermometry/basicParam";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("emissivity"));
+                result["emissivity"] = float.Parse(element.Value);
+
+                // 默认距离单位为厘米
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("distance"));
+                result["distance"] = float.Parse(element.Value) / 100;
+
+                return result;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置人脸测温基本参数配置
+        /// </summary>
+        /// <param name="arguments">人脸测温基本参数配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetFaceThermometryBasicParameter(Dictionary<string, object> arguments)
+        {
+            try {
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/thermometry/basicParam";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("emissivity"));
+                element.Value = arguments["emissivity"].ToString().ToLower();
+
+                // 默认距离单位为厘米
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("distance"));
+                element.Value = ((float)arguments["distance"] * 100).ToString().ToLower();
+
+                var response = SetConfiguration(url, doc.ToString());
+                doc = XDocument.Parse(response);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取体温温度补偿配置
+        /// </summary>
+        /// <returns>体温温度补偿配置</returns>
+        public Dictionary<string, object> GetBodyTemperatureCompensation()
+        {
+            try {
+                var result = new Dictionary<string, object>();
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/bodyTemperatureCompensation";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("type"));
+                result["type"] = element.Value;
+
+                if (element.Value.Equals("auto")) {
+                    // 自动补偿
+                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("AutoParam"));
+                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
+                    result["compensationValue"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
+                    result["smartCorrection"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
+                    result["environmentalTemperature"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
+                    result["temperatureCompensation"] = bool.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
+                    result["environmentalTemperatureMode"] = element1.Value;
+                }
+                else {
+                    // 手动补偿
+                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("ManualParam"));
+                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
+                    result["compensationValue"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
+                    result["smartCorrection"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
+                    result["environmentalTemperature"] = float.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
+                    result["temperatureCompensation"] = bool.Parse(element1.Value);
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
+                    result["environmentalTemperatureMode"] = element1.Value;
+                }
+
+                return result;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置体温温度补偿配置
+        /// </summary>
+        /// <param name="arguments">体温温度补偿配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetBodyTemperatureCompensation(Dictionary<string, object> arguments)
+        {
+            try {
+                var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/bodyTemperatureCompensation";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("type"));
+                element.Value = arguments["type"].ToString().ToLower();
+
+                if (element.Value.Equals("auto")) {
+                    // 自动补偿
+                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("AutoParam"));
+                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
+                    element1.Value = arguments["compensationValue"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
+                    element1.Value = arguments["smartCorrection"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
+                    element1.Value = arguments["environmentalTemperature"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
+                    element1.Value = arguments["temperatureCompensation"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
+                    element1.Value = arguments["environmentalTemperatureMode"].ToString().ToLower();
+                }
+                else {
+                    // 手动补偿
+                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("ManualParam"));
+                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
+                    element1.Value = arguments["compensationValue"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
+                    element1.Value = arguments["smartCorrection"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
+                    element1.Value = arguments["environmentalTemperature"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
+                    element1.Value = arguments["temperatureCompensation"].ToString().ToLower();
+                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
+                    element1.Value = arguments["environmentalTemperatureMode"].ToString().ToLower();
+                }
+
+                var response = SetConfiguration(url, doc.ToString());
+                doc = XDocument.Parse(response);
+                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 获取调色板模式
         /// </summary>
         /// <param name="channel">通道</param>
@@ -594,7 +901,7 @@ namespace HIKVisionIrDevice
                 var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
                     hPlayWnd = IntPtr.Zero, // 预览窗口
                     lChannel = irCameraChannel, // 预览的设备通道
-                    dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                    dwStreamType = 1, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
                     dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
                     bBlocked = false, // 0- 非阻塞取流，1- 阻塞取流
                     dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
@@ -606,13 +913,16 @@ namespace HIKVisionIrDevice
                     Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={irCameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
                     return false;
                 }
+
+                // 主码流动态产生一个关键帧
+                CHCNetSDK.NET_DVR_MakeKeyFrame(userId, irCameraChannel);
             }
 
             if ((cameraParameters.width != 0) && (cameraParameters.height != 0)) {
                 var lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
                     hPlayWnd = IntPtr.Zero, // 预览窗口
                     lChannel = cameraChannel, // 预览的设备通道
-                    dwStreamType = 0, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                    dwStreamType = 1, // 码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
                     dwLinkMode = 0, // 连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
                     bBlocked = false, // 0- 非阻塞取流，1- 阻塞取流
                     dwDisplayBufNum = FRAME_BUFFER_COUNT // 播放库显示缓冲区最大帧数
@@ -624,6 +934,9 @@ namespace HIKVisionIrDevice
                     Tracker.LogE($"NET_DVR_RealPlay_V40 failed, channel={cameraChannel} error code={CHCNetSDK.NET_DVR_GetLastError()}");
                     return false;
                 }
+
+                // 主码流动态产生一个关键帧
+                CHCNetSDK.NET_DVR_MakeKeyFrame(userId, cameraChannel);
             }
 
             return true;
@@ -675,19 +988,6 @@ namespace HIKVisionIrDevice
         }
 
         /// <summary>
-        /// 获取人脸测温配置
-        /// </summary>
-        /// <param name="channel">通道</param>
-        /// <returns>人脸测温配置</returns>
-        private bool GetFaceThermometry(int channel)
-        {
-            var faceThermometry = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/faceThermometry");
-            Tracker.LogI(faceThermometry);
-
-            return true;
-        }
-
-        /// <summary>
         /// 开启布防
         /// </summary>
         /// <returns>是否成功</returns>
@@ -731,17 +1031,19 @@ namespace HIKVisionIrDevice
         /// <param name="configuration">配置</param>
         /// <param name="outputBufferSize">输出缓冲区大小</param>
         /// <returns>配置</returns>
-        private string GetConfiguration(string url, string configuration = null, int outputBufferSize = 1024 * 1024)
+        private string GetConfiguration(string url, string configuration = null, int outputBufferSize = 3 * 1024 * 1024)
         {
-            IntPtr lpOutputXml = IntPtr.Zero;
             IntPtr lpUrl = IntPtr.Zero;
             IntPtr lpInBuffer = IntPtr.Zero;
+            IntPtr lpOutputXml = IntPtr.Zero;
+            IntPtr lpStatusBuffer = IntPtr.Zero;
             url = $"GET {url}";
 
             try {
-                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
                 lpUrl = Marshal.StringToHGlobalAnsi(url);
                 lpInBuffer = Marshal.StringToHGlobalAnsi(configuration);
+                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                lpStatusBuffer = Marshal.AllocHGlobal(4096 * 4);
 
                 var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
                 var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
@@ -755,25 +1057,32 @@ namespace HIKVisionIrDevice
                 struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
                 struOutput.lpOutBuffer = lpOutputXml;
                 struOutput.dwOutBufferSize = (uint)outputBufferSize;
+                struOutput.lpStatusBuffer = lpStatusBuffer;
+                struOutput.dwStatusSize = 4096 * 4;
 
                 if (!CHCNetSDK.NET_DVR_STDXMLConfig(userId, ref struInput, ref struOutput)) {
                     Tracker.LogE($"GetConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
                     return null;
                 }
 
-                return Marshal.PtrToStringAnsi(struOutput.lpOutBuffer);
+                var response = Marshal.PtrToStringAnsi(struOutput.lpOutBuffer);
+                return Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(response));
             }
             finally {
-                if (lpOutputXml != IntPtr.Zero) {
-                    Marshal.FreeHGlobal(lpOutputXml);
-                }
-
                 if (lpUrl != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpUrl);
                 }
 
                 if (lpInBuffer != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpInBuffer);
+                }
+
+                if (lpOutputXml != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpOutputXml);
+                }
+
+                if (lpStatusBuffer != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpStatusBuffer);
                 }
             }
         }
@@ -785,17 +1094,19 @@ namespace HIKVisionIrDevice
         /// <param name="configuration">配置</param>
         /// <param name="outputBufferSize">输出缓冲区大小</param>
         /// <returns>配置</returns>
-        private string SetConfiguration(string url, string configuration, int outputBufferSize = 1024 * 1024)
+        private string SetConfiguration(string url, string configuration, int outputBufferSize = 3 * 1024 * 1024)
         {
-            IntPtr lpOutputXml = IntPtr.Zero;
             IntPtr lpUrl = IntPtr.Zero;
             IntPtr lpInBuffer = IntPtr.Zero;
+            IntPtr lpOutputXml = IntPtr.Zero;
+            IntPtr lpStatusBuffer = IntPtr.Zero;
             url = $"PUT {url}";
 
             try {
-                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
                 lpUrl = Marshal.StringToHGlobalAnsi(url);
                 lpInBuffer = Marshal.StringToHGlobalAnsi(configuration);
+                lpOutputXml = Marshal.AllocHGlobal(outputBufferSize);
+                lpStatusBuffer = Marshal.AllocHGlobal(4096 * 4);
 
                 var struInput = new CHCNetSDK.NET_DVR_XML_CONFIG_INPUT();
                 var struOutput = new CHCNetSDK.NET_DVR_XML_CONFIG_OUTPUT();
@@ -809,25 +1120,32 @@ namespace HIKVisionIrDevice
                 struOutput.dwSize = (uint)Marshal.SizeOf(struOutput);
                 struOutput.lpOutBuffer = lpOutputXml;
                 struOutput.dwOutBufferSize = (uint)outputBufferSize;
+                struOutput.lpStatusBuffer = lpStatusBuffer;
+                struOutput.dwStatusSize = 4096 * 4;
 
                 if (!CHCNetSDK.NET_DVR_STDXMLConfig(userId, ref struInput, ref struOutput)) {
                     Tracker.LogE($"SetConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
                     return null;
                 }
 
-                return Marshal.PtrToStringAnsi(struOutput.lpOutBuffer);
+                var response = Marshal.PtrToStringAnsi(struOutput.lpStatusBuffer);
+                return Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(response));
             }
             finally {
-                if (lpOutputXml != IntPtr.Zero) {
-                    Marshal.FreeHGlobal(lpOutputXml);
-                }
-
                 if (lpUrl != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpUrl);
                 }
 
                 if (lpInBuffer != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpInBuffer);
+                }
+
+                if (lpOutputXml != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpOutputXml);
+                }
+
+                if (lpStatusBuffer != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(lpStatusBuffer);
                 }
             }
         }

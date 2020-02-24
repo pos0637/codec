@@ -11,7 +11,7 @@ namespace IRApplication.Components
         /// <summary>
         /// 使用海康播放组件
         /// </summary>
-        public static readonly bool UseHIKDevice = true;
+        public static readonly bool UseHIKDevice = false;
 
         /// <summary>
         /// 是否初始化SDK

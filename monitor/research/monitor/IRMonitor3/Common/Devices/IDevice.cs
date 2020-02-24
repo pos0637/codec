@@ -83,8 +83,9 @@ namespace Devices
         /// 控制设备
         /// </summary>
         /// <param name="mode">控制类型</param>
+        /// <param name="data">数据</param>
         /// <returns>是否成功</returns>
-        public abstract bool Control(ControlMode mode);
+        public abstract bool Control(ControlMode mode, object data);
 
         /// <summary>
         /// 获取设备类型
