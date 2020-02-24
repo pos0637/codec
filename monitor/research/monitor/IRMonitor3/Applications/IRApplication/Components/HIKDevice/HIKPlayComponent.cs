@@ -46,7 +46,7 @@ namespace IRApplication.Components
             var struLogInfo = new CHCNetSDK.NET_DVR_USER_LOGIN_INFO();
 
             // 设备IP地址或者域名
-            byte[] byIP = Encoding.Default.GetBytes("192.168.8.64");
+            byte[] byIP = Encoding.Default.GetBytes("192.168.1.64");
             struLogInfo.sDeviceAddress = new byte[129];
             byIP.CopyTo(struLogInfo.sDeviceAddress, 0);
 
