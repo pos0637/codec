@@ -127,7 +127,7 @@ namespace VirtualIrDevice
             return true;
         }
 
-        public override bool Control(ControlMode mode)
+        public override bool Control(ControlMode mode, object data)
         {
             return true;
         }
