@@ -6,9 +6,14 @@ namespace IRApplication.UI
     public partial class SettingsForm : Form
     {
         /// <summary>
-        /// 显示参数设置界面
+        /// 显示参数设置窗体
         /// </summary>
         public Action ShowParameterSetConfigForm { get; set; }
+
+        /// <summary>
+        /// 显示用户手册窗体
+        /// </summary>
+        public Action ShowUserManualForm { get; set; }
 
         public SettingsForm()
         {
@@ -18,6 +23,11 @@ namespace IRApplication.UI
         private void button_parameter_Click(object sender, EventArgs e)
         {
             ShowParameterSetConfigForm?.Invoke();
+        }
+
+        private void button_handbook_Click(object sender, EventArgs e)
+        {
+            ShowUserManualForm?.Invoke();
         }
     }
 }

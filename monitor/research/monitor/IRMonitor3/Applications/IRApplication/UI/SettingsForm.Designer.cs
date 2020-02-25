@@ -208,7 +208,6 @@
             this.button_handbook.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(122)))), ((int)(((byte)(148)))));
             this.button_handbook.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.button_handbook.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button_handbook.Enabled = false;
             this.button_handbook.Font = new System.Drawing.Font("宋体", 16F);
             this.button_handbook.ForeColor = System.Drawing.Color.White;
             this.button_handbook.Location = new System.Drawing.Point(61, 387);
@@ -219,6 +218,7 @@
             this.button_handbook.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.button_handbook.UseCompatibleTextRendering = true;
             this.button_handbook.UseVisualStyleBackColor = false;
+            this.button_handbook.Click += new System.EventHandler(this.button_handbook_Click);
             // 
             // SettingsForm
             // 

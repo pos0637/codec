@@ -165,6 +165,12 @@
     <Compile Include="UI\DataVisualizationForm1.designer.cs">
       <DependentUpon>DataVisualizationForm1.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\UserManualForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\UserManualForm.designer.cs">
+      <DependentUpon>UserManualForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\WebViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -222,6 +228,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DataVisualizationForm1.resx">
       <DependentUpon>DataVisualizationForm1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\UserManualForm.resx">
+      <DependentUpon>UserManualForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

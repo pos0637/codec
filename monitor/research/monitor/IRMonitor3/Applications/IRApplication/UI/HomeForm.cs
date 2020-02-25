@@ -31,14 +31,20 @@ namespace IRApplication.UI
         private readonly SettingsForm settingsForm = new SettingsForm();
 
         /// <summary>
-        /// 参数设置界面
+        /// 参数设置窗体
         /// </summary>
         private readonly ParameterSetConfigForm parameterSetConfigForm = new ParameterSetConfigForm();
+
+        /// <summary>
+        /// 用户手册窗体
+        /// </summary>
+        private readonly UserManualForm userManualForm = new UserManualForm();
 
         public HomeForm()
         {
             InitializeComponent();
             settingsForm.ShowParameterSetConfigForm = ShowParameterSetConfigForm;
+            settingsForm.ShowUserManualForm = ShowUserManualForm;
         }
 
         public void RefreshChildForm()
@@ -82,11 +88,19 @@ namespace IRApplication.UI
         }
 
         /// <summary>
-        /// 显示参数设置界面
+        /// 显示参数设置窗体
         /// </summary>
         private void ShowParameterSetConfigForm()
         {
             ShowNormalControl(parameterSetConfigForm, "参数设置");
+        }
+
+        /// <summary>
+        /// 显示用户手册窗体
+        /// </summary>
+        private void ShowUserManualForm()
+        {
+            ShowNormalControl(userManualForm, "用户手册");
         }
 
         /// <summary>
