@@ -25,21 +25,21 @@ namespace IRApplication.UI
         /// </summary>
         private enum PaletteMode
         {
-            白热 = 0,
-            黑热,
-            融合1,
-            彩虹,
-            融合2,
-            铁红1,
-            铁红2,
-            深褐色,
-            色彩1,
-            色彩2,
-            冰火,
-            雨,
-            红热,
-            绿热,
-            深蓝,
+            WhiteHot = 0,
+            BlackHot,
+            Fusion1,
+            Rainbow,
+            Fusion2,
+            Ironbow1,
+            Ironbow2,
+            Sepia,
+            Color1,
+            Color2,
+            IceFire,
+            Rain,
+            RedHot,
+            GreenHot,
+            DeepBlue,
             Max
         }
 
@@ -67,7 +67,7 @@ namespace IRApplication.UI
             InitializeComponent();
 
             this.cell = cell;
-            SetPaletteMode(PaletteMode.铁红1);
+            SetPaletteMode(PaletteMode.Ironbow1);
             SetDisplayMode(DisplayMode.TwoViews);
             panelAlarmList.Controls.Add(new AlarmInformationList { Dock = DockStyle.Fill });
         }
@@ -156,7 +156,7 @@ namespace IRApplication.UI
         private void SetPaletteMode(PaletteMode mode)
         {
             // TODO: delete it
-            cell.SetPaletteMode(null, (int)mode);
+            cell.SetPaletteMode(null, mode.ToString());
             paletteMode = mode;
         }
 

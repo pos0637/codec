@@ -72,18 +72,18 @@ namespace IRService.Services.Cell
         /// </summary>
         /// <param name="deviceId">设备索引</param>
         /// <returns>调色板模式</returns>
-        public int GetPaletteMode(string deviceId)
+        public string GetPaletteMode(string deviceId)
         {
-            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices[0];
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
             if (device == null) {
-                return 0;
+                return null;
             }
 
             if (!device.Read(ReadMode.PaletteMode, null, out object result, out int used)) {
-                return 0;
+                return null;
             }
 
-            return (int)result;
+            return result.ToString();
         }
 
         /// <summary>
@@ -92,9 +92,9 @@ namespace IRService.Services.Cell
         /// <param name="deviceId">设备索引</param>
         /// <param name="mode">调色板模式</param>
         /// <returns>是否成功</returns>
-        public bool SetPaletteMode(string deviceId, int mode)
+        public bool SetPaletteMode(string deviceId, string mode)
         {
-            var device = deviceId != null? devices.FirstOrDefault(d => d.Id.Equals(deviceId)): devices[0];
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
             if (device == null) {
                 return false;
             }
