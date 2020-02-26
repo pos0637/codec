@@ -33,7 +33,7 @@ namespace IRApplication.UI
         /// <summary>
         /// 参数设置窗体
         /// </summary>
-        private readonly ParameterSetConfigForm parameterSetConfigForm = new ParameterSetConfigForm();
+        private ParameterSetConfigForm parameterSetConfigForm;
 
         /// <summary>
         /// 用户手册窗体
@@ -92,7 +92,16 @@ namespace IRApplication.UI
         /// </summary>
         private void ShowParameterSetConfigForm()
         {
-            ShowNormalControl(parameterSetConfigForm, "参数设置");
+            var configuartion = Repository.Repository.LoadConfiguation();
+            if (configuartion.cells.Length == 0) {
+                MessageBox.Show("无可连接的设备!");
+                return;
+            }
+
+            CloseRealPlayControl();
+            var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
+            parameterSetConfigForm = new ParameterSetConfigForm(cell);
+            ShowControl(parameterSetConfigForm, "参数设置");
         }
 
         /// <summary>
@@ -160,6 +169,11 @@ namespace IRApplication.UI
             if (dataVisualizationForm1 != null) {
                 dataVisualizationForm1.Close();
                 dataVisualizationForm1 = null;
+            }
+
+            if (parameterSetConfigForm != null) {
+                parameterSetConfigForm.Close();
+                parameterSetConfigForm = null;
             }
         }
 

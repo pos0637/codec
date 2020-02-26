@@ -1,11 +1,12 @@
-﻿using System;
+﻿using IRService.Services.Cell;
+using System;
 using System.Windows.Forms;
 
 namespace IRApplication.UI
 {
     public partial class ParameterSetConfigForm : Form
     {
-        public ParameterSetConfigForm()
+        public ParameterSetConfigForm(CellService cell)
         {
             InitializeComponent();
         }

@@ -12,7 +12,7 @@ namespace IRService
         public static void Main(string[] args)
         {
             // 初始化通讯会话管理器
-            // InitializeSessionManager();
+            InitializeSessionManager();
 
             // 初始化设备单元服务管理器
             CellServiceManager.Instance.Initialize();

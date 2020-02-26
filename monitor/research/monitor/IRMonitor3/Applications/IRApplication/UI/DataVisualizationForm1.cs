@@ -9,7 +9,7 @@ namespace IRApplication.UI
         /// <summary>
         /// 设备单元服务
         /// </summary>
-        private CellService cell;
+        private readonly CellService cell;
 
         /// <summary>
         /// 构造函数
