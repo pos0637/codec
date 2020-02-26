@@ -13,7 +13,7 @@
   rtmpServerIp: 127.0.0.1
   rtmpServerPort: 1935
   onlineMode: false
-  recordingMode: true
+  recordingMode: false
   recordingDuration: 600
   saveVideoPath: ./video
   saveImagePath: ./image
@@ -38,7 +38,7 @@ cells:
     category: IrCamera
     model: HIKVisionIrDevice
     version: 1.0
-    serialNumber: 
+    serialNumber: 0002
     uri: 'ip=192.168.1.64&port=8000&username=admin&password=abcd1234'
     irCameraParameters:
       channel: 2

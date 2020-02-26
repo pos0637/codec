@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Text;
+using System.Windows.Forms;
 
-namespace IRApplication.Components
+namespace IRApplication.Components.HIKDevice
 {
     /// <summary>
-    /// 海康播放组件
+    /// 可渲染控件
     /// </summary>
-    public sealed class HIKPlayComponent
+    public class HIKVisionRenderableControl : IRenderableControl
     {
         /// <summary>
         /// 使用海康播放组件
         /// </summary>
         public static readonly bool UseHIKDevice = true;
-
-        /// <summary>
-        /// 是否初始化SDK
-        /// </summary>
-        private static readonly bool m_bInitSDK = false;
 
         /// <summary>
         /// 用户句柄
@@ -28,16 +24,22 @@ namespace IRApplication.Components
         /// </summary>
         private int m_lRealHandle = -1;
 
-        static HIKPlayComponent()
+        /// <summary>
+        /// 通道
+        /// </summary>
+        private readonly int channel;
+
+        static HIKVisionRenderableControl()
         {
-            m_bInitSDK = CHCNetSDK.NET_DVR_Init();
+            CHCNetSDK.NET_DVR_Init();
         }
 
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        /// <returns>是否成功</returns>
-        public bool Initialize()
+        public HIKVisionRenderableControl(int channel)
+        {
+            this.channel = channel;
+        }
+
+        public bool InitializeComponent(Control parent, int width, int stride, int height)
         {
             if (m_lUserID >= 0) {
                 return false;
@@ -71,7 +73,41 @@ namespace IRApplication.Components
                 return false;
             }
 
-            return true;
+            return StartRealPlay(channel, parent.Handle);
+        }
+
+        public CreateParams GetParams(CreateParams createParams)
+        {
+            return createParams;
+        }
+
+        public void Dispose()
+        {
+            StopRealPlay();
+        }
+
+        public void DrawRGBAImage(IntPtr image, int length)
+        {
+        }
+
+        public void DrawYImage(IntPtr image, int length)
+        {
+        }
+
+        public void DrawYImage(byte[] image, int length)
+        {
+        }
+
+        public void DrawYV12Image(IntPtr image, int length)
+        {
+        }
+
+        public void OnSizeChanged(Control control)
+        {
+        }
+
+        public void Render(Control control)
+        {
         }
 
         /// <summary>
@@ -80,22 +116,23 @@ namespace IRApplication.Components
         /// <param name="channel">通道</param>
         /// <param name="handle">控件句柄</param>
         /// <returns>是否成功</returns>
-        public bool StartRealPlay(int channel, IntPtr handle)
+        private bool StartRealPlay(int channel, IntPtr handle)
         {
             if (m_lRealHandle >= 0) {
                 CHCNetSDK.NET_DVR_StopRealPlay(m_lRealHandle);
                 m_lRealHandle = -1;
             }
 
-            CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
-            lpPreviewInfo.hPlayWnd = handle;//预览窗口
-            lpPreviewInfo.lChannel = channel;//预te览的设备通道
-            lpPreviewInfo.dwStreamType = 1;//码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
-            lpPreviewInfo.dwLinkMode = 0;//连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
-            lpPreviewInfo.bBlocked = true; //0- 非阻塞取流，1- 阻塞取流
-            lpPreviewInfo.dwDisplayBufNum = 1; //播放库播放缓冲区最大缓冲帧数
-            lpPreviewInfo.byProtoType = 0;
-            lpPreviewInfo.byPreviewMode = 0;
+            CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO {
+                hPlayWnd = handle,//预览窗口
+                lChannel = channel,//预览的设备通道
+                dwStreamType = 1,//码流类型：0-主码流，1-子码流，2-码流3，3-码流4，以此类推
+                dwLinkMode = 0,//连接方式：0- TCP方式，1- UDP方式，2- 多播方式，3- RTP方式，4-RTP/RTSP，5-RSTP/HTTP 
+                bBlocked = true, //0- 非阻塞取流，1- 阻塞取流
+                dwDisplayBufNum = 1, //播放库播放缓冲区最大缓冲帧数
+                byProtoType = 0,
+                byPreviewMode = 0
+            };
 
             IntPtr pUser = new IntPtr();//用户数据
 
@@ -111,7 +148,7 @@ namespace IRApplication.Components
         /// <summary>
         /// 停止实时播放
         /// </summary>
-        public void StopRealPlay()
+        private void StopRealPlay()
         {
             if (m_lRealHandle >= 0) {
                 CHCNetSDK.NET_DVR_StopRealPlay(m_lRealHandle);

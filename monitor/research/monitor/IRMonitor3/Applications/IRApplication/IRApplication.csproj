@@ -104,7 +104,7 @@
       <DependentUpon>CameraDeviceForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\HIKDevice\CHCNetSDK.cs" />
-    <Compile Include="Components\HIKDevice\HIKPlayComponent.cs" />
+    <Compile Include="Components\HIKDevice\HIKVisionRenderableControl.cs" />
     <Compile Include="Components\IrCameraDeviceForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -112,8 +112,14 @@
       <DependentUpon>IrCameraDeviceForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\HIKDevice\PlayCtrl.cs" />
-    <Compile Include="Components\RenderableForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Components\IRenderableControl.cs" />
+    <Compile Include="Components\GDIRenderableControl.cs" />
+    <Compile Include="Components\OpenGLRenderableControl.cs" />
+    <Compile Include="Components\TransparentControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\TransparentControl.Designer.cs">
+      <DependentUpon>TransparentControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -270,6 +276,10 @@
     <ProjectReference Include="..\..\Services\IRService\IRService.csproj">
       <Project>{aa5252be-f718-494f-af56-5c0730d47be8}</Project>
       <Name>IRService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DrawTools\DrawTools.csproj">
+      <Project>{c2f951d8-2cb6-4ab5-9029-1ee3fcdb910a}</Project>
+      <Name>DrawTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

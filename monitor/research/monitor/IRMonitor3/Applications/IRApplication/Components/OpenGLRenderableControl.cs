@@ -8,9 +8,9 @@ using System.Windows.Forms;
 namespace IRApplication.Components
 {
     /// <summary>
-    /// 可渲染窗体
+    /// 可渲染控件
     /// </summary>
-    public class RenderableForm : Form
+    public class OpenGLRenderableControl : IRenderableControl
     {
         /// <summary>
 		/// Vertex position array.
@@ -72,14 +72,7 @@ namespace IRApplication.Components
         /// </summary>
         private uint texture;
 
-        /// <summary>
-        /// 初始化控件
-        /// </summary>
-        /// <param name="displayId">显示索引</param>
-        /// <param name="width">视图宽度</param>
-        /// <param name="stride">视图对齐宽度</param>
-        /// <param name="height">视图高度</param>
-        public void InitializeComponent(int width, int stride, int height)
+        public bool InitializeComponent(Control parent, int width, int stride, int height)
         {
             viewWidth = width;
             viewStride = stride;
@@ -103,59 +96,49 @@ namespace IRApplication.Components
                 };
                 glControl.ContextCreated += new EventHandler<GlControlEventArgs>(glControl_ContextCreated);
                 glControl.Render += new EventHandler<GlControlEventArgs>(glControl_Render);
-                Controls.Add(glControl);
+                parent.Controls.Add(glControl);
+
+                return true;
             }
             catch {
+                return false;
             }
         }
 
-        /// <summary>
-        /// 绘制图像
-        /// </summary>
-        /// <param name="image">YV12图像</param>
-        /// <param name="length">长度</param>
-        protected unsafe void DrawYV12Image(IntPtr image, int length)
+        public CreateParams GetParams(CreateParams createParams)
+        {
+            return createParams;
+        }
+
+        public void Dispose()
+        {
+            glControl.Dispose();
+        }
+
+        public unsafe void DrawYV12Image(IntPtr image, int length)
         {
             System.Buffer.MemoryCopy(image.ToPointer(), yuv.Data.ToPointer(), length, length);
             Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
         }
 
-        /// <summary>
-        /// 绘制图像
-        /// </summary>
-        /// <param name="image">Y图像</param>
-        /// <param name="length">长度</param>
-        protected unsafe void DrawYImage(IntPtr image, int length)
+        public unsafe void DrawYImage(IntPtr image, int length)
         {
             System.Buffer.MemoryCopy(image.ToPointer(), yuv.Data.ToPointer(), length, length);
             Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
         }
 
-        /// <summary>
-        /// 绘制图像
-        /// </summary>
-        /// <param name="image">Y图像</param>
-        /// <param name="length">长度</param>
-        protected unsafe void DrawYImage(byte[] image, int length)
+        public unsafe void DrawYImage(byte[] image, int length)
         {
             Marshal.Copy(image, 0, yuv.Data, length);
             Cv2.CvtColor(yuv, bgra, ColorConversionCodes.YUV2BGRA_YV12);
         }
 
-        /// <summary>
-        /// 绘制图像
-        /// </summary>
-        /// <param name="mat">RGBA图像</param>
-        /// <param name="length">长度</param>
-        protected unsafe void DrawRGBAImage(IntPtr image, int length)
+        public unsafe void DrawRGBAImage(IntPtr image, int length)
         {
             System.Buffer.MemoryCopy(image.ToPointer(), bgra.Data.ToPointer(), length, length);
         }
 
-        /// <summary>
-        /// 渲染
-        /// </summary>
-        protected unsafe void Render()
+        public unsafe void Render(Control control)
         {
             try {
                 Gl.BindTexture(TextureTarget.Texture2d, texture);
@@ -166,12 +149,9 @@ namespace IRApplication.Components
             }
         }
 
-        /// <summary>
-        /// 大小改变事件处理函数
-        /// </summary>
-        protected virtual void OnSizeChanged()
+        public virtual void OnSizeChanged(Control control)
         {
-            area = new Rectangle(PointToScreen(ClientRectangle.Location), ClientSize);
+            area = new Rectangle(control.PointToScreen(control.ClientRectangle.Location), control.ClientSize);
         }
 
         private void glControl_ContextCreated(object sender, GlControlEventArgs e)

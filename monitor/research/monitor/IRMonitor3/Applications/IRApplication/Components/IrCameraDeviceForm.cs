@@ -1,13 +1,15 @@
 ﻿using Common;
 using Devices;
+using IRApplication.Components.HIKDevice;
 using IRService.Common;
 using IRService.Services.Cell;
 using Miscs;
 using System;
+using System.Windows.Forms;
 
 namespace IRApplication.Components
 {
-    public partial class IrCameraDeviceForm : RenderableForm
+    public partial class IrCameraDeviceForm : Form
     {
         /// <summary>
         /// 红外图像
@@ -20,9 +22,18 @@ namespace IRApplication.Components
         private readonly EventEmitter.EventHandler onReceiveIrImage;
 
         /// <summary>
-        /// 海康播放组件
+        /// 可渲染控件
         /// </summary>
-        private readonly HIKPlayComponent hikPlayComponent = new HIKPlayComponent();
+        protected IRenderableControl renderableControl;
+        protected virtual IRenderableControl RenderableControl {
+            get {
+                if (renderableControl == null) {
+                    renderableControl = HIKVisionRenderableControl.UseHIKDevice ? new HIKVisionRenderableControl(1) as IRenderableControl : new OpenGLRenderableControl() as IRenderableControl;
+                }
+
+                return renderableControl;
+            }
+        }
 
         /// <summary>
         /// 构造函数
@@ -33,19 +44,13 @@ namespace IRApplication.Components
         {
             InitializeComponent();
 
-            if (HIKPlayComponent.UseHIKDevice) {
-                hikPlayComponent.Initialize();
-                hikPlayComponent.StartRealPlay(2, this.Handle);
-                return;
-            }
-
             // 初始化窗体
             if (device.Read(ReadMode.IrCameraParameters, null, out object outData, out _)) {
                 var irCameraParameters = outData as Repository.Entities.Configuration.IrCameraParameters;
-                InitializeComponent(irCameraParameters.width, irCameraParameters.stride, irCameraParameters.height);
+                RenderableControl.InitializeComponent(this, irCameraParameters.width, irCameraParameters.stride, irCameraParameters.height);
             }
             else {
-                InitializeComponent(Width, Width, Height);
+                RenderableControl.InitializeComponent(this, Width, Width, Height);
             }
 
             onReceiveIrImage = (args) => {
@@ -53,12 +58,16 @@ namespace IRApplication.Components
                     irImage = Arrays.Clone(args[2] as PinnedBuffer<byte>, irImage, sizeof(byte));
                     if (IsHandleCreated) {
                         BeginInvoke((Action)(() => {
-                            DrawYV12Image(irImage.ptr, irImage.Length);
-                            Render();
+                            RenderableControl.DrawYV12Image(irImage.ptr, irImage.Length);
+                            RenderableControl.Render(this);
                         }));
                     }
                 }
             };
+        }
+
+        protected override CreateParams CreateParams {
+            get { return RenderableControl.GetParams(base.CreateParams); }
         }
 
         private void IrCameraDeviceForm_Load(object sender, System.EventArgs e)
@@ -69,9 +78,12 @@ namespace IRApplication.Components
         private void IrCameraDeviceForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_RECEIVE_IRIMAGE, onReceiveIrImage);
-            if (HIKPlayComponent.UseHIKDevice) {
-                hikPlayComponent.StopRealPlay();
-            }
+            RenderableControl?.Dispose();
+        }
+
+        private void IrCameraDeviceForm_SizeChanged(object sender, EventArgs e)
+        {
+            renderableControl.OnSizeChanged(this);
         }
     }
 }

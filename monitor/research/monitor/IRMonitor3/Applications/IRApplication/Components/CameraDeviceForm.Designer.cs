@@ -34,12 +34,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Location = new System.Drawing.Point(0, 0);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "CameraDeviceForm";
             this.Text = "CameraDeviceForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CameraDeviceForm_FormClosing);
             this.Load += new System.EventHandler(this.CameraDeviceForm_Load);
+            this.SizeChanged += new System.EventHandler(this.CameraDeviceForm_SizeChanged);
             this.ResumeLayout(false);
 
         }
