@@ -178,6 +178,7 @@ namespace IRService.Services.Cell
         private void CloseDevices()
         {
             StopLiveStreaming();
+            StopRecording();
 
             foreach (var worker in workers) {
                 worker.Dispose();
@@ -404,7 +405,7 @@ namespace IRService.Services.Cell
                 return false;
             }
 
-            liveStreamingWorkers.Add(worker);
+            recordingWorkers.Add(worker);
             Tracker.LogE($"StartRecording succeed: {device.Model}");
 
             return true;
