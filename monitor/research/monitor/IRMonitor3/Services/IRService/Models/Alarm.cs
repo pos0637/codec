@@ -16,7 +16,7 @@ namespace IRService.Models
         /// 告警类型
         /// </summary>
         [DataMember]
-        public Repository.Entities.Alarm.Type type;
+        public Repository.Entities.Alarm.AlarmType type;
 
         /// <summary>
         /// 温度类型

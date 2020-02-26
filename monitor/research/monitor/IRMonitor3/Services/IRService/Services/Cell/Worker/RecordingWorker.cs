@@ -140,9 +140,21 @@ namespace IRService.Services.Cell.Worker
                 while (!IsTerminated()) {
                     // 检查分片录像是否结束
                     if ((DateTime.Now - start).TotalSeconds > recordingDuration) {
-                        encoder?.Stop();                        
+                        encoder?.Stop();
                         encoder?.Dispose();
                         encoder = null;
+
+                        // 保存录像信息
+                        Repository.Repository.AddRecording(new Recording() {
+                            cellName = cell.cell.name,
+                            deviceName = device.Name,
+                            channelName = channel.ToString(),
+                            startTime = start,
+                            endTime = DateTime.Now,
+                            type = Recording.RecordingType.Local,
+                            url = uri,
+                            snapshotUrl = Repository.Repository.SaveYV12Image(image)
+                        });
                         break;
                     }
 

@@ -160,7 +160,7 @@ namespace IRService.Services.Cell.Worker
             switch (deviceEvent) {
                 case DeviceEvent.HumanHighTemperatureAlarm: {
                     var detail = $"体温异常: {arguments[1]}";
-                    OnAlarm(cell, device, Alarm.Type.HumanHighTemperature, arguments[0], detail);
+                    OnAlarm(cell, device, Alarm.AlarmType.HumanHighTemperature, arguments[0], detail);
                     break;
                 }
                 default:
@@ -174,13 +174,13 @@ namespace IRService.Services.Cell.Worker
         /// <param name="arguments">参数</param>
         private void OnAlarm(params object[] arguments)
         {
-            var type = (Alarm.Type)arguments[2];
+            var type = (Alarm.AlarmType)arguments[2];
             var rect = (RectangleF?)arguments[3];
             var detail = arguments[4] as string;
 
             Models.Alarm alarm;
             switch (type) {
-                case Alarm.Type.HumanHighTemperature: {
+                case Alarm.AlarmType.HumanHighTemperature: {
                     alarm = new Models.Alarm() {
                         type = type,
                         temperatureType = Selections.TemperatureType.max,
@@ -194,7 +194,7 @@ namespace IRService.Services.Cell.Worker
                     };
                     break;
                 }
-                case Alarm.Type.Manual: {
+                case Alarm.AlarmType.Manual: {
                     alarm = new Models.Alarm() {
                         type = type,
                         temperatureType = Selections.TemperatureType.max,
@@ -232,7 +232,7 @@ namespace IRService.Services.Cell.Worker
                 cellName = cell.cell.name,
                 selectionName = selection?.Entity.name ?? null,
                 startTime = DateTime.Now,
-                alarmType = alarm.type,
+                type = alarm.type,
                 temperatureType = alarm.temperatureType,
                 level = alarm.level,
                 area = JsonUtils.ObjectToJson(alarm.area),

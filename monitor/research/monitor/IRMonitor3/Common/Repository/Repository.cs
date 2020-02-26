@@ -64,6 +64,11 @@ namespace Repository
             public DbSet<Alarm> Alarm { get; set; }
 
             /// <summary>
+            /// 录像信息列表
+            /// </summary>
+            public DbSet<Recording> Recording { get; set; }
+
+            /// <summary>
             /// 获取数据库连接
             /// </summary>
             /// <returns>数据库连接</returns>
@@ -208,6 +213,20 @@ namespace Repository
         /// </summary>
         /// <param name="image">图像</param>
         /// <returns>是否成功</returns>
+        public static string SaveYV12Image(PinnedBuffer<byte> image)
+        {
+            if (image == null) {
+                return null;
+            }
+
+            return SaveYV12Image(image.width, image.height, image.buffer);
+        }
+
+        /// <summary>
+        /// 保存图像
+        /// </summary>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
         public static string SaveYV12Image(Buffer<byte> image)
         {
             if (image == null) {
@@ -278,6 +297,8 @@ namespace Repository
             }
         }
 
+        #region 告警
+
         /// <summary>
         /// 添加告警
         /// </summary>
@@ -304,6 +325,7 @@ namespace Repository
         /// </summary>
         /// <param name="start">开始时间</param>
         /// <param name="end">结束时间</param>
+        /// <returns>告警数量</returns>
         public static int GetAlarmsCount(DateTime start, DateTime end)
         {
             try {
@@ -339,7 +361,7 @@ namespace Repository
                     return db.Set<Alarm>()
                         .Where(a => a.startTime >= start)
                         .Where(a => a.startTime <= end)
-                        .OrderByDescending(alarm => alarm.startTime)
+                        .OrderByDescending(a => a.startTime)
                         .Take(count).ToList();
                 }
             }
@@ -365,13 +387,13 @@ namespace Repository
                         return db.Set<Alarm>()
                             .Where(a => a.startTime >= start)
                             .Where(a => a.startTime <= end)
-                            .OrderByDescending(alarm => alarm.startTime)
+                            .OrderByDescending(a => a.startTime)
                             .Skip((page - 1) * count).Take(count)
                             .ToList();
                     }
                     else {
                         return db.Set<Alarm>()
-                            .OrderByDescending(alarm => alarm.startTime)
+                            .OrderByDescending(a => a.startTime)
                             .Skip((page - 1) * count).Take(count)
                             .ToList();
                     }
@@ -384,7 +406,7 @@ namespace Repository
         }
 
         /// <summary>
-        /// 批量删除
+        /// 批量删除告警
         /// </summary>
         /// <param name="ids">索引列表</param>
         /// <returns>是否成功</returns>
@@ -403,5 +425,138 @@ namespace Repository
                 return false;
             }
         }
+
+        #endregion
+
+        #region 录像
+
+        /// <summary>
+        /// 添加录像
+        /// </summary>
+        /// <param name="recording">录像</param>
+        /// <returns>是否成功</returns>
+        public static bool AddRecording(Recording recording)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    db.Set<Recording>().Add(recording);
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取录像数量
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <returns>录像数量</returns>
+        public static int GetRecordingsCount(DateTime start, DateTime end)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    if ((start != null) && (end != null)) {
+                        return db.Set<Recording>()
+                            .Where(r => r.startTime >= start)
+                            .Where(r => r.startTime <= end)
+                            .Count();
+                    }
+                    else {
+                        return db.Set<Recording>().Count();
+                    }
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 获取最新录像
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <param name="count">数量</param>
+        /// <returns>录像列表</returns>
+        public static List<Recording> GetLastRecordings(DateTime start, DateTime end, int count)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    return db.Set<Recording>()
+                        .Where(r => r.startTime >= start)
+                        .Where(r => r.startTime <= end)
+                        .OrderByDescending(r => r.startTime)
+                        .Take(count).ToList();
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取录像
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <param name="page">页码</param>
+        /// <param name="count">数量</param>
+        /// <returns>录像列表</returns>
+        public static List<Recording> GetRecordings(DateTime start, DateTime end, int page, int count)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    if ((start == null) || (end == null)) {
+                        return db.Set<Recording>()
+                            .Where(r => r.startTime >= start)
+                            .Where(r => r.startTime <= end)
+                            .OrderByDescending(r => r.startTime)
+                            .Skip((page - 1) * count).Take(count)
+                            .ToList();
+                    }
+                    else {
+                        return db.Set<Recording>()
+                            .OrderByDescending(r => r.startTime)
+                            .Skip((page - 1) * count).Take(count)
+                            .ToList();
+                    }
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 批量删除录像
+        /// </summary>
+        /// <param name="ids">索引列表</param>
+        /// <returns>是否成功</returns>
+        public static bool DeleteRecordings(List<int> ids)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    var recordings = db.Set<Recording>().Where(r => ids.Contains(r.id)).ToList();
+                    db.Set<Recording>().RemoveRange(recordings);
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

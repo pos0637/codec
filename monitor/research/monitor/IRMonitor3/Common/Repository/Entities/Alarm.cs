@@ -11,7 +11,7 @@ namespace Repository.Entities
         /// <summary>
         /// 告警类型
         /// </summary>
-        public enum Type
+        public enum AlarmType
         {
             /// <summary>
             /// 无告警
@@ -75,7 +75,7 @@ namespace Repository.Entities
             /// 告警类型
             /// </summary>
             [DataMember]
-            public Type type;
+            public AlarmType type;
 
             /// <summary>
             /// 温度类型
@@ -135,7 +135,7 @@ namespace Repository.Entities
         /// <summary>
         /// 告警类型
         /// </summary>
-        public Type alarmType { get; set; }
+        public AlarmType type { get; set; }
 
         /// <summary>
         /// 温度类型

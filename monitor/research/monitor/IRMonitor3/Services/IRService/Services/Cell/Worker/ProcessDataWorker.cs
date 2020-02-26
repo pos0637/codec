@@ -188,7 +188,7 @@ namespace IRService.Services.Cell.Worker
             alarm.temperatures.Enqueue(temperture);
             // TODO: 通过算法计算温度
 
-            if (configuration.type == Repository.Entities.Alarm.Type.High) {
+            if (configuration.type == Repository.Entities.Alarm.AlarmType.High) {
                 if (temperture >= configuration.criticalThreshold) {
                     alarm.level = Repository.Entities.Alarm.Level.Critical;
                 }
@@ -202,7 +202,7 @@ namespace IRService.Services.Cell.Worker
                     alarm.level = Repository.Entities.Alarm.Level.None;
                 }
             }
-            else if (configuration.type == Repository.Entities.Alarm.Type.Low) {
+            else if (configuration.type == Repository.Entities.Alarm.AlarmType.Low) {
                 if (temperture <= configuration.criticalThreshold) {
                     alarm.level = Repository.Entities.Alarm.Level.Critical;
                 }

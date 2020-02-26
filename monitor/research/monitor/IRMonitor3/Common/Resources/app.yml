@@ -29,9 +29,9 @@ cells:
     cameraParameters:
       channel: 1
       uri: 'channel=1'
-      width: 1280
-      stride: 1280
-      height: 720
+      width: 320
+      stride: 320
+      height: 240
       bpp: 4
       videoFrameRate: 15
   - enabled: true

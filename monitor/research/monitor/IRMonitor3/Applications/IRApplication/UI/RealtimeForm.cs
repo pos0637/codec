@@ -173,7 +173,7 @@ namespace IRApplication.UI
         private void buttonSaveBitmap_Click(object sender, System.EventArgs e)
         {
             // TODO: delete it
-            EventEmitter.Instance.Publish(IRService.Common.Constants.EVENT_SERVICE_ON_ALARM, cell, cell.devices[0], Repository.Entities.Alarm.Type.Manual, new RectangleF(), "用户触发告警");
+            EventEmitter.Instance.Publish(IRService.Common.Constants.EVENT_SERVICE_ON_ALARM, cell, cell.devices[0], Repository.Entities.Alarm.AlarmType.Manual, new RectangleF(), "用户触发告警");
         }
     }
 }
