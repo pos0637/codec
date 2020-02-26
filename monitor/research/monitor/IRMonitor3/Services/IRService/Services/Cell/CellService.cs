@@ -123,6 +123,162 @@ namespace IRService.Services.Cell
             return true;
         }
 
+        /// <summary>
+        /// 获取人脸测温配置规则
+        /// </summary>
+        /// <param name="deviceId">设备索引</param>
+        /// <returns>人脸测温配置规则</returns>
+        public Dictionary<string, object> GetFaceThermometryRegion(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return null;
+            }
+
+            if (!device.Read(ReadMode.FaceThermometryRegion, null, out object result, out int used)) {
+                return null;
+            }
+
+            return result as Dictionary<string, object>;
+        }
+
+        /// <summary>
+        /// 设置人脸测温配置规则
+        /// </summary>
+        ///  <param name="deviceId">设备索引</param>
+        /// <param name="arguments">人脸测温配置规则</param>
+        /// <returns>是否成功</returns>
+        public bool SetFaceThermometryRegion(string deviceId, Dictionary<string, object> arguments)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.FaceThermometryRegion, arguments)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 获取人脸测温基本参数配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <returns>人脸测温基本参数配置</returns>
+        public Dictionary<string, object> GetFaceThermometryBasicParameter(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return null;
+            }
+
+            if (!device.Read(ReadMode.FaceThermometryBasicParameter, null, out object result, out int used)) {
+                return null;
+            }
+
+            return result as Dictionary<string, object>;
+        }
+
+        /// <summary>
+        /// 设置人脸测温基本参数配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <param name="arguments">人脸测温基本参数配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetFaceThermometryBasicParameter(string deviceId, Dictionary<string, object> arguments)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.FaceThermometryBasicParameter, arguments)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 获取体温温度补偿配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <returns>体温温度补偿配置</returns>
+        public Dictionary<string, object> GetBodyTemperatureCompensation(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return null;
+            }
+
+            if (!device.Read(ReadMode.BodyTemperatureCompensation, null, out object result, out int used)) {
+                return null;
+            }
+
+            return result as Dictionary<string, object>;
+        }
+
+        /// <summary>
+        /// 设置体温温度补偿配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <param name="arguments">体温温度补偿配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetBodyTemperatureCompensation(string deviceId, Dictionary<string, object> arguments)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.BodyTemperatureCompensation, arguments)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 获取黑体配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <returns>黑体配置</returns>
+        public Dictionary<string, object> GetBlackBody(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return null;
+            }
+
+            if (!device.Read(ReadMode.BlackBody, null, out object result, out int used)) {
+                return null;
+            }
+
+            return result as Dictionary<string, object>;
+        }
+
+        /// <summary>
+        /// 设置黑体配置
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <param name="arguments">黑体配置</param>
+        /// <returns>是否成功</returns>
+        public bool SetBlackBody(string deviceId, Dictionary<string, object> arguments)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.BlackBody, arguments)) {
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion
     }
 }

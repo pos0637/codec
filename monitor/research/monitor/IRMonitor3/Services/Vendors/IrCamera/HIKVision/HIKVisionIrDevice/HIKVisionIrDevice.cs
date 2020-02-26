@@ -356,6 +356,26 @@ namespace HIKVisionIrDevice
                     return true;
                 }
 
+                case ReadMode.FaceThermometryRegion: {
+                    outData = GetFaceThermometryRegion();
+                    return true;
+                }
+
+                case ReadMode.FaceThermometryBasicParameter: {
+                    outData = GetFaceThermometryBasicParameter();
+                    return true;
+                }
+
+                case ReadMode.BodyTemperatureCompensation: {
+                    outData = GetBodyTemperatureCompensation();
+                    return true;
+                }
+
+                case ReadMode.BlackBody: {
+                    outData = GetBlackBody();
+                    return true;
+                }
+
                 default:
                     break;
             }
@@ -413,6 +433,22 @@ namespace HIKVisionIrDevice
 
                 case WriteMode.PaletteMode: {
                     return SetPaletteMode(data.ToString());
+                }
+
+                case WriteMode.FaceThermometryRegion: {
+                    return SetFaceThermometryRegion(data as Dictionary<string, object>);
+                }
+
+                case WriteMode.FaceThermometryBasicParameter: {
+                    return SetFaceThermometryBasicParameter(data as Dictionary<string, object>);
+                }
+
+                case WriteMode.BodyTemperatureCompensation: {
+                    return SetBodyTemperatureCompensation(data as Dictionary<string, object>);
+                }
+
+                case WriteMode.BlackBody: {
+                    return SetBlackBody(data as Dictionary<string, object>);
                 }
 
                 default:

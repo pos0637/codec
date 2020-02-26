@@ -27,7 +27,11 @@ namespace Devices
         Transmission, // 透过率
         PaletteMode, // 调色板
         IrCameraParameters, // 红外摄像机参数
-        CameraParameters // 可见光摄像机参数
+        CameraParameters, // 可见光摄像机参数
+        FaceThermometryRegion, // 人脸测温区域
+        FaceThermometryBasicParameter, // 人脸测温基本参数
+        BodyTemperatureCompensation, // 体温温度补偿
+        BlackBody // 黑体配置
     };
 
     /// <summary>
@@ -47,6 +51,10 @@ namespace Devices
         Transmission, // 透过率
         PaletteMode, // 调色板
         IrCameraParameters, // 红外摄像机参数
-        CameraParameters // 可见光摄像机参数
+        CameraParameters, // 可见光摄像机参数
+        FaceThermometryRegion, // 人脸测温区域
+        FaceThermometryBasicParameter, // 人脸测温基本参数
+        BodyTemperatureCompensation, // 体温温度补偿
+        BlackBody // 黑体配置
     };
 }
