@@ -20,7 +20,7 @@ namespace Codec
         private long pts;
         private int frames_per_second;
         private bool ioOpened;
-        private Hashtable userData = Hashtable.Synchronized(new Hashtable());
+        private readonly Hashtable userData = Hashtable.Synchronized(new Hashtable());
 
         public void Dispose()
         {

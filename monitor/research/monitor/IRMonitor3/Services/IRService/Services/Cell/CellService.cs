@@ -16,6 +16,11 @@ namespace IRService.Services.Cell
         #region 成员变量
 
         /// <summary>
+        /// 配置信息
+        /// </summary>
+        public Configuration configuration;
+
+        /// <summary>
         /// 设备单元配置
         /// </summary>
         public Configuration.Cell cell;
@@ -33,6 +38,7 @@ namespace IRService.Services.Cell
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override bool Initialize(Dictionary<string, object> arguments)
         {
+            configuration = Repository.Repository.LoadConfiguation();
             cell = arguments["cell"] as Configuration.Cell;
 
             if (!LoadSelections()) {
@@ -44,7 +50,10 @@ namespace IRService.Services.Cell
 
         public override void Stop()
         {
-            EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
+            if (configuration.information.onlineMode) {
+                EventEmitter.Instance.Unsubscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
+            }
+
             CloseDevices();
 
             base.Stop();
@@ -57,8 +66,16 @@ namespace IRService.Services.Cell
                 return;
             }
 
-            onStartLiveStreaming = (args) => { StartLiveStreaming(args[0] as Dictionary<int, string>); };
-            EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
+            if (configuration.information.recordingMode) {
+                if (!StartRecording()) {
+                    return;
+                }
+            }
+
+            if (configuration.information.onlineMode) {
+                onStartLiveStreaming = (args) => { StartLiveStreaming(args[0] as Dictionary<int, string>); };
+                EventEmitter.Instance.Subscribe(Constants.EVENT_SERVICE_START_STREAMING, onStartLiveStreaming);
+            }
 
             base.OnStart();
         }

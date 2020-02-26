@@ -41,7 +41,7 @@ namespace Codec
             ffmpeg.avformat_network_init();
 
             fixed (AVFormatContext** c = &formatContext) {
-                if (ffmpeg.avformat_alloc_output_context2(c, null, "h264", null) < 0) {
+                if (ffmpeg.avformat_alloc_output_context2(c, null, "mp4", null) < 0) {
                     throw new Exception("Could not allocate output format context!");
                 }
             }
@@ -81,6 +81,9 @@ namespace Codec
             }
         }
 
+        /// <summary>
+        /// 重置
+        /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Reset()
         {
@@ -102,6 +105,10 @@ namespace Codec
             ffmpeg.avformat_network_deinit();
         }
 
+        /// <summary>
+        /// 开始推流
+        /// </summary>
+        /// <param name="uri">服务器资源地址</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Start(string filename)
         {
@@ -138,6 +145,9 @@ namespace Codec
             pts = 0;
         }
 
+        /// <summary>
+        /// 停止推流
+        /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Stop()
         {
@@ -162,6 +172,12 @@ namespace Codec
             }
         }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="data1">Y通道数据</param>
+        /// <param name="data2">U通道数据</param>
+        /// <param name="data3">V通道数据</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Encode(IntPtr data1, IntPtr data2, IntPtr data3)
         {
@@ -211,8 +227,7 @@ namespace Codec
                 if (packet->dts != ffmpeg.AV_NOPTS_VALUE)
                     packet->dts = ffmpeg.av_rescale_q(packet->dts, context->time_base, stream->time_base);
                 double sec = packet->pts * ffmpeg.av_q2d(stream->time_base);
-                Console.WriteLine($"frame: {frame->pts}, pts: {packet->pts}, dts: {packet->dts}, time: {sec}, length: {packet->size}");
-
+                // Console.WriteLine($"frame: {frame->pts}, pts: {packet->pts}, dts: {packet->dts}, time: {sec}, length: {packet->size}");
                 // byte[] data = new byte[packet->size];
                 // Marshal.Copy((IntPtr)packet->data, data, 0, packet->size);
                 // Console.WriteLine("data: " + string.Concat(data.Select(b => string.Format("0x{0},", b.ToString("X2"))).ToArray()));               

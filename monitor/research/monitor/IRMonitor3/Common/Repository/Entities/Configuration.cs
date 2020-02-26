@@ -76,6 +76,21 @@
             public int rtmpServerPort;
 
             /// <summary>
+            /// 在线模式
+            /// </summary>
+            public bool onlineMode;
+
+            /// <summary>
+            /// 本地录像模式
+            /// </summary>
+            public bool recordingMode;
+
+            /// <summary>
+            /// 本地录像文件时长
+            /// </summary>
+            public int recordingDuration;
+
+            /// <summary>
             /// 视频保存路径
             /// </summary>
             public string saveVideoPath;

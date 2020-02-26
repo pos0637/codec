@@ -2,8 +2,10 @@
 using Common;
 using Devices;
 using Miscs;
+using Repository.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 
 namespace IRService.Services.Cell.Worker
@@ -14,6 +16,11 @@ namespace IRService.Services.Cell.Worker
     public class RecordingWorker : BaseWorker
     {
         /// <summary>
+        /// 配置信息
+        /// </summary>
+        public Configuration configuration;
+
+        /// <summary>
         /// 设备单元服务
         /// </summary>
         private CellService cell;
@@ -22,6 +29,11 @@ namespace IRService.Services.Cell.Worker
         /// 设备
         /// </summary>
         private IDevice device;
+
+        /// <summary>
+        /// 通道
+        /// </summary>
+        private int channel;
 
         /// <summary>
         /// 服务器资源地址
@@ -63,15 +75,12 @@ namespace IRService.Services.Cell.Worker
         /// </summary>
         private EventEmitter.EventHandler onReceiveImage;
 
-        /// <summary>
-        /// 编码器
-        /// </summary>
-        private RTMPEncoder encoder;
-
         public override ARESULT Initialize(Dictionary<string, object> arguments)
         {
+            configuration = Repository.Repository.LoadConfiguation();
             cell = arguments["cell"] as CellService;
             device = arguments["device"] as IDevice;
+            channel = (int)arguments["channel"];
             uri = arguments["uri"] as string;
             width = (int)arguments["width"];
             height = (int)arguments["height"];
@@ -90,54 +99,94 @@ namespace IRService.Services.Cell.Worker
 
         public override ARESULT Start()
         {
-            try {
-                encoder = new RTMPEncoder();
-                encoder.Initialize(width, height, frameRate);
-                encoder.Start(uri);
-            }
-            catch (Exception e) {
-                Tracker.LogE(e);
-                return ARESULT.E_FAIL;
-            }
-
             EventEmitter.Instance.Subscribe(eventName, onReceiveImage);
             return base.Start();
         }
 
         public override void Discard()
         {
-            encoder?.Stop();
-            encoder?.Dispose();
-            encoder = null;
-
             EventEmitter.Instance.Unsubscribe(eventName, onReceiveImage);
             base.Discard();
         }
 
         protected override void Run()
         {
+            Encoder encoder = null;
             PinnedBuffer<byte> image = null;
-            int size = width * height;
+            var size = width * height;
+            var recordingDuration = configuration.information.recordingDuration;
 
             while (!IsTerminated()) {
-                // 克隆数据
-                var temp = this.image;
-                if (temp == null) {
-                    Thread.Sleep(duration);
-                    continue;
-                }
+                DateTime start = DateTime.Now;
+                var uri = this.uri;
 
                 try {
-                    // 编码
-                    image = Arrays.Clone(temp, image, sizeof(byte));
-                    encoder.Encode(image.ptr, image.ptr + size, image.ptr + size + size / 4);
+                    // 自动生成文件名
+                    if (uri == null) {
+                        uri = GenerateRecordingFilename($"{cell.cell.name}-{device.Name}-{channel}");
+                    }
+
+                    // TODO: 检查存储空间
+                    encoder = new Encoder();
+                    encoder.Initialize(width, height, frameRate);
+                    encoder.Start(uri);
                 }
                 catch (Exception e) {
                     Tracker.LogE(e);
+                    Thread.Sleep(3000);
+                    continue;
                 }
 
-                Thread.Sleep(duration);
+                while (!IsTerminated()) {
+                    // 检查分片录像是否结束
+                    if ((DateTime.Now - start).TotalSeconds > recordingDuration) {
+                        encoder?.Stop();                        
+                        encoder?.Dispose();
+                        encoder = null;
+                        break;
+                    }
+
+                    // 克隆数据
+                    var temp = this.image;
+                    if (temp == null) {
+                        Thread.Sleep(duration);
+                        continue;
+                    }
+
+                    try {
+                        // 编码
+                        image = Arrays.Clone(temp, image, sizeof(byte));
+                        encoder.Encode(image.ptr, image.ptr + size, image.ptr + size + size / 4);
+                    }
+                    catch (Exception e) {
+                        Tracker.LogE(e);
+                        Thread.Sleep(3000);
+                        break;
+                    }
+
+                    Thread.Sleep(duration);
+                }
             }
+
+            encoder?.Stop();
+            encoder?.Dispose();
+        }
+
+        /// <summary>
+        /// 生成录像文件名
+        /// </summary>
+        /// <param name="tag">标签</param>
+        /// <returns>录像文件名</returns>
+        private string GenerateRecordingFilename(string tag)
+        {
+            var now = DateTime.Now;
+            var folder = $"{configuration.information.saveVideoPath}";
+            var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}-{tag}.mp4";
+            if (!Directory.Exists(folder)) {
+                Directory.CreateDirectory(folder);
+            }
+
+            return filename;
         }
     }
 }

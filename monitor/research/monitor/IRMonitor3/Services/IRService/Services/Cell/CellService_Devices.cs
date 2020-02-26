@@ -6,7 +6,6 @@ using Miscs;
 using Repository.Entities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using static IRService.Miscs.MethodUtils;
 
 namespace IRService.Services.Cell
@@ -111,21 +110,6 @@ namespace IRService.Services.Cell
 
                         workers.Add(worker);
                         Tracker.LogE($"CaptureVideoWorker start succeed: {device.model}");
-
-                        // 启动处理告警工作线程
-                        worker = new ProcessAlarmWorker();
-                        if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
-                            Tracker.LogE($"ProcessAlarmWorker initialize fail: {device.model}");
-                            return false;
-                        }
-
-                        if (ARESULT.AFAILED(worker.Start())) {
-                            Tracker.LogE($"ProcessAlarmWorker start fail: {device.model}");
-                            return false;
-                        }
-
-                        workers.Add(worker);
-                        Tracker.LogE($"ProcessAlarmWorker start succeed: {device.model}");
 
                         break;
                     }
@@ -333,7 +317,7 @@ namespace IRService.Services.Cell
                             }
 
                             var cameraParameters = outData as Configuration.CameraParameters;
-                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{cameraParameters.channel}"), cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                            if (!CreateRecordingWorker(device, cameraParameters.channel, null, cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
                                 return false;
                             }
 
@@ -346,7 +330,7 @@ namespace IRService.Services.Cell
                             }
 
                             var cameraParameters = outData as Configuration.CameraParameters;
-                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{cameraParameters.channel}"), cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
+                            if (!CreateRecordingWorker(device, cameraParameters.channel, null, cameraParameters.width, cameraParameters.height, cameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IMAGE)) {
                                 return false;
                             }
 
@@ -355,7 +339,7 @@ namespace IRService.Services.Cell
                             }
 
                             var irCameraParameters = outData as Configuration.IrCameraParameters;
-                            if (!CreateRecordingWorker(device, GenerateRecordingFilename($"{device.Model}-{irCameraParameters.channel}"), irCameraParameters.width, irCameraParameters.height, irCameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IRIMAGE)) {
+                            if (!CreateRecordingWorker(device, irCameraParameters.channel, null, irCameraParameters.width, irCameraParameters.height, irCameraParameters.videoFrameRate, Constants.EVENT_SERVICE_RECEIVE_IRIMAGE)) {
                                 return false;
                             }
 
@@ -369,7 +353,7 @@ namespace IRService.Services.Cell
                     }
                 }
                 catch (Exception e) {
-                    Tracker.LogE($"StartLiveStreaming fail: {device.Model}", e);
+                    Tracker.LogE($"StartRecording fail: {device.Model}", e);
                     return false;
                 }
             }
@@ -388,39 +372,23 @@ namespace IRService.Services.Cell
         }
 
         /// <summary>
-        /// 生成录像文件名
-        /// </summary>
-        /// <param name="tag">标签</param>
-        /// <returns>录像文件名</returns>
-        private string GenerateRecordingFilename(string tag)
-        {
-            var configuation = Repository.Repository.LoadConfiguation();
-            var now = DateTime.Now;
-            var folder = $"{configuation.information.saveVideoPath}/{now.Year}-{now.Month}-{now.Day}";
-            var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}-{tag}.mp4";
-            if (!Directory.Exists(folder)) {
-                Directory.CreateDirectory(folder);
-            }
-
-            return filename;
-        }
-
-        /// <summary>
         /// 创建录像工作线程
         /// </summary>
         /// <param name="device">设备</param>
+        /// <param name="channel">通道</param>
         /// <param name="uri">资源地址</param>
         /// <param name="width">宽度</param>
         /// <param name="height">高度</param>
         /// <param name="frameRate">帧率</param>
         /// <param name="eventName">事件名称</param>
         /// <returns>是否成功</returns>
-        private bool CreateRecordingWorker(IDevice device, string uri, int width, int height, int frameRate, string eventName)
+        private bool CreateRecordingWorker(IDevice device, int channel, string uri, int width, int height, int frameRate, string eventName)
         {
             var worker = new RecordingWorker();
             if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() {
                 { "cell", this },
                 { "device", device },
+                { "channel", channel },
                 { "uri", uri },
                 { "width", width },
                 { "height", height },

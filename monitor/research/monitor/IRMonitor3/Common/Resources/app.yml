@@ -12,6 +12,9 @@
   mqttServerPort: 1883
   rtmpServerIp: 127.0.0.1
   rtmpServerPort: 1935
+  onlineMode: false
+  recordingMode: true
+  recordingDuration: 600
   saveVideoPath: ./video
   saveImagePath: ./image
 cells:
