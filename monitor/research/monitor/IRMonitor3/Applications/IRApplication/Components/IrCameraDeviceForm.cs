@@ -28,7 +28,7 @@ namespace IRApplication.Components
         protected virtual IRenderableControl RenderableControl {
             get {
                 if (renderableControl == null) {
-                    renderableControl = HIKVisionRenderableControl.UseHIKDevice ? new HIKVisionRenderableControl(1) as IRenderableControl : new OpenGLRenderableControl() as IRenderableControl;
+                    renderableControl = HIKVisionRenderableControl.UseHIKDevice ? new HIKVisionRenderableControl(2) as IRenderableControl : new OpenGLRenderableControl() as IRenderableControl;
                 }
 
                 return renderableControl;
