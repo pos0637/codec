@@ -18,7 +18,7 @@ namespace DrawTools
         {
             Point p = drawArea.BackTrackMouse(new Point(e.X, e.Y));
             if (drawArea.CurrentPen == null)
-                AddNewObject(drawArea, new DrawRectangle(p.X, p.Y, 1, 1, drawArea.LineColor, drawArea.FillColor, drawArea.DrawFilled, drawArea.LineWidth));
+                AddNewObject(drawArea, new DrawRectangle(p.X, p.Y, 10, 10, Color.Red, drawArea.FillColor, drawArea.DrawFilled, drawArea.LineWidth));
             else
                 AddNewObject(drawArea, new DrawRectangle(p.X, p.Y, 1, 1, drawArea.PenType, drawArea.FillColor, drawArea.DrawFilled));
         }

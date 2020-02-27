@@ -68,22 +68,22 @@ namespace IRApplication.UI
         /// <summary>
         /// 人脸测温配置规则参数
         /// </summary>
-        private readonly Dictionary<string, object> faceThermometryBasicParameter;
+        private Dictionary<string, object> faceThermometryBasicParameter;
 
         /// <summary>
         /// 人脸测温基本配置参数
         /// </summary>
-        private readonly Dictionary<string, object> faceThermometryRegion;
+        private Dictionary<string, object> faceThermometryRegion;
 
         /// <summary>
         /// 体温温度补偿配置参数
         /// </summary>
-        private readonly Dictionary<string, object> bodyTemperatureCompensation;
+        private Dictionary<string, object> bodyTemperatureCompensation;
 
         /// <summary>
         /// 黑体配置参数
         /// </summary>
-        private readonly Dictionary<string, object> blackBody;
+        private Dictionary<string, object> blackBody;
 
         /// <summary>
         ///  构造函数
@@ -94,37 +94,46 @@ namespace IRApplication.UI
             InitializeComponent();
 
             this.cell = cell;
+            GetParameters();
+        }
 
+        /// <summary>
+        /// 获取参数列表
+        /// </summary>
+        private void GetParameters()
+        {
             faceThermometryBasicParameter = cell.GetFaceThermometryBasicParameter(null);
-            if (faceThermometryBasicParameter != null) {
-                text_facetbp_emissivity.Text = faceThermometryBasicParameter["emissivity"].ToString().ToLower();
-                text_facetbp_distance.Text = faceThermometryBasicParameter["distance"].ToString().ToLower();
-            }
-
             faceThermometryRegion = cell.GetFaceThermometryRegion(null);
-            if (faceThermometryRegion != null) {
-                text_facetr_targetSpeed.Text = faceThermometryRegion["targetSpeed"].ToString().ToLower();
-                text_facetr_sensitivity.Text = faceThermometryRegion["sensitivity"].ToString().ToLower();
-                text_facetr_alarmTemperature.Text = faceThermometryRegion["alarmTemperature"].ToString().ToLower();
-            }
-
             bodyTemperatureCompensation = cell.GetBodyTemperatureCompensation(null);
-            if (bodyTemperatureCompensation != null) {
-                com_bodytc_type.Text = bodyTemperatureCompensation["type"].ToString().ToLower() == "auto" ? "自动" : "手动";
-                text_bodytc_compensationValue.Text = bodyTemperatureCompensation["compensationValue"].ToString().ToLower();
-                text_bodytc_smartCorrection.Text = bodyTemperatureCompensation["smartCorrection"].ToString().ToLower();
-                com_bodytc_mode.Text = bodyTemperatureCompensation["environmentalTemperatureMode"].ToString().ToLower() == "auto" ? "自动" : "手动";
-                text_bodytc_environ.Text = bodyTemperatureCompensation["environmentalTemperature"].ToString().ToLower();
+            blackBody = cell.GetBlackBody(null);
+
+            if ((faceThermometryBasicParameter == null)
+                || (faceThermometryBasicParameter == null)
+                || (faceThermometryRegion == null)
+                || (bodyTemperatureCompensation == null)) {
+                MessageBox.Show("获取参数列表失败!");
+                Close();
+                return;
             }
 
-            blackBody = cell.GetBlackBody(null);
-            if (blackBody != null) {
-                check_black_enabled.Checked = blackBody["enabled"].ToString().ToLower() == "true" ? true : false;
-                com_black_distance.Text = blackBody["distance"].ToString().ToLower();
-                text_black_emissivity.Text = blackBody["emissivity"].ToString().ToLower();
-                text_black_temp.Text = blackBody["temperature"].ToString().ToLower();
-                CheckedEnabled();
-            }
+            text_facetbp_emissivity.Text = faceThermometryBasicParameter["emissivity"].ToString().ToLower();
+            text_facetbp_distance.Text = faceThermometryBasicParameter["distance"].ToString().ToLower();
+
+            text_facetr_targetSpeed.Text = faceThermometryRegion["targetSpeed"].ToString().ToLower();
+            text_facetr_sensitivity.Text = faceThermometryRegion["sensitivity"].ToString().ToLower();
+            text_facetr_alarmTemperature.Text = faceThermometryRegion["alarmTemperature"].ToString().ToLower();
+
+            com_bodytc_type.Text = bodyTemperatureCompensation["type"].ToString().ToLower() == "auto" ? "自动" : "手动";
+            text_bodytc_compensationValue.Text = bodyTemperatureCompensation["compensationValue"].ToString().ToLower();
+            text_bodytc_smartCorrection.Text = bodyTemperatureCompensation["smartCorrection"].ToString().ToLower();
+            com_bodytc_mode.Text = bodyTemperatureCompensation["environmentalTemperatureMode"].ToString().ToLower() == "auto" ? "自动" : "手动";
+            text_bodytc_environ.Text = bodyTemperatureCompensation["environmentalTemperature"].ToString().ToLower();
+
+            check_black_enabled.Checked = blackBody["enabled"].ToString().ToLower() == "true" ? true : false;
+            text_black_distance.Text = blackBody["distance"].ToString().ToLower();
+            text_black_emissivity.Text = blackBody["emissivity"].ToString().ToLower();
+            text_black_temp.Text = blackBody["temperature"].ToString().ToLower();
+            CheckedEnabled();
         }
 
         /// <summary>
@@ -184,6 +193,43 @@ namespace IRApplication.UI
             drawAreaCamera.Initialize(this, drawToolbar, new Size(cameraDeviceForm.Width, cameraDeviceForm.Height));
             drawAreaIRCamera.Initialize(this, drawToolbar, new Size(irCameraDeviceForm.Width, irCameraDeviceForm.Height));
             drawToolbar.SetDrawArea(drawAreaCamera, drawAreaIRCamera);
+
+            Rectangle rect = (Rectangle)faceThermometryRegion["rectangle"];
+            Draw(drawAreaCamera, Color.Green, rect.X * drawAreaCamera.Width / 1000, rect.Y * drawAreaCamera.Height / 1000, rect.Width * drawAreaCamera.Width / 1000, rect.Height * drawAreaCamera.Height / 1000, true);
+
+            Point point = (Point)blackBody["point"];
+            Draw(drawAreaIRCamera, Color.Blue, point.X * drawAreaIRCamera.Width / 1000, point.Y * drawAreaIRCamera.Height / 1000);
+        }
+
+        /// <summary>
+        /// 在对应的DrawArea上画点或矩形
+        /// </summary>
+        /// <param name="drawArea">绘画的区域</param>
+        /// <param name="x">矩形或点的x</param>
+        /// <param name="y">矩形或点的y</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="color">颜色</param>
+        /// <param name="isRectangle">是否是矩形</param>
+        private void Draw(DrawArea drawArea, Color color, int x, int y, int width = 2, int height = 2, bool isRectangle = false)
+        {
+            DrawObject o;
+            if (isRectangle) {
+                o = new DrawRectangle(x, y, width, height, Color.Red, Color.Green, drawArea.DrawFilled, drawArea.LineWidth);
+            }
+            else {
+                o = new DrawPoint(x, y, color, drawArea.LineWidth);
+            }
+
+            int al = drawArea.TheLayers.ActiveLayerIndex;
+            drawArea.TheLayers[al].Graphics.UnselectAll();
+
+            o.Selected = true;
+            o.Dirty = true;
+            o.ID = DrawObject.sCurrentDrawObjectId++;
+
+            drawArea.TheLayers[al].Graphics.Add(o);
+            drawArea.Invalidate();
         }
 
         /// <summary>
@@ -192,12 +238,12 @@ namespace IRApplication.UI
         private void CheckedEnabled()
         {
             if (check_black_enabled.Checked) {
-                com_black_distance.Enabled = true;
+                text_black_distance.Enabled = true;
                 text_black_emissivity.Enabled = true;
                 text_black_temp.Enabled = true;
             }
             else {
-                com_black_distance.Enabled = false;
+                text_black_distance.Enabled = false;
                 text_black_emissivity.Enabled = false;
                 text_black_temp.Enabled = false;
             }
@@ -238,7 +284,7 @@ namespace IRApplication.UI
             ComboBox cb = sender as ComboBox;
             if (cb.Name == "com_bodytc_type") {
                 if (cb.Text == "自动") {
-                    text_bodytc_smartCorrection.Enabled = false;
+                    text_bodytc_smartCorrection.Enabled = true;
                 }
                 else {
                     text_bodytc_smartCorrection.Enabled = true;
@@ -262,7 +308,7 @@ namespace IRApplication.UI
         private void btn_save_Click(object sender, EventArgs e)
         {
             blackBody["enabled"] = check_black_enabled.Checked.ToString();
-            blackBody["distance"] = com_black_distance.Text;
+            blackBody["distance"] = text_black_distance.Text;
             blackBody["emissivity"] = text_black_emissivity.Text;
             blackBody["temperature"] = text_black_temp.Text;
 
@@ -274,7 +320,7 @@ namespace IRApplication.UI
             if (coutours != null) {
                 var getCoutours = drawToolbar.DrawArea.GetParameters();
                 if (getCoutours != null) {
-                    coutours.AddRange(getCoutours);
+                    coutours.Add(getCoutours[0]);
                 }
             }
 
@@ -290,9 +336,14 @@ namespace IRApplication.UI
             faceThermometryBasicParameter["emissivity"] = text_facetbp_emissivity.Text;
             faceThermometryBasicParameter["distance"] = Convert.ToSingle(text_facetbp_distance.Text);
 
-            bodyTemperatureCompensation["type"] = com_bodytc_type.Text == "自动" ? "auto" : "manual";
-            bodyTemperatureCompensation["compensationValue"] = text_bodytc_compensationValue.Text;
-            bodyTemperatureCompensation["smartCorrection"] = text_bodytc_smartCorrection.Text;
+            if (com_bodytc_type.Text == "自动") {
+                bodyTemperatureCompensation["type"] = "auto";
+                bodyTemperatureCompensation["smartCorrection"] = text_bodytc_smartCorrection.Text;
+            }
+            else {
+                bodyTemperatureCompensation["type"] = "manual";
+                bodyTemperatureCompensation["smartCorrection"] = text_bodytc_smartCorrection.Text;
+            }
             bodyTemperatureCompensation["environmentalTemperatureMode"] = com_bodytc_mode.Text == "自动" ? "auto" : "manual";
             bodyTemperatureCompensation["environmentalTemperature"] = text_bodytc_environ.Text;
 
@@ -301,14 +352,267 @@ namespace IRApplication.UI
                 return;
             }
 
+            GetParameters();
+            drawAreaCamera.ClearAll();
+            drawAreaIRCamera.ClearAll();
+
+            Rectangle rect = (Rectangle)faceThermometryRegion["rectangle"];
+            Draw(drawAreaCamera, Color.Green, rect.X * drawAreaCamera.Width / 1000, rect.Y * drawAreaCamera.Height / 1000, rect.Width * drawAreaCamera.Width / 1000, rect.Height * drawAreaCamera.Height / 1000, true);
+
+            Point point = (Point)blackBody["point"];
+            Draw(drawAreaIRCamera, Color.Blue, point.X * drawAreaIRCamera.Width / 1000, point.Y * drawAreaIRCamera.Height / 1000);
             MessageBox.Show("设置完成!");
         }
 
         private void CheckedChanged(object sender, EventArgs e)
         {
+            CheckBox cb = sender as CheckBox;
             CheckedEnabled();
+        }
+
+        private void JudgmentInput(TextBox textBox, KeyPressEventArgs e)
+        {
+            //判断按键是不是要输入的类型。
+            if (((int)e.KeyChar < 48 || (int)e.KeyChar > 57) && (int)e.KeyChar != 8 && (int)e.KeyChar != 46)
+                e.Handled = true;
+            //小数点的处理。
+            if ((int)e.KeyChar == 46) //小数点
+            {
+                if (textBox.Text.Length <= 0)
+                    e.Handled = true; //小数点不能在第一位
+                else {
+                    float f;
+                    float oldf;
+                    bool b1 = false, b2 = false;
+                    b1 = float.TryParse(textBox.Text, out oldf);
+                    b2 = float.TryParse(textBox.Text + e.KeyChar.ToString(), out f);
+                    if (b2 == false) {
+                        if (b1 == true)
+                            e.Handled = true;
+                        else
+                            e.Handled = false;
+                    }
+                }
+            }
+        }
+
+        private void text_black_distance_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_black_temp_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_black_emissivity_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_facetr_targetSpeed_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_facetr_sensitivity_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_facetr_alarmTemperature_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_facetbp_emissivity_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_facetbp_distance_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_bodytc_smartCorrection_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_bodytc_environ_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            JudgmentInput(textBox, e);
+        }
+
+        private void text_black_distance_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 10) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0-10");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_black_temp_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (textBox.Text.Length == 1 && Convert.ToSingle(textBox.Text) != 3 && Convert.ToSingle(textBox.Text) != 4) {
+                textBox.Text = "3";
+                textBox.Select(1, 0);
+            }
+            if (textBox.Text.Length > 1 && (Convert.ToSingle(textBox.Text) < 30 || Convert.ToSingle(textBox.Text) > 50)) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 30-50");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_black_emissivity_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 1) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0-1");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_facetr_targetSpeed_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 1 || Convert.ToSingle(textBox.Text) > 5) {
+                textBox.Text = textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 1-5");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_facetr_sensitivity_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 1 || Convert.ToSingle(textBox.Text) > 5) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 1-5");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_facetr_alarmTemperature_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (textBox.Text.Length == 1 && Convert.ToSingle(textBox.Text) != 3 && Convert.ToSingle(textBox.Text) != 4) {
+                textBox.Text = "3";
+                textBox.Select(1, 0);
+            }
+
+            if (textBox.Text.Length > 1 && (Convert.ToSingle(textBox.Text) < 30 || Convert.ToSingle(textBox.Text) > 45)) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 30-45");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_facetbp_emissivity_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 1) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0.01-1");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_facetbp_distance_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 655) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0-655");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_bodytc_smartCorrection_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 99) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0-99");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
+        }
+
+        private void text_bodytc_environ_TextChanged(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (string.IsNullOrEmpty(textBox.Text)) {
+                return;
+            }
+
+            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 99) {
+                textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
+                MessageBox.Show("范围 0-99");
+                textBox.Focus();
+                textBox.Select(textBox.Text.Length, 0);
+            }
         }
     }
 }
-
-

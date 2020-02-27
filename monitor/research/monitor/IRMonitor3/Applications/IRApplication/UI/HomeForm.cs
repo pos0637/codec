@@ -38,7 +38,7 @@ namespace IRApplication.UI
         /// <summary>
         /// 参数设置窗体
         /// </summary>
-        private SetParameterForm parameterSetConfigForm;
+        private SetParameterForm setParameterForm;
 
         /// <summary>
         /// 用户手册窗体
@@ -105,8 +105,8 @@ namespace IRApplication.UI
 
             CloseRealPlayControl();
             var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
-            parameterSetConfigForm = new SetParameterForm(cell);
-            ShowControl(parameterSetConfigForm, "参数设置");
+            setParameterForm = new SetParameterForm(cell);
+            ShowControl(setParameterForm, "参数设置");
         }
 
         /// <summary>
@@ -176,9 +176,9 @@ namespace IRApplication.UI
                 dataVisualizationForm1 = null;
             }
 
-            if (parameterSetConfigForm != null) {
-                parameterSetConfigForm.Close();
-                parameterSetConfigForm = null;
+            if (setParameterForm != null) {
+                setParameterForm.Close();
+                setParameterForm = null;
             }
         }
 

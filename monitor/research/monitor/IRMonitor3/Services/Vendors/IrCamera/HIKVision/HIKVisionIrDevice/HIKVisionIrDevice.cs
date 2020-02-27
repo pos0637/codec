@@ -784,43 +784,19 @@ namespace HIKVisionIrDevice
         {
             try {
                 var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/bodyTemperatureCompensation";
-                var configuration = GetConfiguration(url);
-                var doc = XDocument.Parse(configuration);
-                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("type"));
-                element.Value = arguments["type"].ToString().ToLower();
-
-                if (element.Value.Equals("auto")) {
+                string configuration = null;
+                if ((arguments["type"] as string).Equals("auto")) {
                     // 自动补偿
-                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("AutoParam"));
-                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
-                    element1.Value = arguments["compensationValue"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
-                    element1.Value = arguments["smartCorrection"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
-                    element1.Value = arguments["environmentalTemperature"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
-                    element1.Value = arguments["temperatureCompensation"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
-                    element1.Value = arguments["environmentalTemperatureMode"].ToString().ToLower();
+                    configuration = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?><BodyTemperatureCompensation version=\"2.0\" xmlns=\"http://www.hikvision.com/ver20/XMLSchema\"><type>auto</type><AutoParam><compensationValue>{arguments["compensationValue"].ToString().ToLower()}</compensationValue><smartCorrection>{arguments["smartCorrection"].ToString().ToLower()}</smartCorrection><environmentalTemperature>{arguments["environmentalTemperature"].ToString().ToLower()}</environmentalTemperature><temperatureCompensation>{arguments["temperatureCompensation"].ToString().ToLower()}</temperatureCompensation><environmentalTemperatureMode>{arguments["environmentalTemperatureMode"].ToString().ToLower()}</environmentalTemperatureMode></AutoParam></BodyTemperatureCompensation>";
                 }
                 else {
                     // 手动补偿
-                    element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("ManualParam"));
-                    var element1 = element.Elements().First(e => e.Name.LocalName.Equals("compensationValue"));
-                    element1.Value = arguments["compensationValue"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("smartCorrection"));
-                    element1.Value = arguments["smartCorrection"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperature"));
-                    element1.Value = arguments["environmentalTemperature"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("temperatureCompensation"));
-                    element1.Value = arguments["temperatureCompensation"].ToString().ToLower();
-                    element1 = element.Elements().First(e => e.Name.LocalName.Equals("environmentalTemperatureMode"));
-                    element1.Value = arguments["environmentalTemperatureMode"].ToString().ToLower();
+                    configuration = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?><BodyTemperatureCompensation version=\"2.0\" xmlns=\"http://www.hikvision.com/ver20/XMLSchema\"><type>manual</type><ManualParam><compensationValue>{arguments["compensationValue"].ToString().ToLower()}</compensationValue><smartCorrection>{arguments["smartCorrection"].ToString().ToLower()}</smartCorrection><environmentalTemperature>{arguments["environmentalTemperature"].ToString().ToLower()}</environmentalTemperature><temperatureCompensation>{arguments["temperatureCompensation"].ToString().ToLower()}</temperatureCompensation><environmentalTemperatureMode>{arguments["environmentalTemperatureMode"].ToString().ToLower()}</environmentalTemperatureMode></ManualParam></BodyTemperatureCompensation>";
                 }
 
-                var response = SetConfiguration(url, doc.ToString());
-                doc = XDocument.Parse(response);
-                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                var response = SetConfiguration(url, configuration);
+                var doc = XDocument.Parse(response);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
                 return element.Value.Equals("1");
             }
             catch (Exception e) {

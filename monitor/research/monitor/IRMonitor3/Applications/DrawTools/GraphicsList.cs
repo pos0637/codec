@@ -159,11 +159,20 @@ namespace DrawTools
         /// Draw all the visible objects in the List
         /// </summary>
         /// <param name="g">Graphics to draw on</param>
+        //public void Remove(DrawArea drawArea)
+        //{
+        //    lock (this) {
+        //        int number = graphicsList.Count;
+        //        if (number != 0) {
+        //            drawArea.RemoveDrawObject((DrawObject)graphicsList[0]);
+        //        }
+        //    }
+        //}
         public void Remove(DrawArea drawArea)
         {
             lock (this) {
                 int number = graphicsList.Count;
-                if (number != 0) {
+                if (number > 1) {
                     drawArea.RemoveDrawObject((DrawObject)graphicsList[0]);
                 }
             }

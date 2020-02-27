@@ -257,10 +257,11 @@ namespace DrawTools
         {
             List<List<Point>> coutour = this.DrawArea.GetParameters();
             if (coutour != null) {
-                coutours.AddRange(coutour);
+                coutours.Add(coutour[0]);
             }
-            this.DrawArea = drawAreaIRCamera;
-            this.DrawArea.ClearAll();
+
+            DrawArea = drawAreaIRCamera;
+            DrawArea.DeleteSelection();
             if (!CanControl || !PointEnabled) {
                 CommandPointer();
                 return;
@@ -271,15 +272,13 @@ namespace DrawTools
 
         private void toolStripButtonRectangle_Click(object sender, EventArgs e)
         {
-            if (this.DrawArea == drawAreaCamera) {
-                
-            }
             List<List<Point>> coutour = this.DrawArea.GetParameters();
             if (coutour != null) {
-                coutours.AddRange(coutour);
+                coutours.Add(coutour[0]);
             }
-            this.DrawArea = drawAreaCamera;
-            this.DrawArea.ClearAll();
+
+            DrawArea = drawAreaCamera;
+            DrawArea.DeleteSelection();
             if (!CanControl || !RectangleEnabled) {
                 CommandPointer();
                 return;
