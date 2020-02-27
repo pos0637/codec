@@ -67,8 +67,8 @@ namespace IRApplication.UI
                 return;
             }
 
-            last_Page_But.Enabled = false;
-            next_Page_But.Enabled = (count > num);
+            last_Page_But.Enabled = page > 1;
+            next_Page_But.Enabled = page < (count / num) + 1;
             pageIndexLab.Text = page.ToString();
             totalPageLab.Text = ((count / num) + 1).ToString();
 
@@ -110,11 +110,6 @@ namespace IRApplication.UI
             GetPage(1, num);
         }
 
-        /// <summary>
-        /// 全选
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void checkAllBtn_Click(object sender, EventArgs e)
         {
             foreach (DataGridViewRow row in alarmDataGridView.Rows) {
@@ -125,11 +120,6 @@ namespace IRApplication.UI
             delBtn.Text = $"删除({alarmDataGridView.Rows.Count})项";
         }
 
-        /// <summary>
-        /// 删除
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void delBtn_Click(object sender, EventArgs e)
         {
             var list = new List<int>();

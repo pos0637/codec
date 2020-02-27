@@ -44,12 +44,12 @@ namespace IRApplication.Components
                         foreach (var alarm in alarms) {
                             var picture = new AlarmInformationItem();
                             picture.NameLabel1.Text = alarm.detail;
-                            picture.pictureEdit.Image = ImageUtils.LoadImage(alarm.imageUrl);
                             picture.pictureIrEdit.Image = ImageUtils.LoadImage(alarm.irImageUrl);
-                            picture.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
-                            picture.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
+                            picture.pictureEdit.Image = ImageUtils.LoadImage(alarm.imageUrl); 
                             picture.pictureIrEdit.BackgroundImageLayout = ImageLayout.Stretch;
                             picture.pictureIrEdit.SizeMode = PictureBoxSizeMode.StretchImage;
+                            picture.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
+                            picture.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
                             flowLayoutPanel1.Controls.Add(picture);
                         }
 

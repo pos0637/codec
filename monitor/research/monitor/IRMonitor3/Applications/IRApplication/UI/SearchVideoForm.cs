@@ -23,7 +23,7 @@ namespace IRApplication.UI
         /// <summary>
         /// 数量
         /// </summary>
-        private const int num = 10;
+        private const int num = 12;
 
         public SearchVideoForm()
         {
@@ -74,17 +74,18 @@ namespace IRApplication.UI
                 return;
             }
 
-            last_Page_But.Enabled = false;
-            next_Page_But.Enabled = (count > num);
+            last_Page_But.Enabled = page > 1;
+            next_Page_But.Enabled = page < (count / num) + 1;
             pageIndexLab.Text = page.ToString();
             totalPageLab.Text = ((count / num) + 1).ToString();
 
             pictureTableLayoutPanel.Controls.Clear();
             foreach (var recording in recordings) {
                 var videoItem = new VideoItem();
+                videoItem.checkBox.Visible = !editBtn.Visible;
                 videoItem.pictureBox1.Image = ImageUtils.LoadImage(recording.snapshotUrl);
                 videoItem.pictureBox1.Tag = recording;
-                videoItem.video_name_label.Text = recording.cellName;
+                videoItem.video_name_label.Text = recording.cellName + "-" + recording.deviceName + "-" + recording.channelName + "-" + recording.startTime.Value.ToString("yyyymmdd hh:mm:ss");
                 videoItem.pictureBox1.Click += new EventHandler(pictureBox1_Click);
                 pictureTableLayoutPanel.Controls.Add(videoItem);
             }

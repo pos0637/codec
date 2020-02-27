@@ -367,7 +367,6 @@
             this.buttonAlarm.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(101)))), ((int)(((byte)(174)))), ((int)(((byte)(173)))));
             this.buttonAlarm.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.buttonAlarm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonAlarm.Enabled = false;
             this.buttonAlarm.Font = new System.Drawing.Font("宋体", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonAlarm.ForeColor = System.Drawing.Color.White;
             this.buttonAlarm.Image = global::IRApplication.Properties.Resources.HomeFormAlarm;
