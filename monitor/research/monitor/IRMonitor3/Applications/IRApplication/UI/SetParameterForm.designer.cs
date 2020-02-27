@@ -67,6 +67,7 @@
             this.com_bodytc_type = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.label12 = new System.Windows.Forms.Label();
@@ -88,7 +89,6 @@
             this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
             this.btn_save = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.label11 = new System.Windows.Forms.Label();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -182,9 +182,7 @@
             this.text_facetr_alarmTemperature.Name = "text_facetr_alarmTemperature";
             this.text_facetr_alarmTemperature.Size = new System.Drawing.Size(278, 23);
             this.text_facetr_alarmTemperature.TabIndex = 60;
-            this.text_facetr_alarmTemperature.Text = "0.5";
-            this.text_facetr_alarmTemperature.TextChanged += new System.EventHandler(this.text_facetr_alarmTemperature_TextChanged);
-            this.text_facetr_alarmTemperature.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_facetr_alarmTemperature_KeyPress);
+            this.text_facetr_alarmTemperature.Text = "0.5";            
             // 
             // text_facetr_targetSpeed
             // 
@@ -192,9 +190,7 @@
             this.text_facetr_targetSpeed.Location = new System.Drawing.Point(78, 3);
             this.text_facetr_targetSpeed.Name = "text_facetr_targetSpeed";
             this.text_facetr_targetSpeed.Size = new System.Drawing.Size(278, 23);
-            this.text_facetr_targetSpeed.TabIndex = 69;
-            this.text_facetr_targetSpeed.TextChanged += new System.EventHandler(this.text_facetr_targetSpeed_TextChanged);
-            this.text_facetr_targetSpeed.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_facetr_targetSpeed_KeyPress);
+            this.text_facetr_targetSpeed.TabIndex = 69;            
             // 
             // text_facetr_sensitivity
             // 
@@ -202,9 +198,7 @@
             this.text_facetr_sensitivity.Location = new System.Drawing.Point(78, 33);
             this.text_facetr_sensitivity.Name = "text_facetr_sensitivity";
             this.text_facetr_sensitivity.Size = new System.Drawing.Size(278, 23);
-            this.text_facetr_sensitivity.TabIndex = 70;
-            this.text_facetr_sensitivity.TextChanged += new System.EventHandler(this.text_facetr_sensitivity_TextChanged);
-            this.text_facetr_sensitivity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_facetr_sensitivity_KeyPress);
+            this.text_facetr_sensitivity.TabIndex = 70;            
             // 
             // label9
             // 
@@ -520,9 +514,7 @@
             this.text_bodytc_environ.Name = "text_bodytc_environ";
             this.text_bodytc_environ.Size = new System.Drawing.Size(278, 23);
             this.text_bodytc_environ.TabIndex = 38;
-            this.text_bodytc_environ.Text = "0";
-            this.text_bodytc_environ.TextChanged += new System.EventHandler(this.text_bodytc_environ_TextChanged);
-            this.text_bodytc_environ.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_bodytc_environ_KeyPress);
+            this.text_bodytc_environ.Text = "0";            
             // 
             // com_bodytc_mode
             // 
@@ -544,9 +536,7 @@
             this.text_bodytc_smartCorrection.Name = "text_bodytc_smartCorrection";
             this.text_bodytc_smartCorrection.Size = new System.Drawing.Size(278, 23);
             this.text_bodytc_smartCorrection.TabIndex = 61;
-            this.text_bodytc_smartCorrection.Text = "0";
-            this.text_bodytc_smartCorrection.TextChanged += new System.EventHandler(this.text_bodytc_smartCorrection_TextChanged);
-            this.text_bodytc_smartCorrection.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_bodytc_smartCorrection_KeyPress);
+            this.text_bodytc_smartCorrection.Text = "0";            
             // 
             // text_bodytc_compensationValue
             // 
@@ -591,6 +581,16 @@
             this.label10.Size = new System.Drawing.Size(14, 36);
             this.label10.TabIndex = 68;
             this.label10.Text = "℃";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label11.Location = new System.Drawing.Point(362, 66);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(14, 33);
+            this.label11.TabIndex = 69;
+            this.label11.Text = "℃";
             // 
             // groupBox4
             // 
@@ -650,9 +650,7 @@
             this.text_facetbp_emissivity.Location = new System.Drawing.Point(78, 3);
             this.text_facetbp_emissivity.Name = "text_facetbp_emissivity";
             this.text_facetbp_emissivity.Size = new System.Drawing.Size(278, 23);
-            this.text_facetbp_emissivity.TabIndex = 67;
-            this.text_facetbp_emissivity.TextChanged += new System.EventHandler(this.text_facetbp_emissivity_TextChanged);
-            this.text_facetbp_emissivity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_facetbp_emissivity_KeyPress);
+            this.text_facetbp_emissivity.TabIndex = 67;            
             // 
             // label7
             // 
@@ -671,9 +669,7 @@
             this.text_facetbp_distance.Location = new System.Drawing.Point(78, 28);
             this.text_facetbp_distance.Name = "text_facetbp_distance";
             this.text_facetbp_distance.Size = new System.Drawing.Size(278, 23);
-            this.text_facetbp_distance.TabIndex = 69;
-            this.text_facetbp_distance.TextChanged += new System.EventHandler(this.text_facetbp_distance_TextChanged);
-            this.text_facetbp_distance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_facetbp_distance_KeyPress);
+            this.text_facetbp_distance.TabIndex = 69;            
             // 
             // groupBox1
             // 
@@ -762,9 +758,7 @@
             this.text_black_emissivity.Name = "text_black_emissivity";
             this.text_black_emissivity.Size = new System.Drawing.Size(278, 23);
             this.text_black_emissivity.TabIndex = 61;
-            this.text_black_emissivity.Text = "0";
-            this.text_black_emissivity.TextChanged += new System.EventHandler(this.text_black_emissivity_TextChanged);
-            this.text_black_emissivity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_black_emissivity_KeyPress);
+            this.text_black_emissivity.Text = "0";            
             // 
             // text_black_temp
             // 
@@ -773,9 +767,7 @@
             this.text_black_temp.Name = "text_black_temp";
             this.text_black_temp.Size = new System.Drawing.Size(278, 23);
             this.text_black_temp.TabIndex = 60;
-            this.text_black_temp.Text = "0";
-            this.text_black_temp.TextChanged += new System.EventHandler(this.text_black_temp_TextChanged);
-            this.text_black_temp.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_black_temp_KeyPress);
+            this.text_black_temp.Text = "0";            
             // 
             // label2
             // 
@@ -805,9 +797,7 @@
             this.text_black_distance.Location = new System.Drawing.Point(78, 35);
             this.text_black_distance.Name = "text_black_distance";
             this.text_black_distance.Size = new System.Drawing.Size(278, 23);
-            this.text_black_distance.TabIndex = 68;
-            this.text_black_distance.TextChanged += new System.EventHandler(this.text_black_distance_TextChanged);
-            this.text_black_distance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.text_black_distance_KeyPress);
+            this.text_black_distance.TabIndex = 68;            
             // 
             // tableLayoutPanel11
             // 
@@ -844,16 +834,6 @@
             // 
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label11.Location = new System.Drawing.Point(362, 66);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(14, 33);
-            this.label11.TabIndex = 69;
-            this.label11.Text = "℃";
             // 
             // SetParameterForm
             // 
