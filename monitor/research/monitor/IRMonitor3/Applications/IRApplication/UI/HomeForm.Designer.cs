@@ -242,6 +242,7 @@
             this.buttonSidebarPlaybackVideo.Text = "    回放录像";
             this.buttonSidebarPlaybackVideo.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonSidebarPlaybackVideo.UseVisualStyleBackColor = true;
+            this.buttonSidebarPlaybackVideo.Click += new System.EventHandler(this.buttonSidebarPlaybackVideo_Click);
             // 
             // buttonSidebarAlarmSearch
             // 
@@ -315,7 +316,6 @@
             this.buttonRecord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(121)))), ((int)(((byte)(158)))), ((int)(((byte)(234)))));
             this.buttonRecord.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.buttonRecord.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonRecord.Enabled = false;
             this.buttonRecord.Font = new System.Drawing.Font("宋体", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonRecord.ForeColor = System.Drawing.Color.White;
             this.buttonRecord.Image = global::IRApplication.Properties.Resources.HomeFormRecord;
@@ -326,6 +326,7 @@
             this.buttonRecord.Text = "回放录像";
             this.buttonRecord.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.buttonRecord.UseVisualStyleBackColor = false;
+            this.buttonRecord.Click += new System.EventHandler(this.buttonRecord_Click);
             // 
             // buttonSecondaryAnalysis
             // 
@@ -377,6 +378,7 @@
             this.buttonAlarm.Text = "告警查询";
             this.buttonAlarm.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.buttonAlarm.UseVisualStyleBackColor = false;
+            this.buttonAlarm.Click += new System.EventHandler(this.buttonAlarm_Click);
             // 
             // buttonRealtime
             // 

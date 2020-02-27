@@ -1,6 +1,6 @@
 ﻿namespace IRApplication.UI
 {
-    partial class ParameterSetConfigForm
+    partial class SetParameterForm
     {
         /// <summary>
         /// Required designer variable.
@@ -823,7 +823,7 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // ParameterSetConfigForm
+            // SetParameterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -831,7 +831,7 @@
             this.ClientSize = new System.Drawing.Size(1326, 793);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "ParameterSetConfigForm";
+            this.Name = "SetParameterForm";
             this.Text = "ParameterSetForm";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.SizeChanged += new System.EventHandler(this.ParameterSetConfigForm_SizeChanged);

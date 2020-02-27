@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace IRApplication.UI
 {
-    public partial class ParameterSetConfigForm : Form
+    public partial class SetParameterForm : Form
     {
         private class GDICameraDeviceForm : CameraDeviceForm
         {
@@ -89,7 +89,7 @@ namespace IRApplication.UI
         ///  构造函数
         /// </summary>
         /// <param name="cell">设备单元服务</param>
-        public ParameterSetConfigForm(CellService cell)
+        public SetParameterForm(CellService cell)
         {
             InitializeComponent();
 
@@ -306,7 +306,6 @@ namespace IRApplication.UI
 
         private void CheckedChanged(object sender, EventArgs e)
         {
-            CheckBox cb = sender as CheckBox;
             CheckedEnabled();
         }
     }

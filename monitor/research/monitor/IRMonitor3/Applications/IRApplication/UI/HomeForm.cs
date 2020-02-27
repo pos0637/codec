@@ -26,6 +26,11 @@ namespace IRApplication.UI
         private readonly SearchAlarmForm searchAlarmForm = new SearchAlarmForm();
 
         /// <summary>
+        /// 查询录像窗体
+        /// </summary>
+        private readonly SearchVideoForm searchVideoForm = new SearchVideoForm();
+
+        /// <summary>
         /// 设置窗体
         /// </summary>
         private readonly SettingsForm settingsForm = new SettingsForm();
@@ -33,7 +38,7 @@ namespace IRApplication.UI
         /// <summary>
         /// 参数设置窗体
         /// </summary>
-        private ParameterSetConfigForm parameterSetConfigForm;
+        private SetParameterForm parameterSetConfigForm;
 
         /// <summary>
         /// 用户手册窗体
@@ -100,7 +105,7 @@ namespace IRApplication.UI
 
             CloseRealPlayControl();
             var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
-            parameterSetConfigForm = new ParameterSetConfigForm(cell);
+            parameterSetConfigForm = new SetParameterForm(cell);
             ShowControl(parameterSetConfigForm, "参数设置");
         }
 
@@ -275,9 +280,24 @@ namespace IRApplication.UI
             ShowDataVisualizationForm();
         }
 
+        private void buttonAlarm_Click(object sender, EventArgs e)
+        {
+            ShowNormalControl(searchAlarmForm, "告警查询");
+        }
+
         private void buttonSidebarAlarmSearch_Click(object sender, EventArgs e)
         {
             ShowNormalControl(searchAlarmForm, "告警查询");
+        }
+
+        private void buttonRecord_Click(object sender, EventArgs e)
+        {
+            ShowNormalControl(searchVideoForm, "回放录像");
+        }
+
+        private void buttonSidebarPlaybackVideo_Click(object sender, EventArgs e)
+        {
+            ShowNormalControl(searchVideoForm, "回放录像");
         }
 
         private void buttonConfig_Click(object sender, EventArgs e)
