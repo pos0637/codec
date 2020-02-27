@@ -86,6 +86,11 @@ namespace IRApplication.UI
         private Dictionary<string, object> blackBody;
 
         /// <summary>
+        /// 是否初始化成功
+        /// </summary>
+        private bool initialized;
+
+        /// <summary>
         ///  构造函数
         /// </summary>
         /// <param name="cell">设备单元服务</param>
@@ -95,6 +100,7 @@ namespace IRApplication.UI
 
             this.cell = cell;
             GetParameters();
+            InitializeDrawArea();
         }
 
         /// <summary>
@@ -134,6 +140,8 @@ namespace IRApplication.UI
             text_black_emissivity.Text = blackBody["emissivity"].ToString().ToLower();
             text_black_temp.Text = blackBody["temperature"].ToString().ToLower();
             CheckedEnabled();
+
+            initialized = true;
         }
 
         /// <summary>
@@ -141,6 +149,10 @@ namespace IRApplication.UI
         /// </summary>
         private void InitializeDrawArea()
         {
+            if (!initialized) {
+                return;
+            }
+
             drawToolbar = new DrawToolbar {
                 PointVisible = true,
                 PolygonVisible = false,
@@ -592,7 +604,7 @@ namespace IRApplication.UI
                 return;
             }
 
-            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 99) {
+            if (Convert.ToSingle(textBox.Text) < -99 || Convert.ToSingle(textBox.Text) > 99) {
                 textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
                 MessageBox.Show("范围 0-99");
                 textBox.Focus();
@@ -607,7 +619,7 @@ namespace IRApplication.UI
                 return;
             }
 
-            if (Convert.ToSingle(textBox.Text) < 0 || Convert.ToSingle(textBox.Text) > 99) {
+            if (Convert.ToSingle(textBox.Text) < -99 || Convert.ToSingle(textBox.Text) > 99) {
                 textBox.Text = textBox.Text.Remove(textBox.Text.Length - 1);
                 MessageBox.Show("范围 0-99");
                 textBox.Focus();
