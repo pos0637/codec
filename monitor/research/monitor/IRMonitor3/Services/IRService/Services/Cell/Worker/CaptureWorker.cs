@@ -10,7 +10,7 @@ namespace IRService.Services.Cell.Worker
     /// <summary>
     /// 获取数据工作线程
     /// </summary>
-    public class CaptureVideoWorker : BaseWorker
+    public class CaptureWorker : BaseWorker
     {
         /// <summary>
         /// 设备单元服务

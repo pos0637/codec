@@ -118,15 +118,11 @@ namespace Communication
         /// </summary>
         private async Task ConnectAsync()
         {
-            while (true) {
-                try {
-                    await mqttClient.ConnectAsync(options, cancellationToken.Token);
-                    return;
-                }
-                catch (Exception) {
-                    Tracker.LogNW(TAG, "connect fail");
-                    await Task.Delay(TimeSpan.FromMilliseconds(RETRY_DURATION));
-                }
+            try {
+                await mqttClient.ConnectAsync(options, cancellationToken.Token);
+            }
+            catch (Exception) {
+                Tracker.LogNW(TAG, "connect fail");
             }
         }
     }

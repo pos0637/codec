@@ -97,7 +97,7 @@ namespace IRService.Services.Cell
                         }
 
                         // 启动获取数据工作线程
-                        dynamic worker = new CaptureVideoWorker();
+                        dynamic worker = new CaptureWorker();
                         if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
                             return false;
@@ -131,7 +131,7 @@ namespace IRService.Services.Cell
                         }
 
                         // 启动获取数据工作线程
-                        dynamic worker = new CaptureVideoWorker();
+                        dynamic worker = new CaptureWorker();
                         if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance } }))) {
                             Tracker.LogE($"CaptureVideoWorker initialize fail: {device.model}");
                             return false;
