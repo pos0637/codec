@@ -55,7 +55,8 @@ namespace IRApplication.UI
             });
 
             EventEmitter.Instance.Subscribe(Common.Constants.EVENT_APP_SHOW_WEBVIEW_FORM, (arguments) => {
-                Close();
+                var configuration = Repository.Repository.LoadConfiguation();
+                System.Diagnostics.Process.Start(configuration.information.serverUrl);
             });
         }
 

@@ -47,6 +47,9 @@
     <None Include="app.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="help.mht">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ir.s3db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

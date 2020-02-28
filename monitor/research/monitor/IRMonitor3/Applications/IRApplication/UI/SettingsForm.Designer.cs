@@ -202,6 +202,7 @@
             this.button_deviceInfo.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.button_deviceInfo.UseCompatibleTextRendering = true;
             this.button_deviceInfo.UseVisualStyleBackColor = false;
+            this.button_deviceInfo.Click += new System.EventHandler(this.button_deviceInfo_Click);
             // 
             // button_handbook
             // 

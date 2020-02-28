@@ -36,6 +36,11 @@ namespace IRApplication.UI
         private readonly SettingsForm settingsForm = new SettingsForm();
 
         /// <summary>
+        /// 配置窗体
+        /// </summary>
+        private readonly ConfigForm configForm = new ConfigForm();
+
+        /// <summary>
         /// 参数设置窗体
         /// </summary>
         private SetParameterForm setParameterForm;
@@ -49,6 +54,7 @@ namespace IRApplication.UI
         {
             InitializeComponent();
             settingsForm.ShowParameterSetConfigForm = ShowParameterSetConfigForm;
+            settingsForm.ShowConfigForm = ShowConfigForm;
             settingsForm.ShowUserManualForm = ShowUserManualForm;
         }
 
@@ -107,6 +113,14 @@ namespace IRApplication.UI
             var cell = CellServiceManager.Instance.GetService(configuartion.cells[0].name) as CellService;
             setParameterForm = new SetParameterForm(cell);
             ShowControl(setParameterForm, "参数设置");
+        }
+
+        /// <summary>
+        /// 显示配置窗体
+        /// </summary>
+        private void ShowConfigForm()
+        {
+            ShowNormalControl(configForm, "设备信息");
         }
 
         /// <summary>
