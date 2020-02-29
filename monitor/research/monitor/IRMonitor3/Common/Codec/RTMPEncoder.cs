@@ -70,10 +70,12 @@ namespace Codec
             context->qmax = 50;
             context->level = 41;
             context->refs = 1;
+            // context->max_b_frames = 0; // 去掉B帧只留下I帧和P帧
             this.frames_per_second = frames_per_second;
 
             if (codec->id == AVCodecID.AV_CODEC_ID_H264) {
                 ffmpeg.av_opt_set(context->priv_data, "preset", "slow", 0);
+                // ffmpeg.av_opt_set(context->priv_data, "tune", "zerolatency", 0); // 零延迟
             }
 
             if ((formatContext->oformat->flags & ffmpeg.AVFMT_GLOBALHEADER) != 0) {
