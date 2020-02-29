@@ -1,4 +1,5 @@
 ﻿using Common;
+using Newtonsoft.Json;
 using OpenCvSharp;
 using Repository.Entities;
 using System;
@@ -199,8 +200,7 @@ namespace Repository
 
             try {
                 var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.temp";
-                byte[] data = temperature.Select(value => Convert.ToByte(value)).ToArray();
-                File.WriteAllText(filename, Convert.ToBase64String(data));
+                File.WriteAllText(filename, JsonConvert.SerializeObject(temperature));
                 return filename;
             }
             catch {
