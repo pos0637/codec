@@ -238,6 +238,7 @@ namespace IRService.Services.Cell.Worker
                 area = JsonUtils.ObjectToJson(alarm.area),
                 point = JsonUtils.ObjectToJson(alarm.point),
                 detail = alarm.detail,
+                solved = false,
                 temperatureUrl = Repository.Repository.SaveAlarmTemperature(alarm.temperature),
                 irImageUrl = Repository.Repository.SaveYV12Image(alarm.irImage),
                 imageUrl = Repository.Repository.SaveYV12Image(alarm.image),

@@ -1,4 +1,5 @@
 ﻿using Common;
+using IRService.Miscs;
 using Newtonsoft.Json;
 using OpenCvSharp;
 using Repository.Entities;
@@ -309,6 +310,32 @@ namespace Repository
             try {
                 using (var db = new RepositoyContext()) {
                     db.Set<Alarm>().Add(alarm);
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 更新告警
+        /// </summary>
+        /// <param name="alarm">告警</param>
+        /// <returns>是否成功</returns>
+        public static bool UpdateAlarm(Alarm alarm)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    var dst = db.Set<Alarm>().FirstOrDefault(a => a.id == alarm.id);
+                    if (dst == null) {
+                        return false;
+                    }
+
+                    MethodUtils.CopyProperties(alarm, ref dst);
                     db.SaveChanges();
                 }
 

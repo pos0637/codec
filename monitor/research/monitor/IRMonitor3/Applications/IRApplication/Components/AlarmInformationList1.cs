@@ -1,4 +1,6 @@
-﻿using Miscs;
+﻿using IRApplication.UI;
+using Miscs;
+using Repository.Entities;
 using System;
 using System.Windows.Forms;
 
@@ -19,9 +21,24 @@ namespace IRApplication.Components
         /// </summary>
         private System.Threading.Timer timer;
 
+        /// <summary>
+        /// 滚动条位置
+        /// </summary>
+        private int scrollPosition;
+
         public AlarmInformationList1()
         {
             InitializeComponent();
+
+            // 鼠标滚轮事件
+            flowLayoutPanel1.MouseWheel += new MouseEventHandler(rightPanel_MouseWheel);
+
+            // 去除水平滚动条
+            flowLayoutPanel1.AutoScroll = false;
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanel1.WrapContents = false;
+            flowLayoutPanel1.HorizontalScroll.Maximum = 0;
+            flowLayoutPanel1.AutoScroll = true;
 
             timer = new System.Threading.Timer((state) => {
                 var end = DateTime.Now;
@@ -34,6 +51,7 @@ namespace IRApplication.Components
                         foreach (var alarm in alarms) {
                             var item = new AlarmInformationItem1();
                             item.SetData(ImageUtils.LoadImage(alarm.imageUrl), ImageUtils.LoadImage(alarm.irImageUrl), alarm.detail);
+                            item.SetOnClickHandler(alarm, new EventHandler(OnClick));
                             flowLayoutPanel1.Controls.Add(item);
                         }
 
@@ -64,6 +82,33 @@ namespace IRApplication.Components
             }
 
             base.OnHandleDestroyed(e);
+        }
+
+        private void OnClick(object sender, EventArgs e)
+        {
+            AlarmInformationForm.ShowAlarmInformationForm((sender as Control).Tag as Alarm);
+        }
+
+        private void flowLayoutPanel1_Scroll(object sender, ScrollEventArgs e)
+        {
+            scrollPosition = e.NewValue;
+        }
+
+        private void rightPanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            var value = scrollPosition - e.Delta;
+            // 底部滚动位置
+            if (value >= flowLayoutPanel1.VerticalScroll.Maximum - flowLayoutPanel1.VerticalScroll.LargeChange) {
+                scrollPosition = flowLayoutPanel1.VerticalScroll.Maximum - flowLayoutPanel1.VerticalScroll.LargeChange + 1;
+            }
+            else {
+                scrollPosition -= e.Delta;
+            }
+
+            // 顶置位置为0
+            if (scrollPosition < 0) {
+                scrollPosition = 0;
+            }
         }
     }
 }

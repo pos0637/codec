@@ -174,6 +174,7 @@
             this.alarmDataGridView.Size = new System.Drawing.Size(786, 648);
             this.alarmDataGridView.TabIndex = 13;
             this.alarmDataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.alarmDataGridView_CellClick);
+            this.alarmDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.alarmDataGridView_CellDoubleClick);
             this.alarmDataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.alarmDataGridView_CellClick);
             this.alarmDataGridView.CurrentCellDirtyStateChanged += new System.EventHandler(this.alarmDataGridView_CurrentCellDirtyStateChanged);
             // 

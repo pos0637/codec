@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace IRApplication.Components
@@ -24,6 +25,19 @@ namespace IRApplication.Components
             pictureBox_image.Image = image;
             pictureBox_irimage.Image = irImage;
             label_detail.Text = detail;
+        }
+
+        /// <summary>
+        /// 设置点击回调事件处理函数
+        /// </summary>
+        /// <param name="tag">标签</param>
+        /// <param name="handler">点击回调事件处理函数</param>
+        public void SetOnClickHandler(object tag, EventHandler handler)
+        {
+            pictureBox_image.Tag = pictureBox_irimage.Tag = label_detail.Tag = tag;
+            pictureBox_image.Click += handler;
+            pictureBox_irimage.Click += handler;
+            label_detail.Click += handler;
         }
     }
 }

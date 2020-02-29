@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using Common;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,31 @@ namespace IRService.Miscs
     /// </summary>
     public static class MethodUtils
     {
+        /// <summary>
+        /// 拷贝属性
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="src">源对象</param>
+        /// <param name="dst">目标对象</param>
+        public static void CopyProperties<T>(T src, ref T dst)
+        {
+            // 如果是字符串或值类型则直接赋值
+            if ((src is string) || src.GetType().IsValueType) {
+                dst = src;
+                return;
+            }
+
+            var fields = src.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var field in fields) {
+                try {
+                    field.SetValue(dst, field.GetValue(src));
+                }
+                catch (Exception e) {
+                    Tracker.LogE(e);
+                }
+            }
+        }
+
         /// <summary>
         /// 调用方法
         /// </summary>

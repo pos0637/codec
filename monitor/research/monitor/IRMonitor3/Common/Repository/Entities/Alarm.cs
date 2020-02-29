@@ -168,6 +168,11 @@ namespace Repository.Entities
         public string comment { get; set; }
 
         /// <summary>
+        /// 已解决
+        /// </summary>
+        public bool solved { get; set; }
+
+        /// <summary>
         /// 温度矩阵快照资源地址
         /// </summary>
         public string temperatureUrl { get; set; }

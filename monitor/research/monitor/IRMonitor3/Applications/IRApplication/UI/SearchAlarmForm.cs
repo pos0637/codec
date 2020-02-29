@@ -196,5 +196,22 @@ namespace IRApplication.UI
                 alarmDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
+
+        private void alarmDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if ((alarmDataGridView.CurrentCell != null)
+                && (alarmDataGridView.CurrentCell.ColumnIndex == 0)
+                || (alarmDataGridView.Rows.Count == 0)) {
+                return;
+            }
+
+            if ((alarmDataGridView.CurrentRow == null)
+                || (alarmDataGridView.CurrentRow.Tag == null)) {
+                return;
+            }
+
+            var alarm = alarmDataGridView.CurrentRow.Tag as Alarm;
+            AlarmInformationForm.ShowAlarmInformationForm(alarm);
+        }
     }
 }

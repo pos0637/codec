@@ -1,4 +1,6 @@
-﻿using Miscs;
+﻿using IRApplication.UI;
+using Miscs;
+using Repository.Entities;
 using System;
 using System.Windows.Forms;
 
@@ -15,6 +17,11 @@ namespace IRApplication.Components
         private System.Threading.Timer timer;
 
         /// <summary>
+        /// 告警窗体
+        /// </summary>
+        public static AlarmInformationForm AlarmInfoForm = null;
+
+        /// <summary>
         /// 滚动条位置
         /// </summary>
         private int scrollPosition;
@@ -22,8 +29,9 @@ namespace IRApplication.Components
         public AlarmInformationList()
         {
             InitializeComponent();
+
             // 鼠标滚轮事件
-            flowLayoutPanel1.MouseWheel += new MouseEventHandler(this.rightPanel_MouseWheel);
+            flowLayoutPanel1.MouseWheel += new MouseEventHandler(rightPanel_MouseWheel);
 
             // 去除水平滚动条
             flowLayoutPanel1.AutoScroll = false;
@@ -42,15 +50,20 @@ namespace IRApplication.Components
                     BeginInvoke((Action)(() => {
                         flowLayoutPanel1.Controls.Clear();
                         foreach (var alarm in alarms) {
-                            var picture = new AlarmInformationItem();
-                            picture.NameLabel1.Text = alarm.detail;
-                            picture.pictureIrEdit.Image = ImageUtils.LoadImage(alarm.irImageUrl);
-                            picture.pictureEdit.Image = ImageUtils.LoadImage(alarm.imageUrl); 
-                            picture.pictureIrEdit.BackgroundImageLayout = ImageLayout.Stretch;
-                            picture.pictureIrEdit.SizeMode = PictureBoxSizeMode.StretchImage;
-                            picture.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
-                            picture.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
-                            flowLayoutPanel1.Controls.Add(picture);
+                            var item = new AlarmInformationItem();
+                            item.NameLabel1.Text = alarm.detail;
+                            item.pictureIrEdit.Image = ImageUtils.LoadImage(alarm.irImageUrl);
+                            item.pictureIrEdit.BackgroundImageLayout = ImageLayout.Stretch;
+                            item.pictureIrEdit.SizeMode = PictureBoxSizeMode.StretchImage;
+                            item.pictureEdit.Image = ImageUtils.LoadImage(alarm.imageUrl);
+                            item.pictureEdit.BackgroundImageLayout = ImageLayout.Stretch;
+                            item.pictureEdit.SizeMode = PictureBoxSizeMode.StretchImage;
+                            item.Tag = alarm;
+                            item.NameLabel1.Tag = item.pictureIrEdit.Tag = item.pictureEdit.Tag = alarm;
+                            item.NameLabel1.Click += new EventHandler(OnClick);
+                            item.pictureEdit.Click += new EventHandler(OnClick);
+                            item.pictureIrEdit.Click += new EventHandler(OnClick);
+                            flowLayoutPanel1.Controls.Add(item);
                         }
 
                         flowLayoutPanel1.VerticalScroll.Value = scrollPosition;
@@ -84,6 +97,11 @@ namespace IRApplication.Components
             base.OnHandleDestroyed(e);
         }
 
+        private void OnClick(object sender, EventArgs e)
+        {
+            AlarmInformationForm.ShowAlarmInformationForm((sender as Control).Tag as Alarm);
+        }
+
         private void flowLayoutPanel1_Scroll(object sender, ScrollEventArgs e)
         {
             scrollPosition = e.NewValue;
@@ -91,7 +109,7 @@ namespace IRApplication.Components
 
         private void rightPanel_MouseWheel(object sender, MouseEventArgs e)
         {
-            int value = scrollPosition - e.Delta;
+            var value = scrollPosition - e.Delta;
             // 底部滚动位置
             if (value >= flowLayoutPanel1.VerticalScroll.Maximum - flowLayoutPanel1.VerticalScroll.LargeChange) {
                 scrollPosition = flowLayoutPanel1.VerticalScroll.Maximum - flowLayoutPanel1.VerticalScroll.LargeChange + 1;
@@ -104,6 +122,6 @@ namespace IRApplication.Components
             if (scrollPosition < 0) {
                 scrollPosition = 0;
             }
-        }
+        }        
     }
 }
