@@ -7,20 +7,20 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
 [Setup]
-AppName=国化智能智能体温筛查系统
+AppName=道华科技智能体温筛查系统
 AppVersion=1.5
-AppVerName=国化智能智能体温筛查系统v1.5
-AppPublisher=福州国化智能技术有限公司
+AppVerName=道华科技智能体温筛查系统v1.5
+AppPublisher=杭州道华科技有限公司
 AppPublisherURL=http://www.gh-i.com
 AppSupportURL=http://www.gh-i.com
 AppUpdatesURL=http://www.gh-i.com
 DefaultDirName={pf}\IRApplication
-DefaultGroupName=国化智能智能体温筛查系统v1.5
+DefaultGroupName=道华科技智能体温筛查系统v1.5
 UninstallDisplayIcon={app}\IRApplication.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=../Build
-OutputBaseFilename=国化智能智能体温筛查系统v1.5
+OutputBaseFilename=道华科技智能体温筛查系统v1.5
 SetupIconFile=./Logo.ico
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
@@ -35,4 +35,4 @@ AllowNoIcons=yes
 Source: "../Release/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\国化智能智能体温筛查系统"; Filename: "{app}\IRApplication.exe"
+Name: "{group}\道华科技智能体温筛查系统"; Filename: "{app}\IRApplication.exe"
