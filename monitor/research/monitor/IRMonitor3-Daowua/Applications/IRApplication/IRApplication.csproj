@@ -326,6 +326,7 @@
     <Content Include="Resources\AlarmLampYellow.png" />
     <Content Include="Resources\Cancel.png" />
     <Content Include="Resources\Cancel2.png" />
+    <None Include="Resources\daohua.png" />
     <Content Include="Resources\HelpGroupSelection.png" />
     <Content Include="Resources\HomeFormAlarm.png" />
     <Content Include="Resources\HomeFormConfig.png" />
@@ -399,6 +400,7 @@
     <Content Include="Resources\设备信息.png" />
     <Content Include="Resources\调色板.png" />
     <Content Include="Resources\返回1.png" />
+    <None Include="Resources\道华.png" />
     <Content Include="Resources\锁定.png" />
   </ItemGroup>
   <ItemGroup>

@@ -87,9 +87,10 @@
             this.pictureBoxLogo.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.tableLayoutPanel1.SetColumnSpan(this.pictureBoxLogo, 3);
             this.pictureBoxLogo.Image = global::IRApplication.Properties.Resources.LogoHome;
-            this.pictureBoxLogo.Location = new System.Drawing.Point(392, 42);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(233, 30);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
-            this.pictureBoxLogo.Size = new System.Drawing.Size(260, 80);
+            this.pictureBoxLogo.Size = new System.Drawing.Size(578, 105);
+            this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxLogo.TabIndex = 1;
             this.pictureBoxLogo.TabStop = false;
             // 
