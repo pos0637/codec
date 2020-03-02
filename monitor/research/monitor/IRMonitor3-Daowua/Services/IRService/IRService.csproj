@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AA5252BE-F718-494F-AF56-5C0730D47BE8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IRService</RootNamespace>
+    <AssemblyName>IRService</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Constants.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="Miscs\HttpMethod.cs" />
+    <Compile Include="Miscs\WebMethod.cs" />
+    <Compile Include="Models\Alarm.cs" />
+    <Compile Include="Models\Selections.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Cell\CellService.cs" />
+    <Compile Include="Services\Cell\CellServiceManager.cs" />
+    <Compile Include="Services\Cell\CellService_Devices.cs" />
+    <Compile Include="Services\Cell\CellService_Selections.cs" />
+    <Compile Include="Services\Cell\Worker\CaptureWorker.cs" />
+    <Compile Include="Services\Cell\Worker\RecordingWorker.cs" />
+    <Compile Include="Services\Web\WebServiceManager.cs" />
+    <Compile Include="Services\Web\WebService.cs" />
+    <None Include="app.config" />
+    <Compile Include="Services\Cell\Worker\LiveStreamingWorker.cs" />
+    <Compile Include="Services\Cell\Worker\ProcessAlarmWorker.cs" />
+    <Compile Include="Services\Cell\Worker\ProcessDataWorker.cs" />
+    <Compile Include="Services\Service.cs" />
+    <Compile Include="Services\ServiceManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Codec\Codec.csproj">
+      <Project>{bbd78eb9-3aa2-44e0-b899-7be5948327ce}</Project>
+      <Name>Codec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Common\Common.csproj">
+      <Project>{3d07e559-c5a6-43f1-b995-fe05d3e5c254}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Communication\Communication.csproj">
+      <Project>{e19c349a-655e-4d41-a524-4b8559408f02}</Project>
+      <Name>Communication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Devices\Devices.csproj">
+      <Project>{4fdcc306-a96e-4601-bcf1-171eaa019dc5}</Project>
+      <Name>Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Miscs\Miscs.csproj">
+      <Project>{4eb5d689-320a-49f3-b2db-78023f7743dc}</Project>
+      <Name>Miscs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Repository\Repository.csproj">
+      <Project>{f0d36adc-dd65-4f05-85f5-cb107464aad3}</Project>
+      <Name>Repository</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Resources\Resources.csproj">
+      <Project>{bf9c3c74-df22-41f7-a88f-084430f2b935}</Project>
+      <Name>Resources</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

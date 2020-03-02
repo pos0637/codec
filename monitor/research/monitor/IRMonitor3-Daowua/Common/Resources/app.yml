@@ -1,0 +1,68 @@
+﻿information:
+  province: 
+  city: 
+  company: 
+  manager: 
+  tester: 
+  substation: 
+  location: 
+  clientId: 0001
+  serverUrl: http://ircloud.gh-i.com
+  mqttServerIp: 112.51.3.158
+  mqttServerPort: 1883
+  rtmpServerIp: 127.0.0.1
+  rtmpServerPort: 1935
+  onlineMode: false
+  recordingMode: false
+  recordingDuration: 600
+  saveVideoPath: ./video
+  saveImagePath: ./image
+cells:
+- name: cell0
+  devices:
+  - enabled: false
+    category: Camera
+    model: HIKVisionDevice
+    version: 1.0
+    serialNumber: 0001
+    uri: 'ip=192.168.1.64&port=8000&username=admin&password=abcd1234'
+    cameraParameters:
+      channel: 1
+      uri: 'channel=1'
+      width: 320
+      stride: 320
+      height: 240
+      bpp: 4
+      videoFrameRate: 15
+  - enabled: true
+    category: IrCamera
+    model: HIKVisionIrDevice
+    version: 1.0
+    serialNumber: 0002
+    uri: 'ip=192.168.1.64&port=8000&username=admin&password=abcd1234'
+    irCameraParameters:
+      channel: 2
+      uri: 'channel=2'
+      width: 320
+      stride: 320
+      height: 240
+      bpp: 4
+      videoFrameRate: 15
+      temperatureWidth: 160
+      temperatureStride: 160
+      temperatureHeight: 120
+      temperatureFrameRate: 15
+      emissivity: 
+      reflectedTemperature: 
+      transmission: 
+      atmosphericTemperature: 
+      relativeHumidity: 
+      distance: 
+    cameraParameters:
+      channel: 1
+      uri: 'channel=1'
+      width: 704
+      stride: 704
+      height: 576
+      bpp: 4
+      videoFrameRate: 15
