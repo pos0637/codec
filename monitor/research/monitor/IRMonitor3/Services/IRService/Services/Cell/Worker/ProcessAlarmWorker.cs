@@ -250,14 +250,16 @@ namespace IRService.Services.Cell.Worker
                 alarms.Enqueue(alarm);
             }
 
-            WebMethod.AddAlarm(new WebMethod.Alarm() {
-                serialNumber = configuration.information.clientId,
-                datetime = alarm.startTime.ToString(),
-                image = ImageUtils.ImageFileToBase64(data.imageUrl),
-                irImage = ImageUtils.ImageFileToBase64(data.irImageUrl),
-                temperature = ImageUtils.ImageFileToBase64(data.temperatureUrl),
-                data = alarm.detail
-            });
+            if (configuration.information.onlineMode) {
+                WebMethod.AddAlarm(new WebMethod.Alarm() {
+                    serialNumber = configuration.information.clientId,
+                    datetime = alarm.startTime.ToString(),
+                    image = ImageUtils.ImageFileToBase64(data.imageUrl),
+                    irImage = ImageUtils.ImageFileToBase64(data.irImageUrl),
+                    temperature = ImageUtils.ImageFileToBase64(data.temperatureUrl),
+                    data = alarm.detail
+                });
+            }
         }
     }
 }

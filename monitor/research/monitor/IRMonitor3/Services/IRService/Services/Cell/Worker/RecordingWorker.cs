@@ -192,7 +192,7 @@ namespace IRService.Services.Cell.Worker
         private string GenerateRecordingFilename(string tag)
         {
             var now = DateTime.Now;
-            var folder = $"{configuration.information.saveVideoPath}/{now.ToString("yyyyMMdd")}";
+            var folder = $"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveVideoPath}/{now.ToString("yyyyMMdd")}";
             var filename = $"{folder}/{now.ToString("yyyyMMddHHmmss")}-{tag}.mp4";
             if (!Directory.Exists(folder)) {
                 Directory.CreateDirectory(folder);

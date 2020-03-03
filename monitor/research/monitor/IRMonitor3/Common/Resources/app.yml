@@ -15,8 +15,8 @@
   onlineMode: false
   recordingMode: false
   recordingDuration: 600
-  saveVideoPath: ./video
-  saveImagePath: ./image
+  saveVideoPath: video
+  saveImagePath: image
 cells:
 - name: cell0
   devices:

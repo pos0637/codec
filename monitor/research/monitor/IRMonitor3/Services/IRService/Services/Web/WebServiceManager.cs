@@ -22,6 +22,11 @@ namespace IRService.Services.Web
                 return false;
             }
 
+            if (!configuration.information.onlineMode) {
+                Tracker.LogI("onlineMode is false");
+                return false;
+            }
+
             // 创建服务
             var service = new WebService();
 

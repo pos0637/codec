@@ -15,7 +15,7 @@ namespace Common
         static Tracker()
         {
             // 打开日志配置文件
-            string path = AppDomain.CurrentDomain.BaseDirectory + @"\log4net.config";
+            string path = $"{AppDomain.CurrentDomain.BaseDirectory}/log4net.config";
             ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");
             XmlConfigurator.Configure(repository, new FileInfo(path));
             sLog = LogManager.GetLogger(repository.Name, "runtime");

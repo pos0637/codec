@@ -200,7 +200,7 @@ namespace Repository
             }
 
             try {
-                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.temp";
+                var filename = $"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.temp";
                 File.WriteAllText(filename, JsonConvert.SerializeObject(temperature));
                 return filename;
             }
@@ -251,7 +251,7 @@ namespace Repository
             }
 
             try {
-                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
+                var filename = $"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
                 var mat = new Mat(height + height / 2, width, MatType.CV_8UC1, image);
                 mat = mat.CvtColor(ColorConversionCodes.YUV2BGR_YV12);
                 return mat.SaveImage(filename) ? filename : null;
@@ -289,7 +289,7 @@ namespace Repository
             }
 
             try {
-                var filename = $"{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
+                var filename = $"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
                 var mat = new Mat(height, width, MatType.CV_8UC4, image);
                 return mat.SaveImage(filename) ? filename : null;
             }

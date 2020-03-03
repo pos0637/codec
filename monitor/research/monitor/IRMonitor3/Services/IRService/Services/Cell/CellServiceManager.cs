@@ -59,12 +59,12 @@ namespace IRService.Services.Cell
         private bool CheckConfiguration(Configuration configuration)
         {
             try {
-                if (!Directory.Exists(configuration.information.saveVideoPath)) {
-                    Directory.CreateDirectory(configuration.information.saveVideoPath);
+                if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveVideoPath}")) {
+                    Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveVideoPath}");
                 }
 
-                if (!Directory.Exists(configuration.information.saveImagePath)) {
-                    Directory.CreateDirectory(configuration.information.saveImagePath);
+                if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}")) {
+                    Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}");
                 }
             }
             catch (Exception e) {
