@@ -584,6 +584,54 @@ namespace Repository
             }
         }
 
+        /// <summary>
+        /// 获取未删除录像
+        /// </summary>
+        /// <param name="count">数量</param>
+        /// <returns>录像列表</returns>
+        public static List<Recording> GetExistsRecordings(int count)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    return db.Set<Recording>()
+                        .Where(r => r.deleted == false)
+                        .OrderByDescending(a => a.startTime)
+                        .Take(count)
+                        .ToList();
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 更新录像
+        /// </summary>
+        /// <param name="recording">录像</param>
+        /// <returns>是否成功</returns>
+        public static bool UpdateRecording(Recording recording)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    var dst = db.Set<Recording>().FirstOrDefault(a => a.id == recording.id);
+                    if (dst == null) {
+                        return false;
+                    }
+
+                    MethodUtils.CopyProperties(recording, ref dst);
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
         #endregion
     }
 }

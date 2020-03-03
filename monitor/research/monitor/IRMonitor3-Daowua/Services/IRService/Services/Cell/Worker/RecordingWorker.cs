@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Linq;
 
 namespace IRService.Services.Cell.Worker
 {
@@ -126,7 +127,9 @@ namespace IRService.Services.Cell.Worker
                         uri = GenerateRecordingFilename($"{cell.cell.name}-{device.Name}-{channel}");
                     }
 
-                    // TODO: 检查存储空间
+                    // 检查存储空间
+                    ClearHardDiskSpace();
+
                     encoder = new Encoder();
                     encoder.Initialize(width, height, frameRate);
                     encoder.Start(uri);
@@ -199,6 +202,40 @@ namespace IRService.Services.Cell.Worker
             }
 
             return filename;
+        }
+
+        /// <summary>
+        /// 清理磁盘空间
+        /// </summary>
+        private void ClearHardDiskSpace()
+        {
+            var disk = AppDomain.CurrentDomain.BaseDirectory.Substring(0, 1) + ":\\";
+
+            while (!IsTerminated()) {
+                // 获取磁盘剩余空间
+                var drive = DriveInfo.GetDrives().FirstOrDefault(d => d.Name.Equals(disk));
+                var usage = drive.TotalFreeSpace / (float)drive.TotalSize;
+
+                // 检查磁盘剩余空间小于30%
+                if (usage < 0.3) {
+                    // 获取未删除录像
+                    var recordings = Repository.Repository.GetExistsRecordings(10);
+                    if (recordings != null) {
+                        // 删除录像
+                        recordings.ForEach(r => {
+                            if (File.Exists(r.url)) {
+                                File.Delete(r.url);
+                            }
+
+                            r.deleted = true;
+                            Repository.Repository.UpdateRecording(r);
+                        });
+                    }
+
+                    // 继续检查磁盘剩余空间
+                    continue;
+                }
+            }
         }
     }
 }

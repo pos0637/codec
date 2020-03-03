@@ -59,6 +59,11 @@ namespace Repository.Entities
         public RecordingType type { get; set; }
 
         /// <summary>
+        /// 是否删除
+        /// </summary>
+        public bool deleted { get; set; }
+
+        /// <summary>
         /// 录像资源地址
         /// </summary>
         public string url { get; set; }
