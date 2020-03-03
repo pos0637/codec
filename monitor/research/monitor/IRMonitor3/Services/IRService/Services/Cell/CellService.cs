@@ -279,6 +279,44 @@ namespace IRService.Services.Cell
             return true;
         }
 
+        /// <summary>
+        /// 获取镜像模式
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <returns>镜像模式</returns>
+        public bool GetMirrorMode(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Read(ReadMode.MirrorMode, null, out object result, out int used)) {
+                return false;
+            }
+
+            return (bool)result;
+        }
+
+        /// <summary>
+        /// 设置镜像模式
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <param name="arguments">镜像模式</param>
+        /// <returns>是否成功</returns>
+        public bool SetMirrorMode(string deviceId, bool mode)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.MirrorMode, mode)) {
+                return false;
+            }
+
+            return true;
+        }
         #endregion
     }
 }

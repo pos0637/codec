@@ -86,6 +86,11 @@ namespace IRApplication.UI
         private Dictionary<string, object> blackBody;
 
         /// <summary>
+        /// 镜像模式配置参数
+        /// </summary>
+        private bool mirrorMode;
+
+        /// <summary>
         /// 是否初始化成功
         /// </summary>
         private bool initialized;
@@ -112,6 +117,7 @@ namespace IRApplication.UI
             faceThermometryRegion = cell.GetFaceThermometryRegion(null);
             bodyTemperatureCompensation = cell.GetBodyTemperatureCompensation(null);
             blackBody = cell.GetBlackBody(null);
+            mirrorMode = cell.GetMirrorMode(null);
 
             if ((faceThermometryBasicParameter == null)
                 || (faceThermometryBasicParameter == null)
@@ -140,6 +146,13 @@ namespace IRApplication.UI
             text_black_emissivity.Text = blackBody["emissivity"].ToString().ToLower();
             text_black_temp.Text = blackBody["temperature"].ToString().ToLower();
             CheckedEnabled();
+
+            if (mirrorMode) {
+                com_Mirror.Text = "上下";
+            }
+            else {
+                com_Mirror.Text = "关闭";
+            }
 
             initialized = true;
         }
@@ -363,6 +376,9 @@ namespace IRApplication.UI
                 MessageBox.Show("设置失败!");
                 return;
             }
+
+            var mirrorMode = com_Mirror.Text.Equals("上下");
+            cell.SetMirrorMode(null, mirrorMode);
 
             GetParameters();
             drawAreaCamera.ClearAll();

@@ -46,7 +46,7 @@
             this.panel_draw_camera = new System.Windows.Forms.Panel();
             this.panel_camera = new System.Windows.Forms.Panel();
             this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
-            this.comboBox7 = new System.Windows.Forms.ComboBox();
+            this.com_Mirror = new System.Windows.Forms.ComboBox();
             this.panelTool = new System.Windows.Forms.Panel();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -89,6 +89,7 @@
             this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
             this.btn_save = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.label14 = new System.Windows.Forms.Label();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -115,7 +116,7 @@
             this.groupBox2.Controls.Add(this.label16);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Font = new System.Drawing.Font("宋体", 10F);
-            this.groupBox2.Location = new System.Drawing.Point(3, 230);
+            this.groupBox2.Location = new System.Drawing.Point(3, 252);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(385, 112);
             this.groupBox2.TabIndex = 44;
@@ -182,7 +183,7 @@
             this.text_facetr_alarmTemperature.Name = "text_facetr_alarmTemperature";
             this.text_facetr_alarmTemperature.Size = new System.Drawing.Size(278, 23);
             this.text_facetr_alarmTemperature.TabIndex = 60;
-            this.text_facetr_alarmTemperature.Text = "0.5";            
+            this.text_facetr_alarmTemperature.Text = "0.5";
             // 
             // text_facetr_targetSpeed
             // 
@@ -190,7 +191,7 @@
             this.text_facetr_targetSpeed.Location = new System.Drawing.Point(78, 3);
             this.text_facetr_targetSpeed.Name = "text_facetr_targetSpeed";
             this.text_facetr_targetSpeed.Size = new System.Drawing.Size(278, 23);
-            this.text_facetr_targetSpeed.TabIndex = 69;            
+            this.text_facetr_targetSpeed.TabIndex = 69;
             // 
             // text_facetr_sensitivity
             // 
@@ -198,7 +199,7 @@
             this.text_facetr_sensitivity.Location = new System.Drawing.Point(78, 33);
             this.text_facetr_sensitivity.Name = "text_facetr_sensitivity";
             this.text_facetr_sensitivity.Size = new System.Drawing.Size(278, 23);
-            this.text_facetr_sensitivity.TabIndex = 70;            
+            this.text_facetr_sensitivity.TabIndex = 70;
             // 
             // label9
             // 
@@ -311,11 +312,11 @@
             // 
             // tableLayoutPanel10
             // 
-            this.tableLayoutPanel10.ColumnCount = 2;
-            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
-            this.tableLayoutPanel10.Controls.Add(this.comboBox7, 0, 0);
-            this.tableLayoutPanel10.Controls.Add(this.panelTool, 1, 0);
+            this.tableLayoutPanel10.ColumnCount = 1;
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel10.Controls.Add(this.panelTool, 0, 0);
             this.tableLayoutPanel10.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel10.Location = new System.Drawing.Point(90, 3);
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
@@ -324,22 +325,24 @@
             this.tableLayoutPanel10.Size = new System.Drawing.Size(694, 28);
             this.tableLayoutPanel10.TabIndex = 1;
             // 
-            // comboBox7
+            // com_Mirror
             // 
-            this.comboBox7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.comboBox7.FormattingEnabled = true;
-            this.comboBox7.Location = new System.Drawing.Point(3, 3);
-            this.comboBox7.Name = "comboBox7";
-            this.comboBox7.Size = new System.Drawing.Size(202, 20);
-            this.comboBox7.TabIndex = 0;
-            this.comboBox7.Visible = false;
+            this.com_Mirror.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.com_Mirror.FormattingEnabled = true;
+            this.com_Mirror.Items.AddRange(new object[] {
+            "关闭",
+            "上下"});
+            this.com_Mirror.Location = new System.Drawing.Point(3, 57);
+            this.com_Mirror.Name = "com_Mirror";
+            this.com_Mirror.Size = new System.Drawing.Size(385, 20);
+            this.com_Mirror.TabIndex = 0;
             // 
             // panelTool
             // 
             this.panelTool.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelTool.Location = new System.Drawing.Point(211, 3);
+            this.panelTool.Location = new System.Drawing.Point(3, 3);
             this.panelTool.Name = "panelTool";
-            this.panelTool.Size = new System.Drawing.Size(480, 22);
+            this.panelTool.Size = new System.Drawing.Size(688, 22);
             this.panelTool.TabIndex = 1;
             // 
             // tableLayoutPanel9
@@ -391,20 +394,24 @@
             // 
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Controls.Add(this.groupBox3, 0, 7);
-            this.tableLayoutPanel2.Controls.Add(this.groupBox4, 0, 5);
-            this.tableLayoutPanel2.Controls.Add(this.groupBox2, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.groupBox1, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel11, 0, 8);
+            this.tableLayoutPanel2.Controls.Add(this.label14, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.com_Mirror, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.groupBox3, 0, 9);
+            this.tableLayoutPanel2.Controls.Add(this.groupBox4, 0, 7);
+            this.tableLayoutPanel2.Controls.Add(this.groupBox2, 0, 5);
+            this.tableLayoutPanel2.Controls.Add(this.groupBox1, 0, 3);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel11, 0, 10);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(891, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 9;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.tableLayoutPanel2.RowCount = 11;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 2F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 2F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 2F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
@@ -418,7 +425,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Font = new System.Drawing.Font("宋体", 10F);
             this.groupBox3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.groupBox3.Location = new System.Drawing.Point(3, 488);
+            this.groupBox3.Location = new System.Drawing.Point(3, 486);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(385, 190);
             this.groupBox3.TabIndex = 59;
@@ -514,7 +521,7 @@
             this.text_bodytc_environ.Name = "text_bodytc_environ";
             this.text_bodytc_environ.Size = new System.Drawing.Size(278, 23);
             this.text_bodytc_environ.TabIndex = 38;
-            this.text_bodytc_environ.Text = "0";            
+            this.text_bodytc_environ.Text = "0";
             // 
             // com_bodytc_mode
             // 
@@ -536,7 +543,7 @@
             this.text_bodytc_smartCorrection.Name = "text_bodytc_smartCorrection";
             this.text_bodytc_smartCorrection.Size = new System.Drawing.Size(278, 23);
             this.text_bodytc_smartCorrection.TabIndex = 61;
-            this.text_bodytc_smartCorrection.Text = "0";            
+            this.text_bodytc_smartCorrection.Text = "0";
             // 
             // text_bodytc_compensationValue
             // 
@@ -597,7 +604,7 @@
             this.groupBox4.Controls.Add(this.tableLayoutPanel7);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox4.Font = new System.Drawing.Font("宋体", 10F);
-            this.groupBox4.Location = new System.Drawing.Point(3, 395);
+            this.groupBox4.Location = new System.Drawing.Point(3, 393);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(385, 72);
             this.groupBox4.TabIndex = 60;
@@ -650,7 +657,7 @@
             this.text_facetbp_emissivity.Location = new System.Drawing.Point(78, 3);
             this.text_facetbp_emissivity.Name = "text_facetbp_emissivity";
             this.text_facetbp_emissivity.Size = new System.Drawing.Size(278, 23);
-            this.text_facetbp_emissivity.TabIndex = 67;            
+            this.text_facetbp_emissivity.TabIndex = 67;
             // 
             // label7
             // 
@@ -669,14 +676,14 @@
             this.text_facetbp_distance.Location = new System.Drawing.Point(78, 28);
             this.text_facetbp_distance.Name = "text_facetbp_distance";
             this.text_facetbp_distance.Size = new System.Drawing.Size(278, 23);
-            this.text_facetbp_distance.TabIndex = 69;            
+            this.text_facetbp_distance.TabIndex = 69;
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.tableLayoutPanel5);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("宋体", 10F);
-            this.groupBox1.Location = new System.Drawing.Point(3, 58);
+            this.groupBox1.Location = new System.Drawing.Point(3, 80);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(385, 151);
             this.groupBox1.TabIndex = 31;
@@ -758,7 +765,7 @@
             this.text_black_emissivity.Name = "text_black_emissivity";
             this.text_black_emissivity.Size = new System.Drawing.Size(278, 23);
             this.text_black_emissivity.TabIndex = 61;
-            this.text_black_emissivity.Text = "0";            
+            this.text_black_emissivity.Text = "0";
             // 
             // text_black_temp
             // 
@@ -767,7 +774,7 @@
             this.text_black_temp.Name = "text_black_temp";
             this.text_black_temp.Size = new System.Drawing.Size(278, 23);
             this.text_black_temp.TabIndex = 60;
-            this.text_black_temp.Text = "0";            
+            this.text_black_temp.Text = "0";
             // 
             // label2
             // 
@@ -797,7 +804,7 @@
             this.text_black_distance.Location = new System.Drawing.Point(78, 35);
             this.text_black_distance.Name = "text_black_distance";
             this.text_black_distance.Size = new System.Drawing.Size(278, 23);
-            this.text_black_distance.TabIndex = 68;            
+            this.text_black_distance.TabIndex = 68;
             // 
             // tableLayoutPanel11
             // 
@@ -807,13 +814,13 @@
             this.tableLayoutPanel11.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel11.Controls.Add(this.btn_save, 1, 1);
             this.tableLayoutPanel11.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel11.Location = new System.Drawing.Point(3, 684);
+            this.tableLayoutPanel11.Location = new System.Drawing.Point(3, 682);
             this.tableLayoutPanel11.Name = "tableLayoutPanel11";
             this.tableLayoutPanel11.RowCount = 3;
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40F));
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanel11.Size = new System.Drawing.Size(385, 100);
+            this.tableLayoutPanel11.Size = new System.Drawing.Size(385, 102);
             this.tableLayoutPanel11.TabIndex = 61;
             // 
             // btn_save
@@ -834,6 +841,17 @@
             // 
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label14.Font = new System.Drawing.Font("宋体", 12F);
+            this.label14.Location = new System.Drawing.Point(3, 39);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(385, 15);
+            this.label14.TabIndex = 0;
+            this.label14.Text = "镜像：";
             // 
             // SetParameterForm
             // 
@@ -859,6 +877,7 @@
             this.tableLayoutPanel9.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
@@ -910,7 +929,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
-        private System.Windows.Forms.ComboBox comboBox7;
+        private System.Windows.Forms.ComboBox com_Mirror;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox text_facetbp_emissivity;
@@ -935,5 +954,6 @@
         private System.Windows.Forms.Panel panel_draw_ircamera;
         private System.Windows.Forms.TextBox text_black_distance;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label14;
     }
 }
