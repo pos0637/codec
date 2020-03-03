@@ -31,7 +31,8 @@ namespace Devices
         FaceThermometryRegion, // 人脸测温区域
         FaceThermometryBasicParameter, // 人脸测温基本参数
         BodyTemperatureCompensation, // 体温温度补偿
-        BlackBody // 黑体配置
+        BlackBody, // 黑体配置
+        MirrorMode // 镜像模式
     };
 
     /// <summary>
@@ -55,6 +56,7 @@ namespace Devices
         FaceThermometryRegion, // 人脸测温区域
         FaceThermometryBasicParameter, // 人脸测温基本参数
         BodyTemperatureCompensation, // 体温温度补偿
-        BlackBody // 黑体配置
+        BlackBody, // 黑体配置
+        MirrorMode // 镜像模式
     };
 }

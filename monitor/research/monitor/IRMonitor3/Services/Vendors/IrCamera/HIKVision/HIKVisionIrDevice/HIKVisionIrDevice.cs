@@ -376,6 +376,11 @@ namespace HIKVisionIrDevice
                     return true;
                 }
 
+                case ReadMode.MirrorMode: {
+                    outData = GetMirrorMode();
+                    return true;
+                }
+
                 default:
                     break;
             }
@@ -449,6 +454,10 @@ namespace HIKVisionIrDevice
 
                 case WriteMode.BlackBody: {
                     return SetBlackBody(data as Dictionary<string, object>);
+                }
+
+                case WriteMode.MirrorMode: {
+                    return SetMirrorMode((bool)data);
                 }
 
                 default:
@@ -847,7 +856,7 @@ namespace HIKVisionIrDevice
         /// <summary>
         /// 设置黑体配置
         /// </summary>
-        /// <param name="arguments"黑体配置</param>
+        /// <param name="arguments">黑体配置</param>
         /// <returns>是否成功</returns>
         public bool SetBlackBody(Dictionary<string, object> arguments)
         {
@@ -878,6 +887,53 @@ namespace HIKVisionIrDevice
                 var response = SetConfiguration(url, doc.ToString());
                 doc = XDocument.Parse(response);
                 element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取镜像模式
+        /// </summary>
+        /// <returns>镜像模式</returns>
+        public bool GetMirrorMode()
+        {
+            try {
+                var url = $"/ISAPI/Image/channels/{cameraChannel}/imageFlip";
+                var configuration = GetConfiguration(url);
+                var doc = XDocument.Parse(configuration);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("enabled"));
+                return element.Value.Equals("true");
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 设置镜像模式
+        /// </summary>
+        /// <param name="mode">镜像模式</param>
+        /// <returns>是否成功</returns>
+        public bool SetMirrorMode(bool mode)
+        {
+            try {
+                var url = $"/ISAPI/Image/channels/{cameraChannel}/imageFlip";
+                var configuration = "";
+                if (mode) {
+                    configuration = "<ImageFlip><enabled>true</enabled><ImageFlipStyle>UPDOWN</ImageFlipStyle></ImageFlip>";
+                }
+                else {
+                    configuration = "<ImageFlip><enabled>false</enabled></ImageFlip>";
+                }
+
+                var response = SetConfiguration(url, configuration);
+                var doc = XDocument.Parse(response);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
                 return element.Value.Equals("1");
             }
             catch (Exception e) {
