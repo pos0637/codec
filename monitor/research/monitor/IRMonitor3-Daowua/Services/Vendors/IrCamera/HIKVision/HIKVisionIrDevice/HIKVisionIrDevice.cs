@@ -905,8 +905,7 @@ namespace HIKVisionIrDevice
                 var url = $"/ISAPI/Image/channels/{cameraChannel}/imageFlip";
                 var configuration = GetConfiguration(url);
                 var doc = XDocument.Parse(configuration);
-                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("ImageFlip"));
-                element = element.Elements().First(e => e.Name.LocalName.Equals("enabled"));
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("enabled"));
                 return element.Value.Equals("true");
             }
             catch (Exception e) {
