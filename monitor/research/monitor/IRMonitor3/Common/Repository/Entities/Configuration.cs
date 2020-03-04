@@ -296,6 +296,37 @@
         }
 
         /// <summary>
+        /// 网络参数
+        /// </summary>
+        public class NetworkParameters
+        {
+            /// <summary>
+            /// 地址
+            /// </summary>
+            public string ip;
+
+            /// <summary>
+            /// 子网掩码
+            /// </summary>
+            public string mask;
+
+            /// <summary>
+            /// 网关地址
+            /// </summary>
+            public string gateway;
+
+            /// <summary>
+            /// DNS服务器地址
+            /// </summary>
+            public string dns1;
+
+            /// <summary>
+            /// 端口
+            /// </summary>
+            public int port;
+        }
+
+        /// <summary>
         /// 信息
         /// </summary>
         public Information information;

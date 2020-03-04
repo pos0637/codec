@@ -253,6 +253,10 @@ namespace HIKVisionIrDevice
                     return SetFaceThermometryEnabled((bool)data);
                 }
 
+                case ControlMode.Reboot: {
+                    return SetConfiguration("/ISAPI/System/reboot", null);
+                }
+
                 default:
                     return false;
             }
@@ -381,6 +385,11 @@ namespace HIKVisionIrDevice
                     return true;
                 }
 
+                case ReadMode.NetworkParameters: {
+                    outData = GetNetworkParameters();
+                    return true;
+                }
+
                 default:
                     break;
             }
@@ -460,6 +469,10 @@ namespace HIKVisionIrDevice
                     return SetMirrorMode((bool)data);
                 }
 
+                case WriteMode.NetworkParameters: {
+                    return SetNetworkParameters(data as Repository.Entities.Configuration.NetworkParameters);
+                }
+
                 default:
                     break;
             }
@@ -517,8 +530,8 @@ namespace HIKVisionIrDevice
             configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam");
             Tracker.LogD($"get streamParam: {configuration}");
 
-            configuration = SetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam", "<ThermalStreamParam version=\"2.0\" xmlns=\"http://www.isapi.org/ver20/XMLSchema\"><videoCodingType>pixel-to-pixel_thermometry_data</videoCodingType></ThermalStreamParam>");
-            Tracker.LogD($"set streamParam: {configuration}");
+            var result = SetConfiguration($"/ISAPI/Thermal/channels/{channel}/streamParam", "<ThermalStreamParam version=\"2.0\" xmlns=\"http://www.isapi.org/ver20/XMLSchema\"><videoCodingType>pixel-to-pixel_thermometry_data</videoCodingType></ThermalStreamParam>");
+            Tracker.LogD($"set streamParam: {result}");
 
             configuration = GetConfiguration($"/ISAPI/Thermal/channels/{channel}/thermometry/pixelToPixelParam/capabilities");
             Tracker.LogD($"get pixelToPixelParam capabilities: {configuration}");
@@ -549,7 +562,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="enabled">是否启用</param>
         /// <returns>是否成功</returns>
-        public bool SetFaceThermometryEnabled(bool enabled)
+        private bool SetFaceThermometryEnabled(bool enabled)
         {
             try {
                 var url = $"/ISAPI/Thermal/channels/{cameraChannel}/faceThermometry";
@@ -558,10 +571,7 @@ namespace HIKVisionIrDevice
                 var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("faceThermometryEnabled"));
                 element.Value = enabled.ToString().ToLower();
 
-                var response = SetConfiguration(url, doc.ToString());
-                doc = XDocument.Parse(response);
-                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, doc.ToString());
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -573,7 +583,7 @@ namespace HIKVisionIrDevice
         /// 获取人脸测温配置规则
         /// </summary>
         /// <returns>人脸测温配置规则</returns>
-        public Dictionary<string, object> GetFaceThermometryRegion()
+        private Dictionary<string, object> GetFaceThermometryRegion()
         {
             try {
                 var result = new Dictionary<string, object>();
@@ -623,7 +633,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="arguments">人脸测温配置规则</param>
         /// <returns>是否成功</returns>
-        public bool SetFaceThermometryRegion(Dictionary<string, object> arguments)
+        private bool SetFaceThermometryRegion(Dictionary<string, object> arguments)
         {
             try {
                 // 第一区域始终存在
@@ -667,10 +677,7 @@ namespace HIKVisionIrDevice
                 element = elements[3].Elements().First(e => e.Name.LocalName.Equals("positionY"));
                 element.Value = rectangle.Top.ToString();
 
-                var response = SetConfiguration(url, doc.ToString());
-                doc = XDocument.Parse(response);
-                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, doc.ToString());
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -682,7 +689,7 @@ namespace HIKVisionIrDevice
         /// 获取人脸测温基本参数配置
         /// </summary>
         /// <returns>人脸测温基本参数配置</returns>
-        public Dictionary<string, object> GetFaceThermometryBasicParameter()
+        private Dictionary<string, object> GetFaceThermometryBasicParameter()
         {
             try {
                 var result = new Dictionary<string, object>();
@@ -709,7 +716,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="arguments">人脸测温基本参数配置</param>
         /// <returns>是否成功</returns>
-        public bool SetFaceThermometryBasicParameter(Dictionary<string, object> arguments)
+        private bool SetFaceThermometryBasicParameter(Dictionary<string, object> arguments)
         {
             try {
                 var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/thermometry/basicParam";
@@ -722,10 +729,7 @@ namespace HIKVisionIrDevice
                 element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("distance"));
                 element.Value = ((float)arguments["distance"] * 100).ToString().ToLower();
 
-                var response = SetConfiguration(url, doc.ToString());
-                doc = XDocument.Parse(response);
-                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, doc.ToString());
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -737,7 +741,7 @@ namespace HIKVisionIrDevice
         /// 获取体温温度补偿配置
         /// </summary>
         /// <returns>体温温度补偿配置</returns>
-        public Dictionary<string, object> GetBodyTemperatureCompensation()
+        private Dictionary<string, object> GetBodyTemperatureCompensation()
         {
             try {
                 var result = new Dictionary<string, object>();
@@ -789,7 +793,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="arguments">体温温度补偿配置</param>
         /// <returns>是否成功</returns>
-        public bool SetBodyTemperatureCompensation(Dictionary<string, object> arguments)
+        private bool SetBodyTemperatureCompensation(Dictionary<string, object> arguments)
         {
             try {
                 var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/bodyTemperatureCompensation";
@@ -803,10 +807,7 @@ namespace HIKVisionIrDevice
                     configuration = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?><BodyTemperatureCompensation version=\"2.0\" xmlns=\"http://www.hikvision.com/ver20/XMLSchema\"><type>manual</type><ManualParam><compensationValue>{arguments["compensationValue"].ToString().ToLower()}</compensationValue><smartCorrection>{arguments["smartCorrection"].ToString().ToLower()}</smartCorrection><environmentalTemperature>{arguments["environmentalTemperature"].ToString().ToLower()}</environmentalTemperature><temperatureCompensation>{arguments["temperatureCompensation"].ToString().ToLower()}</temperatureCompensation><environmentalTemperatureMode>{arguments["environmentalTemperatureMode"].ToString().ToLower()}</environmentalTemperatureMode></ManualParam></BodyTemperatureCompensation>";
                 }
 
-                var response = SetConfiguration(url, configuration);
-                var doc = XDocument.Parse(response);
-                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, configuration);
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -818,7 +819,7 @@ namespace HIKVisionIrDevice
         /// 获取黑体配置
         /// </summary>
         /// <returns>黑体配置</returns>
-        public Dictionary<string, object> GetBlackBody()
+        private Dictionary<string, object> GetBlackBody()
         {
             try {
                 var result = new Dictionary<string, object>();
@@ -858,7 +859,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="arguments">黑体配置</param>
         /// <returns>是否成功</returns>
-        public bool SetBlackBody(Dictionary<string, object> arguments)
+        private bool SetBlackBody(Dictionary<string, object> arguments)
         {
             try {
                 var url = $"/ISAPI/Thermal/channels/{irCameraChannel}/blackBody";
@@ -884,10 +885,7 @@ namespace HIKVisionIrDevice
                 element1 = element.Elements().First(e => e.Name.LocalName.Equals("positionY"));
                 element1.Value = point.Y.ToString().ToLower();
 
-                var response = SetConfiguration(url, doc.ToString());
-                doc = XDocument.Parse(response);
-                element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, doc.ToString());
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -899,7 +897,7 @@ namespace HIKVisionIrDevice
         /// 获取镜像模式
         /// </summary>
         /// <returns>镜像模式</returns>
-        public bool GetMirrorMode()
+        private bool GetMirrorMode()
         {
             try {
                 var url = $"/ISAPI/Image/channels/{cameraChannel}/imageFlip";
@@ -919,7 +917,7 @@ namespace HIKVisionIrDevice
         /// </summary>
         /// <param name="mode">镜像模式</param>
         /// <returns>是否成功</returns>
-        public bool SetMirrorMode(bool mode)
+        private bool SetMirrorMode(bool mode)
         {
             try {
                 var url = $"/ISAPI/Image/channels/{cameraChannel}/imageFlip";
@@ -931,10 +929,62 @@ namespace HIKVisionIrDevice
                     configuration = "<ImageFlip><enabled>false</enabled></ImageFlip>";
                 }
 
-                var response = SetConfiguration(url, configuration);
-                var doc = XDocument.Parse(response);
-                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element.Value.Equals("1");
+                return SetConfiguration(url, configuration);
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取网络参数
+        /// </summary>
+        /// <returns>网络参数</returns>
+        private Repository.Entities.Configuration.NetworkParameters GetNetworkParameters()
+        {
+            try {
+                var ret = GetDvrConfiguration<CHCNetSDK.NET_DVR_NETCFG_V30>(CHCNetSDK.NET_DVR_GET_NETCFG_V30);
+                if (ret == null) {
+                    return null;
+                }
+
+                var cfg = (CHCNetSDK.NET_DVR_NETCFG_V30)ret;
+                return new Repository.Entities.Configuration.NetworkParameters() {
+                    ip = cfg.struEtherNet[0].struDVRIP.sIpV4,
+                    gateway = cfg.struGatewayIpAddr.sIpV4,
+                    mask = cfg.struEtherNet[0].struDVRIPMask.sIpV4,
+                    dns1 = cfg.struDnsServer1IpAddr.sIpV4,
+                    port = cfg.struEtherNet[0].wDVRPort
+                };
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置网络参数
+        /// </summary>
+        /// <param name="parameters">网络参数</param>
+        /// <returns>是否成功</returns>
+        private bool SetNetworkParameters(Repository.Entities.Configuration.NetworkParameters parameters)
+        {
+            try {
+                var ret = GetDvrConfiguration<CHCNetSDK.NET_DVR_NETCFG_V30>(CHCNetSDK.NET_DVR_GET_NETCFG_V30);
+                if (ret == null) {
+                    return false;
+                }
+
+                var cfg = (CHCNetSDK.NET_DVR_NETCFG_V30)ret;
+                cfg.struEtherNet[0].struDVRIP.sIpV4 = parameters.ip;
+                cfg.struGatewayIpAddr.sIpV4 = parameters.gateway;
+                cfg.struEtherNet[0].struDVRIPMask.sIpV4 = parameters.mask;
+                cfg.struDnsServer1IpAddr.sIpV4 = parameters.dns1;
+                cfg.struEtherNet[0].wDVRPort = (ushort)parameters.port;
+
+                return SetDvrConfiguration(CHCNetSDK.NET_DVR_SET_NETCFG_V30, cfg);
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -982,10 +1032,7 @@ namespace HIKVisionIrDevice
                     configuration = doc.ToString();
                 }
 
-                var response = SetConfiguration(url, configuration);
-                var doc1 = XDocument.Parse(response);
-                var element1 = doc1.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
-                return element1.Value.Equals("1");
+                return SetConfiguration(url, configuration);
             }
             catch (Exception e) {
                 Tracker.LogE(e);
@@ -1215,14 +1262,17 @@ namespace HIKVisionIrDevice
         /// <param name="url">请求信令</param>
         /// <param name="configuration">配置</param>
         /// <param name="outputBufferSize">输出缓冲区大小</param>
-        /// <returns>配置</returns>
-        private string SetConfiguration(string url, string configuration, int outputBufferSize = 3 * 1024 * 1024)
+        /// <returns>是否成功</returns>
+        private bool SetConfiguration(string url, string configuration, int outputBufferSize = 3 * 1024 * 1024)
         {
             IntPtr lpUrl = IntPtr.Zero;
             IntPtr lpInBuffer = IntPtr.Zero;
             IntPtr lpOutputXml = IntPtr.Zero;
             IntPtr lpStatusBuffer = IntPtr.Zero;
             url = $"PUT {url}";
+            if (configuration == null) {
+                configuration = "";
+            }
 
             try {
                 lpUrl = Marshal.StringToHGlobalAnsi(url);
@@ -1247,11 +1297,14 @@ namespace HIKVisionIrDevice
 
                 if (!CHCNetSDK.NET_DVR_STDXMLConfig(userId, ref struInput, ref struOutput)) {
                     Tracker.LogE($"SetConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
-                    return null;
+                    return false;
                 }
 
                 var response = Marshal.PtrToStringAnsi(struOutput.lpStatusBuffer);
-                return Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(response));
+                response = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(response));
+                var doc = XDocument.Parse(response);
+                var element = doc.Root.Elements().First(e => e.Name.LocalName.Equals("statusCode"));
+                return element.Value.Equals("1");
             }
             finally {
                 if (lpUrl != IntPtr.Zero) {
@@ -1268,6 +1321,75 @@ namespace HIKVisionIrDevice
 
                 if (lpStatusBuffer != IntPtr.Zero) {
                     Marshal.FreeHGlobal(lpStatusBuffer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取DVR配置
+        /// </summary>
+        /// <typeparam name="T">配置数据类型</typeparam>
+        /// <param name="command">设备配置命令</param>
+        /// <returns>配置</returns>
+        private object GetDvrConfiguration<T>(uint command)
+        {
+            IntPtr ptr = IntPtr.Zero;
+
+            try {
+                var configuration = Activator.CreateInstance(typeof(T));
+                var size = Marshal.SizeOf(configuration);
+                ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(configuration, ptr, false);
+
+                uint returned = 0;
+                if (!CHCNetSDK.NET_DVR_GetDVRConfig(userId, command, -1, ptr, (uint)size, ref returned)) {
+                    Tracker.LogE($"GetDvrConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
+                    return null;
+                }
+
+                return (T)Marshal.PtrToStructure(ptr, typeof(T));
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+            finally {
+                if (ptr != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(ptr);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置DVR配置
+        /// </summary>
+        /// <typeparam name="T">配置数据类型</typeparam>
+        /// <param name="command">设备配置命令</param>
+        /// <param name="configuration">配置数据</param>
+        /// <returns>是否成功</returns>
+        private bool SetDvrConfiguration<T>(uint command, T configuration)
+        {
+            IntPtr ptr = IntPtr.Zero;
+
+            try {
+                var size = Marshal.SizeOf(configuration);
+                ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(configuration, ptr, false);
+
+                if (!CHCNetSDK.NET_DVR_SetDVRConfig(userId, command, -1, ptr, (uint)size)) {
+                    Tracker.LogE($"SetDvrConfiguration fail: {CHCNetSDK.NET_DVR_GetLastError()}");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return default;
+            }
+            finally {
+                if (ptr != IntPtr.Zero) {
+                    Marshal.FreeHGlobal(ptr);
                 }
             }
         }

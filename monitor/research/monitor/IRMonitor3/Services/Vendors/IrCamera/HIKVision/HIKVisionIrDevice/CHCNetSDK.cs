@@ -1195,17 +1195,16 @@ namespace HIKVisionIrDevice
         {
 
             /// char[16]
-            [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 16, ArraySubType = UnmanagedType.I1)]
-            public byte[] sIpV4;
+            [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = 16)]
+            public string sIpV4;
 
             /// BYTE[128]
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 128, ArraySubType = UnmanagedType.I1)]
-            public byte[] sIpV6;
+            public byte[] byRes;
 
             public void Init()
             {
-                sIpV4 = new byte[16];
-                sIpV6 = new byte[128];
+                byRes = new byte[128];
             }
         }
 

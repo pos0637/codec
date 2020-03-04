@@ -1,6 +1,8 @@
 ﻿using Common;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -70,7 +72,17 @@ namespace IRService.Services
         }
 
         /// <summary>
-        /// 删除服务
+        /// 获取服务列表
+        /// </summary>
+        /// <returns>服务列表</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public List<Service> GetServices()
+        {
+            return services.Values.OfType<Service>().ToList();
+        }
+
+        /// <summary>
+        /// 删除服务列表
         /// </summary>
         /// <param name="serviceId">服务索引</param>
         [MethodImpl(MethodImplOptions.Synchronized)]

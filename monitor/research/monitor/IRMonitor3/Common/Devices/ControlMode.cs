@@ -9,7 +9,8 @@ namespace Devices
         AutoFocus, // 红外热像仪专用
         FocusFar, // 调远焦
         FocusNear, // 调近焦
-        SetFaceThermometryEnabled // 启用人脸测温
+        SetFaceThermometryEnabled, // 启用人脸测温
+        Reboot // 重启
     };
 
     /// <summary>
@@ -32,7 +33,8 @@ namespace Devices
         FaceThermometryBasicParameter, // 人脸测温基本参数
         BodyTemperatureCompensation, // 体温温度补偿
         BlackBody, // 黑体配置
-        MirrorMode // 镜像模式
+        MirrorMode, // 镜像模式
+        NetworkParameters // 网络参数
     };
 
     /// <summary>
@@ -57,6 +59,7 @@ namespace Devices
         FaceThermometryBasicParameter, // 人脸测温基本参数
         BodyTemperatureCompensation, // 体温温度补偿
         BlackBody, // 黑体配置
-        MirrorMode // 镜像模式
+        MirrorMode, // 镜像模式
+        NetworkParameters // 网络参数
     };
 }

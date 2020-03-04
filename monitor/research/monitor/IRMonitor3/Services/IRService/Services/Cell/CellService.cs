@@ -317,6 +317,65 @@ namespace IRService.Services.Cell
 
             return true;
         }
+
+        /// <summary>
+        /// 获取网络参数
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <returns>网络参数</returns>
+        public Configuration.NetworkParameters GetNetworkParameters(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return null;
+            }
+
+            if (!device.Read(ReadMode.NetworkParameters, null, out object result, out int used)) {
+                return null;
+            }
+
+            return result as Configuration.NetworkParameters;
+        }
+
+        /// <summary>
+        /// 设置网络参数
+        /// </summary>
+        /// <param name="deviceId">设备索引</param> 
+        /// <param name="parameters">网络参数</param>
+        /// <returns>是否成功</returns>
+        public bool SetNetworkParameters(string deviceId, Configuration.NetworkParameters parameters)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Write(WriteMode.NetworkParameters, parameters)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 重启设备
+        /// </summary>
+        /// <param name="deviceId">设备索引</param>
+        /// <returns>是否成功</returns>
+        public bool RebootDevice(string deviceId)
+        {
+            var device = deviceId != null ? devices.FirstOrDefault(d => d.Id.Equals(deviceId)) : devices.Count > 0 ? devices[0] : null;
+            if (device == null) {
+                return false;
+            }
+
+            if (!device.Control(ControlMode.Reboot, null)) {
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion
     }
 }
