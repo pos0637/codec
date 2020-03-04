@@ -59,5 +59,19 @@ namespace IRApplication.UI
         {
             Close();
         }
+
+        private void buttonNarrow_Click(object sender, System.EventArgs e)
+        {
+            panel4.SendToBack();
+            tableLayoutPanel3.Parent = tableLayoutPanel2;
+            tableLayoutPanel3.Dock = DockStyle.Fill;
+        }
+
+        private void buttonZoom_Click(object sender, System.EventArgs e)
+        {
+            panel4.BringToFront();
+            tableLayoutPanel3.Parent = panel4;
+            tableLayoutPanel3.Dock = DockStyle.Fill;
+        }
     }
 }

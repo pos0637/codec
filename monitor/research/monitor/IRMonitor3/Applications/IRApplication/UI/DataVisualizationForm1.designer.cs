@@ -36,6 +36,9 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
             this.panel10 = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label_alarm_count = new System.Windows.Forms.Label();
+            this.buttonZoom = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
             this.panel8 = new System.Windows.Forms.Panel();
@@ -54,8 +57,8 @@
             this.panel14 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.button1 = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label_alarm_count = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.buttonNarrow = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -72,6 +75,7 @@
             this.panel6.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -109,6 +113,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.9F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel3, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.panel3, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.buttonZoom, 1, 2);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(307, 173);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -192,10 +197,51 @@
             this.panel10.BackgroundImage = global::IRApplication.Properties.Resources.u5;
             this.panel10.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.panel10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel10.Location = new System.Drawing.Point(460, 12);
+            this.panel10.Location = new System.Drawing.Point(392, 12);
             this.panel10.Name = "panel10";
-            this.panel10.Size = new System.Drawing.Size(66, 39);
+            this.panel10.Size = new System.Drawing.Size(82, 39);
             this.panel10.TabIndex = 0;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label3.Font = new System.Drawing.Font("宋体", 20F);
+            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.Location = new System.Drawing.Point(480, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(258, 45);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "疑似发病人数";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label_alarm_count
+            // 
+            this.label_alarm_count.AutoSize = true;
+            this.label_alarm_count.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_alarm_count.Font = new System.Drawing.Font("Century", 30F);
+            this.label_alarm_count.ForeColor = System.Drawing.Color.Red;
+            this.label_alarm_count.Location = new System.Drawing.Point(744, 9);
+            this.label_alarm_count.Name = "label_alarm_count";
+            this.label_alarm_count.Size = new System.Drawing.Size(82, 45);
+            this.label_alarm_count.TabIndex = 2;
+            this.label_alarm_count.Text = "0";
+            this.label_alarm_count.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // buttonZoom
+            // 
+            this.buttonZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonZoom.BackColor = System.Drawing.Color.White;
+            this.buttonZoom.BackgroundImage = global::IRApplication.Properties.Resources.放大;
+            this.buttonZoom.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.buttonZoom.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.buttonZoom.Location = new System.Drawing.Point(1159, 97);
+            this.buttonZoom.Name = "buttonZoom";
+            this.buttonZoom.Size = new System.Drawing.Size(75, 50);
+            this.buttonZoom.TabIndex = 2;
+            this.buttonZoom.UseVisualStyleBackColor = false;
+            this.buttonZoom.Visible = false;
+            this.buttonZoom.Click += new System.EventHandler(this.buttonZoom_Click);
             // 
             // panel1
             // 
@@ -438,31 +484,27 @@
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label3
+            // panel4
             // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("宋体", 20F);
-            this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(532, 9);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(210, 45);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "疑似发病人数";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.panel4.Controls.Add(this.buttonNarrow);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(1920, 1080);
+            this.panel4.TabIndex = 0;
             // 
-            // label_alarm_count
+            // buttonNarrow
             // 
-            this.label_alarm_count.AutoSize = true;
-            this.label_alarm_count.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_alarm_count.Font = new System.Drawing.Font("Century", 30F);
-            this.label_alarm_count.ForeColor = System.Drawing.Color.Red;
-            this.label_alarm_count.Location = new System.Drawing.Point(748, 9);
-            this.label_alarm_count.Name = "label_alarm_count";
-            this.label_alarm_count.Size = new System.Drawing.Size(66, 45);
-            this.label_alarm_count.TabIndex = 2;
-            this.label_alarm_count.Text = "0";
-            this.label_alarm_count.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.buttonNarrow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonNarrow.BackgroundImage = global::IRApplication.Properties.Resources.缩小;
+            this.buttonNarrow.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.buttonNarrow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonNarrow.Location = new System.Drawing.Point(1845, 0);
+            this.buttonNarrow.Name = "buttonNarrow";
+            this.buttonNarrow.Size = new System.Drawing.Size(75, 50);
+            this.buttonNarrow.TabIndex = 0;
+            this.buttonNarrow.UseVisualStyleBackColor = true;
+            this.buttonNarrow.Click += new System.EventHandler(this.buttonNarrow_Click);
             // 
             // DataVisualizationForm1
             // 
@@ -471,6 +513,7 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.ClientSize = new System.Drawing.Size(1920, 1080);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.panel4);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "DataVisualizationForm1";
             this.Text = "testForm";
@@ -493,6 +536,7 @@
             this.panel6.ResumeLayout(false);
             this.tableLayoutPanel11.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
+            this.panel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -527,5 +571,8 @@
         private System.Windows.Forms.Panel panel_alarms;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label_alarm_count;
+        private System.Windows.Forms.Button buttonZoom;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Button buttonNarrow;
     }
 }

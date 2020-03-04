@@ -742,6 +742,16 @@ namespace IRApplication.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap 放大 {
+            get {
+                object obj = ResourceManager.GetObject("放大", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap 暂停 {
             get {
                 object obj = ResourceManager.GetObject("暂停", resourceCulture);
@@ -815,6 +825,16 @@ namespace IRApplication.Properties {
         internal static System.Drawing.Bitmap 线 {
             get {
                 object obj = ResourceManager.GetObject("线", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 缩小 {
+            get {
+                object obj = ResourceManager.GetObject("缩小", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

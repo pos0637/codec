@@ -175,5 +175,19 @@ namespace IRApplication.UI
             // TODO: delete it
             EventEmitter.Instance.Publish(IRService.Common.Constants.EVENT_SERVICE_ON_ALARM, cell, cell.devices[0], Repository.Entities.Alarm.AlarmType.Manual, new RectangleF(), "用户触发告警");
         }
+
+        private void buttonZoom_Click(object sender, System.EventArgs e)
+        {
+            panel25.BringToFront();
+            panel24.Parent = panel25;
+            panel24.Dock = DockStyle.Fill;
+        }
+
+        private void buttonNarrow_Click(object sender, System.EventArgs e)
+        {
+            panel25.SendToBack();
+            panel24.Parent = panelIRViewForm;
+            panel24.Dock = DockStyle.Fill;
+        }
     }
 }

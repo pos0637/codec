@@ -388,6 +388,7 @@
     <Content Include="Resources\慢.png" />
     <Content Include="Resources\抓拍.png" />
     <Content Include="Resources\播放.png" />
+    <None Include="Resources\放大.png" />
     <Content Include="Resources\暂停.png" />
     <Content Include="Resources\椭圆.png" />
     <Content Include="Resources\点.png" />
@@ -396,6 +397,7 @@
     <Content Include="Resources\矩形.png" />
     <Content Include="Resources\箭头.png" />
     <Content Include="Resources\线.png" />
+    <None Include="Resources\缩小.png" />
     <Content Include="Resources\设备信息.png" />
     <Content Include="Resources\调色板.png" />
     <Content Include="Resources\返回1.png" />

@@ -358,4 +358,10 @@
   <data name="u9" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\u9.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="放大" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\放大.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="缩小" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\缩小.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
