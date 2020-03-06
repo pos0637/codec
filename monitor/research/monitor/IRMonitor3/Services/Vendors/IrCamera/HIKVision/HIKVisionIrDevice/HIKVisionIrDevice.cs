@@ -1422,7 +1422,7 @@ namespace HIKVisionIrDevice
             }
 
             var buffer = temperatureBuffer.GetWritableBuffer();
-            var length = (int)dwBufSize - headerSize;
+            var length = hasHeader ? (int)dwBufSize - headerSize : (int)dwBufSize;
             if (((!mHasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
                 buffer.Reset();
                 mHasHeader = false;
