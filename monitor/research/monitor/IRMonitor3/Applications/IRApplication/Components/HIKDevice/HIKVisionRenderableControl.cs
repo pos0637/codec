@@ -12,7 +12,7 @@ namespace IRApplication.Components.HIKDevice
         /// <summary>
         /// 使用海康播放组件
         /// </summary>
-        public static readonly bool UseHIKDevice = true;
+        public static readonly bool UseHIKDevice = false;
 
         /// <summary>
         /// 用户句柄
