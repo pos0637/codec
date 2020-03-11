@@ -24,29 +24,24 @@ namespace HIKVisionIrDevice
         #region 成员变量
 
         /// <summary>
-        /// 设备状态
-        /// </summary>
-        private DeviceStatus mStatus = DeviceStatus.Idle;
-
-        /// <summary>
         /// IP地址
         /// </summary>
-        private string mIp;
+        private string ip;
 
         /// <summary>
         /// 端口
         /// </summary>
-        private short mPort;
+        private short port;
 
         /// <summary>
         /// 用户名
         /// </summary>
-        private string mUserName;
+        private string userName;
 
         /// <summary>
         /// 密码
         /// </summary>
-        private string mPassword;
+        private string password;
 
         /// <summary>
         /// 红外摄像机参数
@@ -71,17 +66,17 @@ namespace HIKVisionIrDevice
         /// <summary>
         /// 距离
         /// </summary>
-        private float mDistance = 0.0F;
+        private float distance = 0.0F;
 
         /// <summary>
         /// 发射率
         /// </summary>
-        private float mEmissivity = 0.0F;
+        private float emissivity = 0.0F;
 
         /// <summary>
         /// 反射温度
         /// </summary>
-        private float mReflectedTemperature = 0.0F;
+        private float reflectedTemperature = 0.0F;
 
         /// <summary>
         /// 用户索引
@@ -161,7 +156,7 @@ namespace HIKVisionIrDevice
         /// <summary>
         /// 是否解析到温度帧头部
         /// </summary>
-        private bool mHasHeader = false;
+        private bool hasHeader = false;
 
         #endregion
 
@@ -187,15 +182,15 @@ namespace HIKVisionIrDevice
             temperatureBuffer = new TripleByteBuffer(4 + irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight * sizeof(float));
             irImageBuffer = new TripleByteBuffer(irCameraParameters.width * irCameraParameters.height * 3 / 2);
             imageBuffer = new TripleByteBuffer(cameraParameters.width * cameraParameters.height * 3 / 2);
-            mHasHeader = false;
+            hasHeader = false;
 
             CHCNetSDK.NET_DVR_Init();
 
-            if (!Login(mIp, mPort, mUserName, mPassword)) {
+            if (!Login(ip, port, userName, password)) {
                 return false;
             }
 
-            if (!Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature)) {
+            if (!Config(irCameraChannel, distance, emissivity, reflectedTemperature)) {
                 Logout();
                 return false;
             }
@@ -211,7 +206,7 @@ namespace HIKVisionIrDevice
             }
 
             lock (this) {
-                mStatus = DeviceStatus.Running;
+                status = DeviceStatus.Running;
             }
 
             return true;
@@ -224,7 +219,7 @@ namespace HIKVisionIrDevice
             Logout();
 
             lock (this) {
-                mStatus = DeviceStatus.Idle;
+                status = DeviceStatus.Idle;
             }
 
             return true;
@@ -270,7 +265,7 @@ namespace HIKVisionIrDevice
         public override DeviceStatus GetDeviceStatus()
         {
             lock (this) {
-                return mStatus;
+                return status;
             }
         }
 
@@ -286,17 +281,17 @@ namespace HIKVisionIrDevice
 
             switch (mode) {
                 case ReadMode.ObjectDistance: {
-                    outData = mDistance;
+                    outData = distance;
                     break;
                 }
 
                 case ReadMode.Emissivity: {
-                    outData = mEmissivity;
+                    outData = emissivity;
                     break;
                 }
 
                 case ReadMode.ReflectedTemperature: {
-                    outData = mReflectedTemperature;
+                    outData = reflectedTemperature;
                     break;
                 }
 
@@ -402,33 +397,33 @@ namespace HIKVisionIrDevice
             switch (mode) {
                 case WriteMode.URI: {
                     var dict = (data as string).ParseQueryString();
-                    mIp = dict["ip"];
-                    mPort = short.Parse(dict["port"]);
-                    mUserName = dict["username"];
-                    mPassword = dict["password"];
+                    ip = dict["ip"];
+                    port = short.Parse(dict["port"]);
+                    userName = dict["username"];
+                    password = dict["password"];
                     break;
                 }
 
                 case WriteMode.ObjectDistance: {
-                    mDistance = (float)data;
+                    distance = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, distance, emissivity, reflectedTemperature);
                     }
                     break;
                 }
 
                 case WriteMode.Emissivity: {
-                    mEmissivity = (float)data;
+                    emissivity = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, distance, emissivity, reflectedTemperature);
                     }
                     break;
                 }
 
                 case WriteMode.ReflectedTemperature: {
-                    mReflectedTemperature = (float)data;
+                    reflectedTemperature = (float)data;
                     if (GetDeviceStatus() == DeviceStatus.Running) {
-                        return Config(irCameraChannel, mDistance, mEmissivity, mReflectedTemperature);
+                        return Config(irCameraChannel, distance, emissivity, reflectedTemperature);
                     }
                     break;
                 }
@@ -1418,21 +1413,21 @@ namespace HIKVisionIrDevice
                     return;
                 }
                 headerSize = (int)st_frame_info.u32HeaderSize;
-                mHasHeader = hasHeader = true;
+                this.hasHeader = hasHeader = true;
             }
 
             var buffer = temperatureBuffer.GetWritableBuffer();
             var length = hasHeader ? (int)dwBufSize - headerSize : (int)dwBufSize;
-            if (((!mHasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
+            if (((!this.hasHeader) && (!hasHeader)) || ((buffer.Used + length) > buffer.Capacity)) {
                 buffer.Reset();
-                mHasHeader = false;
+                this.hasHeader = false;
                 return;
             }
 
             buffer.Push(pBuffer + headerSize, length);
             if (buffer.IsFull()) {
                 temperatureBuffer.SwapWritableBuffer();
-                mHasHeader = false;
+                this.hasHeader = false;
             }
         }
 

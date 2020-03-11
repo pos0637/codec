@@ -3,7 +3,6 @@ using Devices;
 using Miscs;
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace HIKVisionDevice
 {
@@ -17,11 +16,6 @@ namespace HIKVisionDevice
         #endregion
 
         #region 成员变量
-
-        /// <summary>
-        /// 设备状态
-        /// </summary>
-        private DeviceStatus mStatus = DeviceStatus.Idle;
 
         /// <summary>
         /// IP地址
@@ -118,7 +112,7 @@ namespace HIKVisionDevice
             }
 
             lock (this) {
-                mStatus = DeviceStatus.Running;
+                status = DeviceStatus.Running;
             }
 
             return true;
@@ -130,7 +124,7 @@ namespace HIKVisionDevice
             Logout();
 
             lock (this) {
-                mStatus = DeviceStatus.Idle;
+                status = DeviceStatus.Idle;
             }
 
             return true;
@@ -149,7 +143,7 @@ namespace HIKVisionDevice
         public override DeviceStatus GetDeviceStatus()
         {
             lock (this) {
-                return mStatus;
+                return status;
             }
         }
 

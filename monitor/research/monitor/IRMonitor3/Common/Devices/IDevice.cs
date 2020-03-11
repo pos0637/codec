@@ -15,6 +15,11 @@ namespace Devices
         public delegate void EventHandler(DeviceEvent deviceEvent, params object[] arguments);
 
         /// <summary>
+        /// 设备状态
+        /// </summary>
+        protected DeviceStatus status = DeviceStatus.Idle;
+
+        /// <summary>
         /// 设备索引
         /// </summary>
         public string Id { get; set; }

@@ -10,7 +10,9 @@ namespace Common
         /// <summary>
         /// 三重缓存
         /// </summary>
-        private ByteBuffer[] byteBuffers;
+        private readonly ByteBuffer[] byteBuffers;
+
+        private bool needSwapReadableBuffer;
 
         /// <summary>
         /// 构造函数
@@ -64,9 +66,14 @@ namespace Common
         [MethodImpl(MethodImplOptions.Synchronized)]
         public ByteBuffer SwapReadableBuffer()
         {
+            if (!needSwapReadableBuffer) {
+                return byteBuffers[0];
+            }
+
             var byteBuffer = byteBuffers[1];
             byteBuffers[1] = byteBuffers[0];
             byteBuffers[0] = byteBuffer;
+            needSwapReadableBuffer = false;
 
             return byteBuffers[0];
         }
@@ -82,6 +89,7 @@ namespace Common
             byteBuffers[1] = byteBuffers[2];
             byteBuffers[2] = byteBuffer;
             byteBuffers[2].Reset();
+            needSwapReadableBuffer = true;
 
             return byteBuffers[2];
         }
