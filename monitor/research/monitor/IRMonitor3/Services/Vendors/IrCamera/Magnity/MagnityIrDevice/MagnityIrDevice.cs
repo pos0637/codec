@@ -53,12 +53,17 @@ namespace MagnityIrDevice
         /// <summary>
         /// 温度帧缓存
         /// </summary>
+        private int[] tempBuffer;
+
+        /// <summary>
+        /// 温度帧缓存
+        /// </summary>
         private PinnedBuffer<int> temperatureBuffer;
 
         /// <summary>
         /// 红外图像帧缓存
         /// </summary>
-        private PinnedBuffer<byte> irImageBuffer;
+        private TripleByteBuffer irImageBuffer;
 
         #endregion
 
@@ -93,8 +98,9 @@ namespace MagnityIrDevice
 
         public override bool Open()
         {
+            tempBuffer = new int[irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight];
             temperatureBuffer = PinnedBuffer<int>.Alloc(irCameraParameters.temperatureWidth * irCameraParameters.temperatureHeight);
-            irImageBuffer = PinnedBuffer<byte>.Alloc(irCameraParameters.width * irCameraParameters.height * 3 / 2);
+            irImageBuffer = new TripleByteBuffer(irCameraParameters.width * irCameraParameters.height * 3 / 2);
 
             if (!Connect(ip)) {
                 return false;
@@ -195,8 +201,8 @@ namespace MagnityIrDevice
                         return false;
                     }
 
-                    GetIrImage(ref irImageBuffer);
-                    Buffer.BlockCopy(irImageBuffer.buffer, 0, dst, 0, length);
+                    var buffer = irImageBuffer.SwapReadableBuffer().ToArray();
+                    Buffer.BlockCopy(buffer, 0, dst, 0, length);
 
                     return true;
                 }
@@ -425,18 +431,24 @@ namespace MagnityIrDevice
         {
             device.Lock();
 
-            if (!device.GetTemperatureDataRaw(temperatureBuffer.buffer, (uint)temperatureBuffer.Length * sizeof(int), 1)) {
+            if (!device.GetTemperatureDataRaw(tempBuffer, (uint)tempBuffer.Length * sizeof(int), 1)) {
                 Tracker.LogE("GetTemperatureDataRaw fail");
+                device.Unlock();
+                return;
             }
 
             device.Unlock();
+
+            for (int y1 = irCameraParameters.height - 1, y2 = 0; y1 >= 0; y1--, y2++) {
+                Buffer.BlockCopy(tempBuffer, irCameraParameters.width * y1, temperatureBuffer.buffer, irCameraParameters.width * y2, irCameraParameters.width);
+            }
         }
 
         /// <summary>
         /// 获取红外图像
         /// </summary>
         /// <param name="irImageBuffer">红外图像帧缓存</param>
-        private unsafe void GetIrImage(ref PinnedBuffer<byte> irImageBuffer)
+        private unsafe void GetIrImage(ref TripleByteBuffer irImageBuffer)
         {
             var data = IntPtr.Zero;
             var info = IntPtr.Zero;
@@ -448,11 +460,14 @@ namespace MagnityIrDevice
                 device.Unlock();
                 return;
             }
-            else {
-                Buffer.MemoryCopy(data.ToPointer(), irImageBuffer.ptr.ToPointer(), irImageBuffer.Length, irImageBuffer.Length);
-            }
 
             device.Unlock();
+
+            var buffer = irImageBuffer.GetWritableBuffer();
+            for (var y = irCameraParameters.height - 1; y >= 0; y--) {
+                buffer.Push(IntPtr.Add(data, irCameraParameters.width * y), irCameraParameters.width);
+            }
+            irImageBuffer.SwapWritableBuffer();
         }
 
         /// <summary>
@@ -469,6 +484,8 @@ namespace MagnityIrDevice
             if (!device.IsProcessingImage()) {
                 return;
             }
+
+            GetIrImage(ref irImageBuffer);
         }
 
         #endregion

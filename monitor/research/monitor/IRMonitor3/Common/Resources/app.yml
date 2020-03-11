@@ -66,3 +66,27 @@ cells:
       height: 576
       bpp: 4
       videoFrameRate: 15
+  - enabled: false
+    category: IrCamera
+    model: MagnityIrDevice
+    version: 1.0
+    serialNumber: 0002
+    uri: 'ip=192.168.1.64'
+    irCameraParameters:
+      channel: 1
+      uri: ''
+      width: 320
+      stride: 320
+      height: 240
+      bpp: 4
+      videoFrameRate: 15
+      temperatureWidth: 320
+      temperatureStride: 320
+      temperatureHeight: 240
+      temperatureFrameRate: 15
+      emissivity: 
+      reflectedTemperature: 
+      transmission: 
+      atmosphericTemperature: 
+      relativeHumidity: 
+      distance: 
