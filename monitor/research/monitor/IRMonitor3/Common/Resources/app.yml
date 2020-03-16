@@ -74,7 +74,7 @@ cells:
       height: 576
       bpp: 4
       videoFrameRate: 15
-- enabled: false
+  - enabled: false
     category: IrCamera
     model: MagnityIrDevice
     version: 1.0
