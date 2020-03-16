@@ -46,13 +46,14 @@
             this.panel_draw_camera = new System.Windows.Forms.Panel();
             this.panel_camera = new System.Windows.Forms.Panel();
             this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
-            this.com_Mirror = new System.Windows.Forms.ComboBox();
             this.panelTool = new System.Windows.Forms.Panel();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel_draw_ircamera = new System.Windows.Forms.Panel();
             this.panel_ircamera = new System.Windows.Forms.Panel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.label14 = new System.Windows.Forms.Label();
+            this.com_Mirror = new System.Windows.Forms.ComboBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label25 = new System.Windows.Forms.Label();
@@ -89,7 +90,6 @@
             this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
             this.btn_save = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.label14 = new System.Windows.Forms.Label();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -325,18 +325,6 @@
             this.tableLayoutPanel10.Size = new System.Drawing.Size(694, 28);
             this.tableLayoutPanel10.TabIndex = 1;
             // 
-            // com_Mirror
-            // 
-            this.com_Mirror.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.com_Mirror.FormattingEnabled = true;
-            this.com_Mirror.Items.AddRange(new object[] {
-            "关闭",
-            "上下"});
-            this.com_Mirror.Location = new System.Drawing.Point(3, 57);
-            this.com_Mirror.Name = "com_Mirror";
-            this.com_Mirror.Size = new System.Drawing.Size(385, 20);
-            this.com_Mirror.TabIndex = 0;
-            // 
             // panelTool
             // 
             this.panelTool.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -418,6 +406,29 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 13F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(391, 787);
             this.tableLayoutPanel2.TabIndex = 61;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label14.Font = new System.Drawing.Font("宋体", 12F);
+            this.label14.Location = new System.Drawing.Point(3, 39);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(385, 15);
+            this.label14.TabIndex = 0;
+            this.label14.Text = "镜像：";
+            // 
+            // com_Mirror
+            // 
+            this.com_Mirror.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.com_Mirror.FormattingEnabled = true;
+            this.com_Mirror.Items.AddRange(new object[] {
+            "关闭",
+            "上下"});
+            this.com_Mirror.Location = new System.Drawing.Point(3, 57);
+            this.com_Mirror.Name = "com_Mirror";
+            this.com_Mirror.Size = new System.Drawing.Size(385, 20);
+            this.com_Mirror.TabIndex = 0;
             // 
             // groupBox3
             // 
@@ -841,17 +852,6 @@
             // 
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label14.Font = new System.Drawing.Font("宋体", 12F);
-            this.label14.Location = new System.Drawing.Point(3, 39);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(385, 15);
-            this.label14.TabIndex = 0;
-            this.label14.Text = "镜像：";
             // 
             // SetParameterForm
             // 

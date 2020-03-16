@@ -17,6 +17,14 @@
   recordingDuration: 600
   saveVideoPath: video
   saveImagePath: image
+ai:
+  faceDetectorParameter:
+    enabled: false
+    frameRate: 10
+    appId: "j2RS4gh7dJK4cHUpah1cAFFycKCnLLJacKAxGKRMWJ7"
+    sdkKey: "EsuPn4tjQjz5pNuveYDGMVYffCFDWd27WexbibHfphfm"
+    scaleOfFace: 25
+    numberOfFace: 5
 cells:
 - name: cell0
   devices:
@@ -66,7 +74,7 @@ cells:
       height: 576
       bpp: 4
       videoFrameRate: 15
-  - enabled: false
+- enabled: false
     category: IrCamera
     model: MagnityIrDevice
     version: 1.0

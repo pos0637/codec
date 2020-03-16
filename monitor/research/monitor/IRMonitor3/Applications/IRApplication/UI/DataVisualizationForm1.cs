@@ -23,6 +23,7 @@ namespace IRApplication.UI
             ShowControl(panel_camera, new CameraDeviceForm(cell, cell.devices[0]));
             ShowControl(panel_ircamera, new IrCameraDeviceForm(cell, cell.devices[0]));
             panel_alarms.Controls.Add(new AlarmInformationList1 { Dock = DockStyle.Fill, labelAlarmCount = label_alarm_count });
+            panel_image.Controls.Add(new PeopleInformationList1 { Dock = DockStyle.Fill, labelPeopleCount = label_people_count });
         }
 
         /// <summary>

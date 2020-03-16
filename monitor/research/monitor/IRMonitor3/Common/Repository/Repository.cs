@@ -66,6 +66,11 @@ namespace Repository
             public DbSet<Alarm> Alarm { get; set; }
 
             /// <summary>
+            /// 人员信息列表
+            /// </summary>
+            public DbSet<People> People { get; set; }
+
+            /// <summary>
             /// 录像信息列表
             /// </summary>
             public DbSet<Recording> Recording { get; set; }
@@ -224,7 +229,7 @@ namespace Repository
         }
 
         /// <summary>
-        /// 保存图像
+        /// 保存YV12图像
         /// </summary>
         /// <param name="image">图像</param>
         /// <returns>是否成功</returns>
@@ -238,7 +243,7 @@ namespace Repository
         }
 
         /// <summary>
-        /// 保存图像
+        /// 保存YV12图像
         /// </summary>
         /// <param name="width">宽度</param>
         /// <param name="height">高度</param>
@@ -254,6 +259,28 @@ namespace Repository
                 var filename = $"{AppDomain.CurrentDomain.BaseDirectory}/{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
                 var mat = new Mat(height + height / 2, width, MatType.CV_8UC1, image);
                 mat = mat.CvtColor(ColorConversionCodes.YUV2BGR_YV12);
+                return mat.SaveImage(filename) ? filename : null;
+            }
+            catch {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存图像
+        /// </summary>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
+        /// <param name="image">图像</param>
+        /// <returns>是否成功</returns>
+        public static string SaveImage(Mat mat)
+        {
+            if (mat == null) {
+                return null;
+            }
+
+            try {
+                var filename = $"{AppDomain.CurrentDomain.BaseDirectory}{configuration.information.saveImagePath}/{Guid.NewGuid().ToString("N")}.png";
                 return mat.SaveImage(filename) ? filename : null;
             }
             catch {
@@ -581,6 +608,73 @@ namespace Repository
             catch (Exception e) {
                 Tracker.LogE(e);
                 return false;
+            }
+        }
+
+        #endregion
+
+        #region 人流量
+
+        /// <summary>
+        /// 增加人员
+        /// </summary>
+        /// <param name="people">人员</param>
+        /// <returns>结果</returns>
+        public static bool AddPeople(People people)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    db.Set<People>().Add(people);
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取人员
+        /// </summary>
+        /// <param name="page">页数</param>
+        /// <param name="count">个数</param>
+        /// <returns>结果</returns>
+        public static List<People> GetPeoples(DateTime start, DateTime end, int count)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    return db.Set<People>()
+                        .Where(a => a.startTime >= start)
+                        .Where(a => a.startTime <= end)
+                        .OrderByDescending(a => a.startTime)
+                        .Take(count).ToList();
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取人员数量
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <returns>人员数量</returns>
+        public static int GetPeoplesCount()
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    return db.Set<People>().Count();
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return 0;
             }
         }
 

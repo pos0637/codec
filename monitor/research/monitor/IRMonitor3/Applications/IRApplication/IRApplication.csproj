@@ -115,6 +115,14 @@
     <Compile Include="Components\IRenderableControl.cs" />
     <Compile Include="Components\GDIRenderableControl.cs" />
     <Compile Include="Components\OpenGLRenderableControl.cs" />
+    <Compile Include="Components\PeopleInformationItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\PeopleInformationItem.Designer.cs" />
+    <Compile Include="Components\PeopleInformationList1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\PeopleInformationList1.Designer.cs" />
     <Compile Include="Components\TransparentControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -225,6 +233,8 @@
     <EmbeddedResource Include="Components\IrCameraDeviceForm.resx">
       <DependentUpon>IrCameraDeviceForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Components\PeopleInformationItem.resx" />
+    <EmbeddedResource Include="Components\PeopleInformationList1.resx" />
     <EmbeddedResource Include="Components\VideoItem.resx">
       <DependentUpon>VideoItem.cs</DependentUpon>
     </EmbeddedResource>

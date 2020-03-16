@@ -61,6 +61,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Magnity", "Magnity", "{B6DD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagnityIrDevice", "Services\Vendors\IrCamera\Magnity\MagnityIrDevice\MagnityIrDevice.csproj", "{0AA6A18C-31E6-4F50-A2FE-38A15C611C45}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AI", "AI", "{B478B6A1-4F77-4EF3-9F02-91A304E9A540}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceDetector", "AI\FaceDetector\FaceDetector.vcxproj", "{2978FF15-01DB-4FEB-8B45-252DCA8B111E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -275,6 +279,16 @@ Global
 		{0AA6A18C-31E6-4F50-A2FE-38A15C611C45}.Release|x64.Build.0 = Release|Any CPU
 		{0AA6A18C-31E6-4F50-A2FE-38A15C611C45}.Release|x86.ActiveCfg = Release|Any CPU
 		{0AA6A18C-31E6-4F50-A2FE-38A15C611C45}.Release|x86.Build.0 = Release|Any CPU
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Debug|x64.ActiveCfg = Debug|x64
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Debug|x64.Build.0 = Debug|x64
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Debug|x86.ActiveCfg = Debug|Win32
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Debug|x86.Build.0 = Debug|Win32
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Release|Any CPU.ActiveCfg = Release|Win32
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Release|x64.ActiveCfg = Release|x64
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Release|x64.Build.0 = Release|x64
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Release|x86.ActiveCfg = Release|Win32
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -304,6 +318,7 @@ Global
 		{C7B984E4-FA49-4C0A-83F5-5B19C685F301} = {DF236656-F5F9-49F1-9245-D5E61484E0EA}
 		{B6DDA189-60DF-4DCE-8EA6-B9282764DDEC} = {2CAF0C42-DABB-45B9-B78C-6638A6C64A92}
 		{0AA6A18C-31E6-4F50-A2FE-38A15C611C45} = {B6DDA189-60DF-4DCE-8EA6-B9282764DDEC}
+		{2978FF15-01DB-4FEB-8B45-252DCA8B111E} = {B478B6A1-4F77-4EF3-9F02-91A304E9A540}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7354525E-931D-4817-9C72-BF94D96FDB2D}

@@ -102,6 +102,17 @@
         }
 
         /// <summary>
+        /// 人工智能
+        /// </summary>
+        public class AI
+        {
+            /// <summary>
+            /// 人脸检测参数
+            /// </summary>
+            public FaceDetectorParameter faceDetectorParameter;
+        }
+
+        /// <summary>
         /// 设备单元
         /// </summary>
         public class Cell
@@ -327,6 +338,42 @@
         }
 
         /// <summary>
+        /// 人脸检测参数
+        /// </summary>
+        public class FaceDetectorParameter
+        {
+            /// <summary>
+            /// 是否启用
+            /// </summary>
+            public bool enabled;
+
+            /// <summary>
+            /// 检测频率
+            /// </summary>
+            public int frameRate;
+
+            /// <summary>
+            /// 激活引擎使用的ID
+            /// </summary>
+            public string appId;
+
+            /// <summary>
+            /// 激活引擎使用的SDK
+            /// </summary>
+            public string sdkKey;
+
+            /// <summary>
+            /// 允许最小人脸占图像比例
+            /// </summary>
+            public int scaleOfFace;
+
+            /// <summary>
+            /// 允许最多检测人脸数量
+            /// </summary>
+            public int numberOfFace;
+        }
+
+        /// <summary>
         /// 信息
         /// </summary>
         public Information information;
@@ -335,5 +382,10 @@
         /// 设备单元列表
         /// </summary>
         public Cell[] cells;
+
+        /// <summary>
+        /// 人工智能
+        /// </summary>
+        public AI ai;
     }
 }

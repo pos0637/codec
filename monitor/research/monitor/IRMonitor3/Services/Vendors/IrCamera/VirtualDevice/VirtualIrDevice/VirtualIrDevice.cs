@@ -6,11 +6,6 @@ namespace VirtualIrDevice
     public class VirtualIrDevice : IDevice
     {
         /// <summary>
-        /// 设备状态
-        /// </summary>
-        private DeviceStatus status;
-
-        /// <summary>
         /// 红外摄像机参数
         /// </summary>
         private Repository.Entities.Configuration.IrCameraParameters irCameraParameters;

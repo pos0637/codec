@@ -160,6 +160,23 @@ namespace IRService.Services.Cell
                         workers.Add(worker);
                         Tracker.LogE($"ProcessAlarmWorker start succeed: {device.model}");
 
+                        if (configuration.ai.faceDetectorParameter.enabled) {
+                            // 启动人脸处理工作线程
+                            worker = new ProcessFaceWorker();
+                            if (ARESULT.AFAILED(worker.Initialize(new Dictionary<string, object>() { { "cell", this }, { "device", instance }, { "frameRate", configuration.ai.faceDetectorParameter.frameRate } }))) {
+                                Tracker.LogE($"ProcessFaceWorker initialize fail: {device.model}");
+                                return false;
+                            }
+
+                            if (ARESULT.AFAILED(worker.Start())) {
+                                Tracker.LogE($"ProcessFaceWorker start fail: {device.model}");
+                                return false;
+                            }
+
+                            workers.Add(worker);
+                            Tracker.LogE($"ProcessFaceWorker start succeed: {device.model}");
+                        }
+
                         break;
                     }
                     default:

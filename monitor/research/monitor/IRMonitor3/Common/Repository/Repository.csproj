@@ -85,6 +85,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\DetectionResult.cs" />
+    <Compile Include="Entities\People.cs" />
     <Compile Include="Entities\Recording.cs" />
     <Compile Include="Entities\Alarm.cs" />
     <Compile Include="Entities\Configuration.cs" />

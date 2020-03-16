@@ -1,7 +1,9 @@
 ﻿using Devices;
 using DrawTools;
 using IRApplication.Components;
+using IRService.Common;
 using IRService.Services.Cell;
+using Miscs;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -389,6 +391,8 @@ namespace IRApplication.UI
 
             Point point = (Point)blackBody["point"];
             Draw(drawAreaIRCamera, Color.Blue, point.X * drawAreaIRCamera.Width / 1000, point.Y * drawAreaIRCamera.Height / 1000);
+
+            EventEmitter.Instance.Publish(Constants.EVENT_SERVICE_ROI_CHANGED, cell, this.cell.devices[0], rect);
             MessageBox.Show("设置完成!");
         }
 

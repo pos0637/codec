@@ -29,5 +29,15 @@
         /// 开启推流事件名称
         /// </summary>
         public static readonly string EVENT_SERVICE_START_STREAMING = "EVENT_SERVICE_START_STREAMING";
+
+        /// <summary>
+        /// ROI改变事件名称
+        /// </summary>
+        public static readonly string EVENT_SERVICE_ROI_CHANGED = "EVENT_SERVICE_ROI_CHANGED";
+
+        /// <summary>
+        /// 搜索人脸事件名称
+        /// </summary>
+        public static readonly string EVENT_SERVICE_FIND_FACE = "EVENT_SERVICE_FIND_FACE";
     }
 }
