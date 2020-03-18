@@ -1,8 +1,11 @@
 ﻿using Miscs;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
 using Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace IRApplication.UI
@@ -166,8 +169,33 @@ namespace IRApplication.UI
             GetPage(page + 1, num);
         }
 
+        /// <summary>
+        /// 下载图片
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonDown_Click(object sender, EventArgs e)
         {
+            if ((alarmPicture.Image == null) || (irAlarmPicture.Image == null)) {
+                return;
+            }
+
+            var dialog = new FolderBrowserDialog {
+                Description = "请选择文件保存的路径"
+            };
+
+            try {
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    alarmPicture.Image.Save($"{dialog.SelectedPath}/{DateTime.Now.ToString("yyyyMMddHHmmss")}.png");
+                    irAlarmPicture.Image.Save($"{dialog.SelectedPath}/ir{DateTime.Now.ToString("yyyyMMddHHmmss")}.png");
+                    MessageBox.Show("下载成功");
+                }
+            }
+            catch {
+                MessageBox.Show("下载失败");
+                return;
+            }
+
         }
 
         private void alarmDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -212,6 +240,84 @@ namespace IRApplication.UI
 
             var alarm = alarmDataGridView.CurrentRow.Tag as Alarm;
             AlarmInformationForm.ShowAlarmInformationForm(alarm);
+        }
+
+        /// <summary>
+        /// 导出报表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonReport_Click(object sender, EventArgs e)
+        {
+            var dialog = new FolderBrowserDialog {
+                Description = "请选择文件保存的路径"
+            };
+
+            try {
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    var list = Repository.Repository.GetAlarms(dateTimePickerStart.Value, dateTimePickerEnd.Value);
+                    var workbook = new HSSFWorkbook();
+                    // 创建一个sheet
+                    var sheet1 = workbook.CreateSheet("sheet1");
+                    // 设置列宽,excel列宽每个像素是1/256
+                    sheet1.SetColumnWidth(0, 18 * 256);
+                    sheet1.SetColumnWidth(1, 18 * 256);
+                    sheet1.SetColumnWidth(2, 30 * 256);
+                    sheet1.SetColumnWidth(3, 30 * 256);
+                    sheet1.SetColumnWidth(4, 18 * 256);
+                    sheet1.SetColumnWidth(5, 18 * 256);
+
+                    var rowHeader = sheet1.CreateRow(0); // 创建表头行
+                    rowHeader.CreateCell(0, CellType.String).SetCellValue("设备名称");
+                    rowHeader.CreateCell(1, CellType.String).SetCellValue("开始时间");
+                    rowHeader.CreateCell(2, CellType.String).SetCellValue("告警原因");
+                    rowHeader.CreateCell(3, CellType.String).SetCellValue("处理建议");
+                    rowHeader.CreateCell(4, CellType.String).SetCellValue("可见光图片");
+                    rowHeader.CreateCell(5, CellType.String).SetCellValue("外红图片");
+
+                    if (list.Count > 0) {
+                        var rowline = 1; // 从第二行开始(索引从0开始)
+                        foreach (var alarm in list) {
+                            var row = sheet1.CreateRow(rowline);
+                            // 设置行高, excel行高度每个像素点是1/20
+                            row.Height = 80 * 20;
+                            // 填入生产单号
+                            row.CreateCell(0, CellType.String).SetCellValue(alarm.deviceName);
+                            row.CreateCell(1, CellType.String).SetCellValue(alarm.startTime.ToString());
+                            row.CreateCell(2, CellType.String).SetCellValue(alarm.detail);
+                            row.CreateCell(3, CellType.String).SetCellValue(alarm.comment);
+
+                            // 将图片文件读入一个字符串
+                            var bytes = File.ReadAllBytes(alarm.imageUrl);
+                            var pictureIdx = workbook.AddPicture(bytes, PictureType.JPEG);
+
+                            var patriarch = (HSSFPatriarch)sheet1.CreateDrawingPatriarch();
+                            // 插图片的位置 
+                            var anchor = new HSSFClientAnchor(0, 0, 0, 0, 4, rowline, 5, rowline + 1);
+                            // 把图片插到相应的位置
+                            var pict = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIdx);
+
+                            bytes = File.ReadAllBytes(alarm.irImageUrl);
+                            pictureIdx = workbook.AddPicture(bytes, PictureType.JPEG);
+                            patriarch = (HSSFPatriarch)sheet1.CreateDrawingPatriarch();
+                            // 插图片的位置 
+                            anchor = new HSSFClientAnchor(0, 0, 0, 0, 5, rowline, 6, rowline + 1);
+                            // 把图片插到相应的位置
+                            pict = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIdx);
+                            rowline++;
+                        }
+                    }
+
+                    using (Stream stream = File.OpenWrite($"{dialog.SelectedPath}/告警报表{DateTime.Now.ToString("yyyyMMddHHmmss")}.xls")) {
+                        workbook.Write(stream);
+                    }
+
+                    MessageBox.Show("报表生成成功");
+                }
+            }
+            catch {
+                MessageBox.Show("报表生成失败");
+            }
         }
     }
 }

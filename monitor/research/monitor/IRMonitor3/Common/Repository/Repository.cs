@@ -460,6 +460,36 @@ namespace Repository
         }
 
         /// <summary>
+        /// 获取告警
+        /// </summary>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <returns>告警列表</returns>
+        public static List<Alarm> GetAlarms(DateTime start, DateTime end)
+        {
+            try {
+                using (var db = new RepositoyContext()) {
+                    if ((start == null) || (end == null)) {
+                        return db.Set<Alarm>()
+                            .Where(a => a.startTime >= start)
+                            .Where(a => a.startTime <= end)
+                            .OrderByDescending(a => a.startTime)
+                            .ToList();
+                    }
+                    else {
+                        return db.Set<Alarm>()
+                            .OrderByDescending(a => a.startTime)
+                            .ToList();
+                    }
+                }
+            }
+            catch (Exception e) {
+                Tracker.LogE(e);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 批量删除告警
         /// </summary>
         /// <param name="ids">索引列表</param>
