@@ -1,8 +1,11 @@
 ﻿using Miscs;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
 using Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace IRApplication.UI
@@ -212,6 +215,80 @@ namespace IRApplication.UI
 
             var alarm = alarmDataGridView.CurrentRow.Tag as Alarm;
             AlarmInformationForm.ShowAlarmInformationForm(alarm);
+        }
+
+        private void buttonReport_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "请选择文件保存的路径";
+            var list = Repository.Repository.GetAlarms(dateTimePickerStart.Value, dateTimePickerEnd.Value);
+
+            try {
+                HSSFWorkbook workbook = new HSSFWorkbook();
+                //创建一个sheet
+                ISheet sheet1 = workbook.CreateSheet("sheet1");
+                // 设置列宽,excel列宽每个像素是1/256
+                sheet1.SetColumnWidth(0, 18 * 256);
+                sheet1.SetColumnWidth(1, 18 * 256);
+                sheet1.SetColumnWidth(2, 30 * 256);
+                sheet1.SetColumnWidth(3, 30 * 256);
+                sheet1.SetColumnWidth(4, 18 * 256);
+                sheet1.SetColumnWidth(5, 18 * 256);
+
+                IRow rowHeader = sheet1.CreateRow(0);//创建表头行
+                rowHeader.CreateCell(0, CellType.String).SetCellValue("设备名称");
+                rowHeader.CreateCell(1, CellType.String).SetCellValue("开始时间");
+                rowHeader.CreateCell(2, CellType.String).SetCellValue("告警原因");
+                rowHeader.CreateCell(3, CellType.String).SetCellValue("处理建议");
+                rowHeader.CreateCell(4, CellType.String).SetCellValue("可见光图片");
+                rowHeader.CreateCell(5, CellType.String).SetCellValue("外红图片");
+
+                if (list.Count > 0) {
+                    int rowline = 1;//从第二行开始(索引从0开始)
+                    foreach (Alarm alarm in list) {
+                        IRow row = sheet1.CreateRow(rowline);
+                        //设置行高 ,excel行高度每个像素点是1/20
+                        row.Height = 80 * 20;
+                        //填入生产单号
+                        row.CreateCell(0, CellType.String).SetCellValue(alarm.deviceName);
+                        row.CreateCell(1, CellType.String).SetCellValue(alarm.startTime.ToString());
+                        row.CreateCell(2, CellType.String).SetCellValue(alarm.detail);
+                        row.CreateCell(3, CellType.String).SetCellValue(alarm.comment);
+
+                        //将图片文件读入一个字符串
+                        byte[] bytes = System.IO.File.ReadAllBytes(alarm.imageUrl);
+                        int pictureIdx = workbook.AddPicture(bytes, PictureType.JPEG);
+
+                        HSSFPatriarch patriarch = (HSSFPatriarch)sheet1.CreateDrawingPatriarch();
+                        // 插图片的位置 
+                        HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, 4, rowline, 5, rowline + 1);
+                        //把图片插到相应的位置
+                        HSSFPicture pict = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIdx);
+
+                        bytes = System.IO.File.ReadAllBytes(alarm.irImageUrl);
+                        pictureIdx = workbook.AddPicture(bytes, PictureType.JPEG);
+                        patriarch = (HSSFPatriarch)sheet1.CreateDrawingPatriarch();
+                        // 插图片的位置 
+                        anchor = new HSSFClientAnchor(0, 0, 0, 0, 5, rowline, 6, rowline + 1);
+                        //把图片插到相应的位置
+                        pict = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIdx);
+                        rowline++;
+                    }
+                }
+
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    string foldPath = dialog.SelectedPath;
+                    DirectoryInfo theFolder = new DirectoryInfo(foldPath);
+                    using (Stream stream = File.OpenWrite(foldPath + "\\告警报表.xls")) {
+                        workbook.Write(stream);
+                    }
+                }
+
+                MessageBox.Show("下载成功");
+            }
+            catch (Exception ea) {
+                MessageBox.Show("下载失败");
+            }
         }
     }
 }
