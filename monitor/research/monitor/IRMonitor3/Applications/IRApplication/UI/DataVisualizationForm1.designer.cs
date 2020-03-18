@@ -226,7 +226,7 @@
             // 
             this.label_alarm_count.AutoSize = true;
             this.label_alarm_count.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_alarm_count.Font = new System.Drawing.Font("Century", 30F);
+            this.label_alarm_count.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_alarm_count.ForeColor = System.Drawing.Color.Red;
             this.label_alarm_count.Location = new System.Drawing.Point(743, 9);
             this.label_alarm_count.Name = "label_alarm_count";
@@ -255,7 +255,7 @@
             // 
             this.label_people_count.AutoSize = true;
             this.label_people_count.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_people_count.Font = new System.Drawing.Font("Century", 25F);
+            this.label_people_count.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_people_count.ForeColor = System.Drawing.Color.Red;
             this.label_people_count.Location = new System.Drawing.Point(232, 0);
             this.label_people_count.Name = "label_people_count";

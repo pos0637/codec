@@ -100,7 +100,12 @@ public:
                 maskImg = gcnew Mat(height, width, MatType::CV_8UC3, Scalar(0));
 
                 if ((roi->Width != 0) && (roi->Height != 0)) {
-                    Cv2::Rectangle(maskImg, OpenCvSharp::Rect(roi->X, roi->Y, roi->Width, roi->Height), Scalar(255, 255, 255), -1, LineTypes::Link8, 0);
+                    if (roi->Height < 0) {
+                        Cv2::Rectangle(maskImg, OpenCvSharp::Rect(roi->X, roi->Y + roi->Height, roi->Width, -roi->Height), Scalar(255, 255, 255), -1, LineTypes::Link8, 0);
+                    }
+                    else {
+                        Cv2::Rectangle(maskImg, OpenCvSharp::Rect(roi->X, roi->Y, roi->Width, roi->Height), Scalar(255, 255, 255), -1, LineTypes::Link8, 0);
+                    }
                 }
                 else {
                     Cv2::Rectangle(maskImg, OpenCvSharp::Rect(0, 0, width, height), Scalar(255, 255, 255), -1, LineTypes::Link8, 0);
@@ -116,6 +121,7 @@ public:
 
             std::vector<::Rect> faceRects;
             std::vector<::Rect> AddfaceRects;
+
             int result = StaticImageFaceOp((unsigned char*)dstImg->Data.ToPointer(), dstImg->Width, dstImg->Height, dstImg->Channels(), faceRects, AddfaceRects);
             if (result != 0) {
                 return nullptr;
