@@ -27,11 +27,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchAlarmForm));
             this.dateTimePickerStart = new System.Windows.Forms.DateTimePicker();
             this.dateTimePickerEnd = new System.Windows.Forms.DateTimePicker();
@@ -81,8 +81,8 @@
             this.dateTimePickerStart.CustomFormat = "yyyy-MM-dd HH:mm:ss";
             this.dateTimePickerStart.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dateTimePickerStart.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerStart.Location = new System.Drawing.Point(91, 24);
-            this.dateTimePickerStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePickerStart.Location = new System.Drawing.Point(119, 27);
+            this.dateTimePickerStart.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePickerStart.Name = "dateTimePickerStart";
             this.dateTimePickerStart.Size = new System.Drawing.Size(164, 35);
             this.dateTimePickerStart.TabIndex = 19;
@@ -92,8 +92,8 @@
             this.dateTimePickerEnd.CustomFormat = "yyyy-MM-dd HH:mm:ss";
             this.dateTimePickerEnd.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dateTimePickerEnd.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerEnd.Location = new System.Drawing.Point(313, 24);
-            this.dateTimePickerEnd.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePickerEnd.Location = new System.Drawing.Point(341, 27);
+            this.dateTimePickerEnd.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePickerEnd.Name = "dateTimePickerEnd";
             this.dateTimePickerEnd.Size = new System.Drawing.Size(164, 35);
             this.dateTimePickerEnd.TabIndex = 20;
@@ -104,7 +104,7 @@
             this.panel1.Controls.Add(this.panel3);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1803, 912);
             this.panel1.TabIndex = 25;
@@ -116,14 +116,14 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.Controls.Add(this.alarmDataGridView, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.buttonReport, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.buttonDown, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel1, 2, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 95);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 62F));
@@ -139,14 +139,14 @@
             this.alarmDataGridView.AllowUserToResizeRows = false;
             this.alarmDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.alarmDataGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.alarmDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.alarmDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.alarmDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.alarmDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column5,
@@ -159,24 +159,24 @@
             this.alarmDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.alarmDataGridView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
             this.alarmDataGridView.EnableHeadersVisualStyles = false;
-            this.alarmDataGridView.Location = new System.Drawing.Point(17, 4);
-            this.alarmDataGridView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.alarmDataGridView.Location = new System.Drawing.Point(18, 5);
+            this.alarmDataGridView.Margin = new System.Windows.Forms.Padding(5);
             this.alarmDataGridView.MultiSelect = false;
             this.alarmDataGridView.Name = "alarmDataGridView";
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.alarmDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle10.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.alarmDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this.alarmDataGridView.RowHeadersVisible = false;
             this.alarmDataGridView.RowHeadersWidth = 51;
             this.tableLayoutPanel2.SetRowSpan(this.alarmDataGridView, 2);
             this.alarmDataGridView.RowTemplate.Height = 23;
             this.alarmDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.alarmDataGridView.Size = new System.Drawing.Size(1048, 809);
+            this.alarmDataGridView.Size = new System.Drawing.Size(1046, 807);
             this.alarmDataGridView.TabIndex = 13;
             this.alarmDataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.alarmDataGridView_CellClick);
             this.alarmDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.alarmDataGridView_CellDoubleClick);
@@ -204,8 +204,8 @@
             // Column1
             // 
             this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.Column1.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Column1.DefaultCellStyle = dataGridViewCellStyle7;
             this.Column1.FillWeight = 58.47717F;
             this.Column1.HeaderText = "设备名称";
             this.Column1.MinimumWidth = 6;
@@ -216,8 +216,8 @@
             // Column2
             // 
             this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.Column2.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Column2.DefaultCellStyle = dataGridViewCellStyle8;
             this.Column2.FillWeight = 66.51405F;
             this.Column2.HeaderText = "开始时间";
             this.Column2.MinimumWidth = 6;
@@ -227,8 +227,8 @@
             // Column4
             // 
             this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.Column4.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Column4.DefaultCellStyle = dataGridViewCellStyle9;
             this.Column4.FillWeight = 170.4173F;
             this.Column4.HeaderText = "告警原因";
             this.Column4.MinimumWidth = 6;
@@ -259,7 +259,7 @@
             this.buttonReport.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonReport.ForeColor = System.Drawing.Color.Black;
             this.buttonReport.Location = new System.Drawing.Point(1425, 4);
-            this.buttonReport.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonReport.Margin = new System.Windows.Forms.Padding(4);
             this.buttonReport.Name = "buttonReport";
             this.buttonReport.Size = new System.Drawing.Size(344, 54);
             this.buttonReport.TabIndex = 11;
@@ -274,7 +274,7 @@
             this.buttonDown.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonDown.ForeColor = System.Drawing.Color.Black;
             this.buttonDown.Location = new System.Drawing.Point(1073, 4);
-            this.buttonDown.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonDown.Margin = new System.Windows.Forms.Padding(4);
             this.buttonDown.Name = "buttonDown";
             this.buttonDown.Size = new System.Drawing.Size(344, 54);
             this.buttonDown.TabIndex = 12;
@@ -339,7 +339,7 @@
             this.panel3.Controls.Add(this.buttonSearch);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 0);
-            this.panel3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel3.Margin = new System.Windows.Forms.Padding(4);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(1803, 95);
             this.panel3.TabIndex = 17;
@@ -349,8 +349,8 @@
             this.editBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.editBtn.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.editBtn.Image = ((System.Drawing.Image)(resources.GetObject("editBtn.Image")));
-            this.editBtn.Location = new System.Drawing.Point(860, 21);
-            this.editBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.editBtn.Location = new System.Drawing.Point(888, 22);
+            this.editBtn.Margin = new System.Windows.Forms.Padding(4);
             this.editBtn.Name = "editBtn";
             this.editBtn.Size = new System.Drawing.Size(53, 44);
             this.editBtn.TabIndex = 16;
@@ -364,8 +364,8 @@
             this.next_Page_But.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.next_Page_But.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.next_Page_But.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.next_Page_But.Location = new System.Drawing.Point(1109, 21);
-            this.next_Page_But.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.next_Page_But.Location = new System.Drawing.Point(1137, 22);
+            this.next_Page_But.Margin = new System.Windows.Forms.Padding(4);
             this.next_Page_But.Name = "next_Page_But";
             this.next_Page_But.Size = new System.Drawing.Size(160, 45);
             this.next_Page_But.TabIndex = 23;
@@ -377,7 +377,7 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("宋体", 14F);
-            this.label15.Location = new System.Drawing.Point(1627, 32);
+            this.label15.Location = new System.Drawing.Point(1655, 32);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(34, 24);
             this.label15.TabIndex = 22;
@@ -387,7 +387,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("宋体", 14F);
-            this.label14.Location = new System.Drawing.Point(1428, 32);
+            this.label14.Location = new System.Drawing.Point(1456, 32);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(82, 24);
             this.label14.TabIndex = 19;
@@ -397,7 +397,7 @@
             // 
             this.pageIndexLab.AutoSize = true;
             this.pageIndexLab.Font = new System.Drawing.Font("宋体", 14F);
-            this.pageIndexLab.Location = new System.Drawing.Point(1369, 32);
+            this.pageIndexLab.Location = new System.Drawing.Point(1397, 32);
             this.pageIndexLab.Name = "pageIndexLab";
             this.pageIndexLab.Size = new System.Drawing.Size(22, 24);
             this.pageIndexLab.TabIndex = 20;
@@ -407,7 +407,7 @@
             // 
             this.totalPageLab.AutoSize = true;
             this.totalPageLab.Font = new System.Drawing.Font("宋体", 14F);
-            this.totalPageLab.Location = new System.Drawing.Point(1559, 32);
+            this.totalPageLab.Location = new System.Drawing.Point(1587, 32);
             this.totalPageLab.Name = "totalPageLab";
             this.totalPageLab.Size = new System.Drawing.Size(22, 24);
             this.totalPageLab.TabIndex = 21;
@@ -417,7 +417,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("宋体", 14F);
-            this.label12.Location = new System.Drawing.Point(1301, 32);
+            this.label12.Location = new System.Drawing.Point(1329, 32);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(34, 24);
             this.label12.TabIndex = 21;
@@ -429,8 +429,8 @@
             this.editBtnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.editBtnCancel.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.editBtnCancel.ForeColor = System.Drawing.Color.Black;
-            this.editBtnCancel.Location = new System.Drawing.Point(671, 21);
-            this.editBtnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.editBtnCancel.Location = new System.Drawing.Point(699, 22);
+            this.editBtnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.editBtnCancel.Name = "editBtnCancel";
             this.editBtnCancel.Size = new System.Drawing.Size(160, 45);
             this.editBtnCancel.TabIndex = 18;
@@ -443,7 +443,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(268, 32);
+            this.label1.Location = new System.Drawing.Point(296, 32);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 24);
@@ -454,7 +454,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(16, 30);
+            this.label2.Location = new System.Drawing.Point(44, 32);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(70, 24);
@@ -468,8 +468,8 @@
             this.last_Page_But.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.last_Page_But.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.last_Page_But.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.last_Page_But.Location = new System.Drawing.Point(941, 21);
-            this.last_Page_But.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.last_Page_But.Location = new System.Drawing.Point(969, 22);
+            this.last_Page_But.Margin = new System.Windows.Forms.Padding(4);
             this.last_Page_But.Name = "last_Page_But";
             this.last_Page_But.Size = new System.Drawing.Size(160, 45);
             this.last_Page_But.TabIndex = 9;
@@ -484,8 +484,8 @@
             this.buttonSearch.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonSearch.ForeColor = System.Drawing.Color.Black;
             this.buttonSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonSearch.Location = new System.Drawing.Point(499, 21);
-            this.buttonSearch.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonSearch.Location = new System.Drawing.Point(527, 22);
+            this.buttonSearch.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(160, 45);
             this.buttonSearch.TabIndex = 9;
@@ -501,7 +501,7 @@
             this.checkAllBtn.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.checkAllBtn.ForeColor = System.Drawing.Color.White;
             this.checkAllBtn.Location = new System.Drawing.Point(4, 4);
-            this.checkAllBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkAllBtn.Margin = new System.Windows.Forms.Padding(4);
             this.checkAllBtn.Name = "checkAllBtn";
             this.checkAllBtn.Size = new System.Drawing.Size(893, 61);
             this.checkAllBtn.TabIndex = 0;
@@ -519,7 +519,7 @@
             this.lowerPanel.Controls.Add(this.delBtn, 1, 0);
             this.lowerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lowerPanel.Location = new System.Drawing.Point(0, 843);
-            this.lowerPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lowerPanel.Margin = new System.Windows.Forms.Padding(4);
             this.lowerPanel.Name = "lowerPanel";
             this.lowerPanel.RowCount = 1;
             this.lowerPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -532,7 +532,7 @@
             this.delBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.delBtn.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.delBtn.Location = new System.Drawing.Point(905, 4);
-            this.delBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.delBtn.Margin = new System.Windows.Forms.Padding(4);
             this.delBtn.Name = "delBtn";
             this.delBtn.Size = new System.Drawing.Size(894, 61);
             this.delBtn.TabIndex = 1;
